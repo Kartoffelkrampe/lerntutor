@@ -1,0 +1,93 @@
+LernTutor – Einrichtung
+=======================
+
+Die App besteht aus diesem Ordner. Damit sie auf PC und Tablet als richtige App
+läuft und über Google Drive synchronisiert, liegt sie einmal im Internet
+(kostenlos über GitHub Pages). Danach installierst du sie auf jedem Gerät.
+
+
+1) App online stellen (einmalig, ca. 5 Minuten)
+-----------------------------------------------
+1. Auf github.com anmelden → oben rechts „+“ → „New repository“
+   Name z. B. „lerntutor“, Public, „Create repository“.
+2. „uploading an existing file“ anklicken und ALLE Dateien aus diesem Ordner
+   hineinziehen (index.html, sw.js, manifest.webmanifest, icon-*.png, icon.svg)
+   → „Commit changes“.
+3. Im Repository: Settings → Pages → Branch „main“, Ordner „/ (root)“ → Save.
+4. Nach 1–2 Minuten läuft die App unter
+      https://DEIN-GITHUB-NAME.github.io/lerntutor/
+
+Updates: einfach die geänderte index.html erneut hochladen.
+Ohne Internet-Veröffentlichung geht es auch lokal am PC mit
+„LernTutor starten (Windows).bat“ (dann aber nur an diesem PC).
+
+
+2) Als App installieren
+-----------------------
+Windows (Edge oder Chrome): Seite öffnen → in der Adressleiste auf das
+  Installieren-Symbol klicken (oder in der App links „💻 Als App installieren“).
+  Danach im Startmenü und in der Taskleiste, eigenes Fenster, läuft auch offline.
+Android-Tablet (Chrome): Seite öffnen → Menü ⋮ → „App installieren“
+  bzw. „Zum Startbildschirm hinzufügen“.
+
+
+3) KI verbinden (in der App oben rechts auf 🤖)
+---------------------------------------------
+Ollama am PC:
+  • Am PC zwei Umgebungsvariablen setzen (Windows-Suche: „Umgebungsvariablen“):
+        OLLAMA_ORIGINS = *
+        OLLAMA_HOST    = 0.0.0.0      (nur nötig, wenn das Tablet zugreifen soll)
+    Ollama danach neu starten. Modell laden, z. B.:  ollama pull qwen2.5:7b
+  • In der App am PC:     http://localhost:11434
+  • In der App am Tablet: http://IP-DES-PCS:11434   (IP am PC: „ipconfig“)
+  • Chrome fragt beim ersten Mal, ob die Seite auf Geräte im lokalen Netzwerk
+    zugreifen darf → Erlauben. Blockiert der Browser die Verbindung trotzdem,
+    nimm am Tablet einen Cloud-Anbieter (siehe unten) oder Ollama direkt auf
+    dem Tablet (App „Termux“: pkg install ollama, ollama serve).
+  • Für lange Vorlesungen die „Kontextlänge“ auf 16384 oder mehr stellen,
+    wenn dein PC genug Arbeitsspeicher hat.
+Andere KIs: Anbieter „OpenAI-kompatibel“ (Knöpfe für OpenAI, Gemini, Groq,
+  OpenRouter, Mistral, LM Studio) oder „Anthropic Claude“ – API-Schlüssel eintragen.
+
+
+4) Vorlesungen aufnehmen
+------------------------
+Zwei Möglichkeiten:
+  • Live (Chrome-Spracherkennung): sofort nutzbar, braucht Internet,
+    speichert kein Audio.
+  • Whisper (beste Qualität, Audio wird gespeichert): in den KI-Einstellungen
+    unter „Spracherkennung“ z. B. „Groq“ wählen und einen kostenlosen
+    API-Schlüssel von console.groq.com eintragen.
+Nach dem Beenden schlägt die KI Fach und Dokument vor, du bestätigst,
+und die Zusammenfassung landet im Dokument. Unter „Vorlesungsaufnahmen“
+in der Seitenleiste kannst du sie später mit dem Tutor nacharbeiten.
+Bitte vorher die Lehrperson fragen, ob Mitschnitte erlaubt sind.
+
+
+5) Google-Drive-Synchronisation (einmalig, ca. 10 Minuten)
+---------------------------------------------------------
+1. console.cloud.google.com öffnen → neues Projekt „LernTutor“ anlegen.
+2. „APIs & Dienste“ → „Bibliothek“ → „Google Drive API“ → Aktivieren.
+3. „OAuth-Zustimmungsbildschirm“ (Google Auth Platform): App-Name „LernTutor“,
+   Nutzertyp „Extern“, deine E-Mail eintragen. Unter „Zielgruppe“ dich selbst
+   als Testnutzer hinzufügen.
+4. „Anmeldedaten“ bzw. „Clients“ → „OAuth-Client-ID erstellen“ → Typ
+   „Webanwendung“. Bei „Autorisierte JavaScript-Quellen“ eintragen:
+        https://DEIN-GITHUB-NAME.github.io
+        http://localhost:8000
+   → Erstellen und die Client-ID kopieren (endet auf .apps.googleusercontent.com).
+5. In der App links „☁️ Google-Drive-Sync“ → Client-ID einfügen,
+   Gerätenamen eingeben → „Verbinden & synchronisieren“ → mit Google anmelden.
+6. Auf jedem weiteren Gerät Schritt 5 wiederholen.
+   Tipp: Trägst du die Client-ID in index.html bei DEFAULT_CLIENT_ID ein,
+   musst du sie nirgends mehr eintippen.
+
+Was synchronisiert wird: Fächer, Notizen/Dokumente, Tutor-Chats,
+Vorlesungs-Transkripte und -Zusammenfassungen. Die Daten liegen in einem
+versteckten App-Ordner deines eigenen Google Drive.
+Was auf dem Gerät bleibt: Audioaufnahmen und KI-Einstellungen/Schlüssel
+(weil z. B. die Ollama-Adresse am PC und Tablet unterschiedlich ist).
+Wird dasselbe Dokument auf zwei Geräten gleichzeitig geändert, bleiben
+beide Fassungen erhalten (eine als „(Konflikt …)“-Kopie).
+Nach dem App-Start genügt einmal Tippen, dann meldet sich die App kurz
+bei Google an und synchronisiert ab dann automatisch jede Minute.

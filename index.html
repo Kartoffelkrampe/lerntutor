@@ -1,0 +1,1482 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#161d28">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>LernTutor</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<style>
+:root{--bg:#f6f7fb;--panel:#fff;--panel2:#eef1f7;--text:#1b2230;--muted:#667085;--line:#dde2ec;--acc:#3b6ef5;--acc2:#e8eeff;--user:#e8eeff;--ai:#fff;--danger:#d9363e}
+@media (prefers-color-scheme:dark){:root{--bg:#0f141c;--panel:#161d28;--panel2:#1f2835;--text:#e6eaf2;--muted:#94a0b4;--line:#2a3443;--acc:#6b93ff;--acc2:#22304d;--user:#22304d;--ai:#161d28}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,select,input,textarea{font:inherit;color:inherit}
+button{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;min-height:40px;cursor:pointer;touch-action:manipulation}
+button.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+button.ghost{background:transparent;border-color:transparent}
+button.danger{color:var(--danger)}
+button:disabled{opacity:.45}
+select,input[type=text],input[type=password],input[type=url],input[type=number],textarea{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:40px;width:100%}
+.top{height:56px;display:flex;align-items:center;gap:8px;padding:0 10px;background:var(--panel);border-bottom:1px solid var(--line)}
+.top h1{font-size:18px;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.menu{display:none}
+.tabs{display:none;gap:4px}
+.tabs button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.pill{font-size:13px;padding:4px 12px;min-height:34px;border-radius:999px;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.app{display:grid;grid-template-columns:230px 1fr;height:calc(100dvh - 56px)}
+aside{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;overflow:auto}
+.side-h{padding:12px 14px 4px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.subj{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 12px;border-left:4px solid transparent;cursor:pointer}
+.subj.on{background:var(--acc2);border-left-color:var(--acc);font-weight:600}
+.subj .ic{font-size:20px;width:26px;text-align:center}
+.subj .nm{flex:1;overflow:hidden;text-overflow:ellipsis}
+.subj .ed{opacity:.55;min-height:32px;padding:2px 8px}
+.side-foot{margin-top:auto;padding:10px;display:grid;gap:8px;border-top:1px solid var(--line)}
+main{display:grid;grid-template-columns:1fr 1fr;min-height:0}
+.pane{display:flex;flex-direction:column;min-height:0;min-width:0}
+#editorPane{border-right:1px solid var(--line)}
+.bar{display:flex;flex-wrap:wrap;gap:6px;padding:8px;border-bottom:1px solid var(--line);background:var(--panel);align-items:center}
+.bar select{flex:1;min-width:120px;width:auto}
+.aibar button{font-size:14px;padding:6px 10px;min-height:36px}
+#editor{flex:1;border:0;border-radius:0;resize:none;padding:16px;font-size:17px;line-height:1.6;background:var(--panel);outline:none}
+#preview{flex:1;overflow:auto;padding:16px;background:var(--panel)}
+.status{font-size:12px;color:var(--muted);padding:4px 12px;border-top:1px solid var(--line);background:var(--panel)}
+#msgs{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:94%;padding:10px 14px;border-radius:14px;border:1px solid var(--line);overflow-wrap:anywhere}
+.msg.user{align-self:flex-end;background:var(--user)}
+.msg.assistant{align-self:flex-start;background:var(--ai)}
+.msg .acts{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.msg .acts button{font-size:12px;min-height:30px;padding:2px 9px}
+.msg p{margin:.4em 0}.msg h2,.msg h3,.msg h4{margin:.6em 0 .3em;font-size:1.05em}
+.msg ul,.msg ol{padding-left:1.3em;margin:.3em 0}
+.empty{color:var(--muted);text-align:center;margin:auto;padding:20px;max-width:420px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{border-radius:999px;font-size:14px;padding:4px 12px;min-height:34px}
+.chips button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.follow{padding:6px 12px 0;background:var(--bg)}
+.composer{display:flex;gap:8px;padding:8px;border-top:1px solid var(--line);background:var(--panel);align-items:flex-end}
+#q{flex:1;resize:none;max-height:180px}
+.ctxrow{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-left:auto}
+pre{background:var(--panel2);padding:10px;border-radius:8px;overflow:auto;font-size:14px}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92em}
+blockquote{border-left:3px solid var(--acc);margin:.5em 0;padding:.2em .8em;color:var(--muted)}
+.tbl{overflow:auto}table{border-collapse:collapse;margin:.4em 0}td,th{border:1px solid var(--line);padding:4px 8px}
+.katex-display{overflow-x:auto;overflow-y:hidden;padding:2px 0}
+dialog{border:1px solid var(--line);border-radius:16px;background:var(--panel);color:var(--text);width:min(580px,94vw);padding:0}
+dialog::backdrop{background:#0009}
+dialog form{padding:16px;display:grid;gap:12px;max-height:86dvh;overflow:auto}
+dialog label{display:grid;gap:4px;font-size:14px;color:var(--muted)}
+dialog h2{margin:0;font-size:19px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row>*{flex:1}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.prov{display:none;gap:10px}.prov.on{display:grid}
+.presets button{font-size:13px;min-height:32px;padding:2px 10px;flex:0 0 auto}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:10px;opacity:0;transition:.2s;pointer-events:none;z-index:99;max-width:90vw}
+#toast.on{opacity:1}
+.typing::after{content:'▍';animation:blink 1s steps(2) infinite}@keyframes blink{50%{opacity:0}}
+#recBtn.live{background:var(--danger);border-color:var(--danger);color:#fff}
+.rec small{display:block;color:var(--muted);font-size:12px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-top{display:flex;align-items:center;gap:10px;font-size:22px;font-variant-numeric:tabular-nums}
+.rec-top .hint{font-size:14px}
+.dot{width:14px;height:14px;border-radius:50%;background:var(--danger);animation:pulse 1.4s infinite}
+@keyframes pulse{50%{opacity:.25}}
+.rtext{max-height:42dvh;min-height:120px;overflow:auto;background:var(--panel2);border-radius:10px;padding:10px;font-size:14px;white-space:pre-wrap}
+dialog h3{margin:6px 0 0;font-size:16px}
+@media (max-width:1100px){.menu{display:inline-block}.app{grid-template-columns:1fr}aside{position:fixed;top:56px;bottom:0;left:0;width:270px;z-index:20;transform:translateX(-105%);transition:transform .2s;box-shadow:0 0 30px #0006}body.side aside{transform:none}}
+@media (max-width:899px){main{grid-template-columns:1fr}.tabs{display:flex}body[data-tab=edit] #tutorPane,body[data-tab=tutor] #editorPane{display:none}#editorPane{border-right:0}.pill{max-width:120px}}
+</style>
+</head>
+<body data-tab="edit">
+<header class="top">
+  <button class="ghost menu" id="menuBtn" aria-label="Fächer">☰</button>
+  <h1 id="title">LernTutor</h1>
+  <div class="tabs"><button data-tab="edit">✏️ Schreiben</button><button data-tab="tutor">🎓 Tutor</button></div>
+  <button class="pill" id="recBtn" title="Vorlesung aufnehmen">🎙 Vorlesung</button>
+  <button class="pill" id="syncBtn" title="Google-Drive-Synchronisation">☁️ Sync</button>
+  <button class="pill" id="modelPill" title="KI-Einstellungen">⚙️ KI</button>
+</header>
+
+<div class="app">
+  <aside id="side">
+    <div class="side-h">Fächer</div>
+    <div id="subjList"></div>
+    <div style="padding:8px 10px"><button id="addSubj" style="width:100%">＋ Fach hinzufügen</button></div>
+    <div class="side-h">Vorlesungsaufnahmen</div>
+    <div id="recList"></div>
+    <div class="side-foot">
+      <button id="setBtn">⚙️ KI-Einstellungen</button>
+      <button id="syncSetBtn">☁️ Google-Drive-Sync</button>
+      <button id="installBtn" hidden>💻 Als App installieren</button>
+      <div class="row"><button id="expBtn">⬇️ Backup</button><button id="impBtn">⬆️ Laden</button></div>
+      <input type="file" id="impFile" accept=".json,application/json" hidden>
+    </div>
+  </aside>
+
+  <main>
+    <section class="pane" id="editorPane">
+      <div class="bar">
+        <select id="docSel" aria-label="Dokument"></select>
+        <button id="newDoc" title="Neues Dokument">＋</button>
+        <button id="renDoc" title="Umbenennen">✎</button>
+        <button id="delDoc" title="Löschen" class="danger">🗑</button>
+        <button id="prevBtn" title="Vorschau mit Formeln">👁 Vorschau</button>
+      </div>
+      <div class="bar aibar">
+        <button data-act="explain">💬 Erklären</button>
+        <button data-act="summary">📋 Zusammenfassen</button>
+        <button data-act="correct">✅ Korrigieren</button>
+        <button data-act="quiz">❓ Quiz</button>
+        <button data-act="cards">🗂 Karteikarten</button>
+        <button data-act="ask">🙋 Frage dazu</button>
+      </div>
+      <textarea id="editor" spellcheck="true" placeholder="Hier schreiben … Mitschriften, Aufsätze, Lösungswege.&#10;Formeln gehen mit $…$, z. B. $F = m \cdot a$.&#10;&#10;Text markieren → oben eine KI-Aktion wählen."></textarea>
+      <div id="preview" hidden></div>
+      <div class="status" id="status"></div>
+    </section>
+
+    <section class="pane" id="tutorPane">
+      <div class="bar">
+        <div class="chips" id="modes"></div>
+        <label class="ctxrow"><input type="checkbox" id="ctxChk"> Notizen mitsenden</label>
+        <button class="ghost" id="clearChat" title="Verlauf dieses Fachs löschen">🧹</button>
+      </div>
+      <div id="msgs"></div>
+      <div class="follow chips" id="follow"></div>
+      <div class="composer">
+        <textarea id="q" rows="2" placeholder="Frag deinen Tutor … (Strg+Enter sendet)"></textarea>
+        <button class="pri" id="sendBtn">Senden</button>
+        <button id="stopBtn" hidden>■ Stopp</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Einstellungen -->
+<dialog id="setDlg">
+  <form method="dialog" id="setForm">
+    <h2>KI-Anbindung</h2>
+    <label>Anbieter
+      <select id="sProv">
+        <option value="ollama">Ollama (lokal / im Heimnetz)</option>
+        <option value="openai">OpenAI-kompatibel (OpenAI, Gemini, Groq, OpenRouter, Mistral, LM Studio …)</option>
+        <option value="anthropic">Anthropic Claude</option>
+      </select>
+    </label>
+
+    <div class="prov" data-p="ollama">
+      <label>Ollama-Adresse <input type="url" id="oUrl" placeholder="http://localhost:11434"></label>
+      <label>Modell <input type="text" id="oModel" list="oList" placeholder="z. B. llama3.2, qwen2.5, gemma3"></label>
+      <datalist id="oList"></datalist>
+      <label>Kontextlänge in Tokens (größer = längere Vorlesungen am Stück, braucht mehr RAM) <input type="number" id="oCtx" min="2048" step="1024"></label>
+      <p class="hint">Läuft Ollama auf dem Tablet (Termux): <code>http://localhost:11434</code>. Läuft es auf dem PC: <code>http://IP-des-PCs:11434</code> und am PC <code>OLLAMA_HOST=0.0.0.0</code> sowie <code>OLLAMA_ORIGINS=*</code> setzen.</p>
+    </div>
+
+    <div class="prov" data-p="openai">
+      <div class="row presets" id="presets"></div>
+      <label>Basis-URL <input type="url" id="aUrl" placeholder="https://api.openai.com/v1"></label>
+      <label>API-Schlüssel <input type="password" id="aKey" autocomplete="off" placeholder="leer lassen bei LM Studio"></label>
+      <label>Modell <input type="text" id="aModel" list="aList"></label>
+      <datalist id="aList"></datalist>
+    </div>
+
+    <div class="prov" data-p="anthropic">
+      <label>API-Schlüssel <input type="password" id="cKey" autocomplete="off" placeholder="sk-ant-…"></label>
+      <label>Modell <input type="text" id="cModel" placeholder="claude-sonnet-5-5"></label>
+    </div>
+
+    <div class="row"><button type="button" id="loadModels">📥 Modelle laden</button><button type="button" id="testBtn">🔌 Verbindung testen</button></div>
+    <p class="hint" id="testOut"></p>
+
+    <h3>🎙 Spracherkennung für Aufnahmen (Whisper)</h3>
+    <div class="row presets" id="wPresets"></div>
+    <label>Basis-URL <input type="url" id="wUrl" placeholder="https://api.groq.com/openai/v1"></label>
+    <label>API-Schlüssel <input type="password" id="wKey" autocomplete="off" placeholder="leer = Schlüssel von oben, falls gleiche URL"></label>
+    <label>Modell <input type="text" id="wModel" placeholder="whisper-large-v3-turbo"></label>
+    <p class="hint">Jede OpenAI-kompatible Transkriptions-API geht: Groq, OpenAI oder ein eigener Whisper-Server am PC (z. B. „speaches“). Ohne Whisper kannst du die Live-Erkennung von Chrome nutzen.</p>
+
+    <div class="row">
+      <label>Niveau
+        <select id="sLevel"><option>Schule (Sek I)</option><option>Oberstufe / Abitur</option><option>Ausbildung</option><option>Studium</option></select>
+      </label>
+      <label>Kreativität <input type="range" id="sTemp" min="0" max="1" step="0.1"></label>
+    </div>
+    <p class="hint">Schlüssel und Texte werden nur lokal in diesem Browser gespeichert. Backup über „⬇️ Backup“ in der Seitenleiste.</p>
+    <div class="row"><button value="cancel">Abbrechen</button><button class="pri" id="saveSet" value="ok">Speichern</button></div>
+  </form>
+</dialog>
+
+<!-- Fach bearbeiten -->
+<dialog id="subDlg">
+  <form method="dialog">
+    <h2 id="subDlgT">Fach</h2>
+    <div class="row"><label style="flex:0 0 90px">Symbol <input type="text" id="subIc" maxlength="4"></label><label>Name <input type="text" id="subNm"></label></div>
+    <label>Besondere Anweisungen für den Tutor
+      <textarea id="subPr" rows="5" placeholder="z. B. „Vorlesung Technische Mechanik III. Nutze Vektorschreibweise und Freikörperbilder in Worten. Achte auf Einheiten.“"></textarea>
+    </label>
+    <div class="row"><button type="button" class="danger" id="subDel">Löschen</button><button value="cancel">Abbrechen</button><button class="pri" id="subSave" value="ok">Speichern</button></div>
+  </form>
+</dialog>
+
+<!-- Aufnahme -->
+<dialog id="recDlg">
+  <form method="dialog">
+    <h2>🎙 Vorlesung aufnehmen</h2>
+    <div id="recSetup" style="display:grid;gap:10px">
+      <label>Fach <select id="rSubj"></select></label>
+      <label>Titel (optional – sonst schlägt die KI einen vor) <input type="text" id="rTitle" placeholder="z. B. Kapitel 3 – Kinematik des Punktes"></label>
+      <div class="row">
+        <label>Spracherkennung
+          <select id="rMethod">
+            <option value="whisper">Whisper – Audio wird gespeichert</option>
+            <option value="live">Live – Chrome-Erkennung, ohne Audio</option>
+          </select>
+        </label>
+        <label style="flex:0 0 130px">Sprache
+          <select id="rLang"><option value="de">Deutsch</option><option value="en">Englisch</option><option value="auto">Automatisch</option></select>
+        </label>
+      </div>
+      <p class="hint" id="rMethodHint"></p>
+      <p class="hint">⚖️ Frag vorher die Lehrperson – Mitschnitte sind nicht überall erlaubt. Der Bildschirm bleibt während der Aufnahme an; lass die App im Vordergrund.</p>
+    </div>
+    <div id="recLive" hidden style="display:grid;gap:10px">
+      <div class="rec-top"><span class="dot"></span><span id="rTime">00:00</span><span id="rState" class="hint"></span></div>
+      <div id="rText" class="rtext"></div>
+    </div>
+    <div class="row">
+      <button type="button" id="rStart" class="pri">● Aufnahme starten</button>
+      <button type="button" id="rImport">📂 Audiodatei importieren</button>
+      <button type="button" id="rPause" hidden>⏸ Pause</button>
+      <button type="button" id="rStop" hidden class="danger">■ Beenden &amp; verarbeiten</button>
+      <button value="cancel" id="rClose">Schließen</button>
+    </div>
+    <input type="file" id="rFile" accept="audio/*" hidden>
+  </form>
+</dialog>
+
+<!-- Aufnahme-Details -->
+<dialog id="riDlg">
+  <form method="dialog">
+    <h2 id="riTitle"></h2>
+    <p class="hint" id="riMeta"></p>
+    <label>Transkript (du kannst es korrigieren)<textarea id="riText" rows="10"></textarea></label>
+    <p class="hint" id="riProg"></p>
+    <div class="row" style="flex-wrap:wrap">
+      <button type="button" id="riProc" class="pri">🧠 Zuordnen &amp; zusammenfassen</button>
+      <button type="button" id="riTutor">🎓 Mit Tutor nacharbeiten</button>
+      <button type="button" id="riTrans">🔁 Neu transkribieren</button>
+      <button type="button" id="riAudio">⬇️ Audio</button>
+      <button type="button" id="riDel" class="danger">🗑 Löschen</button>
+      <button value="cancel">Schließen</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Zuordnung -->
+<dialog id="asgDlg">
+  <form method="dialog">
+    <h2>Wohin gehört die Vorlesung?</h2>
+    <p class="hint" id="asgWhy"></p>
+    <label>Fach <select id="asgSubj"></select></label>
+    <label>Dokument <select id="asgDoc"></select></label>
+    <label>Titel der Vorlesung <input type="text" id="asgTitle"></label>
+    <label class="ctxrow" style="margin:0"><input type="checkbox" id="asgSum"> Zusammenfassung ins Dokument schreiben</label>
+    <label class="ctxrow" style="margin:0"><input type="checkbox" id="asgTr"> Vollständiges Transkript anhängen</label>
+    <div class="row"><button value="cancel">Abbrechen</button><button class="pri" value="ok">Übernehmen</button></div>
+  </form>
+</dialog>
+
+<!-- Sync -->
+<dialog id="syncDlg">
+  <form method="dialog">
+    <h2>☁️ Synchronisation über Google Drive</h2>
+    <p class="hint">Fächer, Notizen, Tutor-Chats, Transkripte und Zusammenfassungen werden in einem privaten App-Ordner deines Google Drive abgelegt und auf allen Geräten abgeglichen. Audiodateien und KI-Einstellungen bleiben auf dem jeweiligen Gerät.</p>
+    <label>Google OAuth Client-ID <input type="text" id="gClient" placeholder="1234…apps.googleusercontent.com" autocomplete="off"></label>
+    <label>Name dieses Geräts <input type="text" id="gDevice" placeholder="z. B. Tablet, Laptop"></label>
+    <label class="ctxrow" style="margin:0"><input type="checkbox" id="gAuto"> Automatisch synchronisieren (beim ersten Tippen nach dem Start kurz bei Google anmelden)</label>
+    <p class="hint" id="gStatus"></p>
+    <div class="row"><button type="button" id="gConnect" class="pri">🔗 Verbinden &amp; synchronisieren</button><button type="button" id="gOff" class="danger">Trennen</button></div>
+    <p class="hint">Bei Bearbeitung auf zwei Geräten gleichzeitig geht nichts verloren: Die ältere Fassung wird als „(Konflikt …)“-Kopie behalten.</p>
+    <div class="row"><button value="cancel">Schließen</button></div>
+  </form>
+</dialog>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+const KEY = 'lerntutor.v1';
+const $ = s => document.querySelector(s);
+const uid = () => Math.random().toString(36).slice(2, 10);
+
+const DEFAULT_SUBJECTS = [
+  { icon: '📐', name: 'Mathematik', prompt: 'Rechne Schritt für Schritt und begründe jeden Umformungsschritt.' },
+  { icon: '⚛️', name: 'Physik', prompt: 'Achte auf Einheiten und physikalische Anschauung.' },
+  { icon: '⚙️', name: 'Technische Mechanik', prompt: 'Beschreibe Freikörperbilder in Worten, nutze Vektoren und achte auf Vorzeichen-Konventionen und Einheiten.' },
+  { icon: '💻', name: 'Informatik', prompt: 'Nutze kurze Codebeispiele.' },
+  { icon: '🧪', name: 'Chemie', prompt: '' },
+  { icon: '📖', name: 'Deutsch', prompt: 'Hilf bei Aufbau, Argumentation und Stil, ohne Texte komplett für den Lernenden zu schreiben.' },
+  { icon: '🇬🇧', name: 'Englisch', prompt: 'Antworte auf Wunsch auf Englisch und erkläre Grammatik auf Deutsch.' },
+  { icon: '🏛️', name: 'Geschichte', prompt: '' }
+];
+
+const MODES = {
+  erklaeren: { label: '💡 Erklären', prompt: 'Erkläre verständlich und strukturiert, Schritt für Schritt, mit einem konkreten Beispiel. Schließe mit einer kurzen Verständnisfrage ab.' },
+  sokratisch: { label: '🧭 Sokratisch', prompt: 'Gib die Lösung NICHT direkt vor. Führe den Lernenden mit gezielten Rückfragen und kleinen Hinweisen selbst zur Lösung – immer nur einen Schritt pro Antwort. Erst wenn er nach mehreren Versuchen feststeckt, zeige den nächsten Schritt.' },
+  abfragen: { label: '❓ Abfragen', prompt: 'Frage den Lernenden ab: Stelle immer nur EINE Übungsfrage pro Nachricht (zum Fach bzw. zu seinen Notizen). Warte auf die Antwort, bewerte sie fair (richtig / teilweise / falsch), erkläre Fehler kurz und stelle dann die nächste Frage. Steigere die Schwierigkeit langsam.' },
+  pruefen: { label: '🔍 Lösung prüfen', prompt: 'Der Lernende zeigt dir seine Lösung oder seinen Text. Prüfe Schritt für Schritt, benenne genau, wo ein Fehler liegt und warum, und gib Hinweise zur Korrektur, statt alles komplett vorzurechnen. Lobe, was richtig ist.' }
+};
+
+const FOLLOWUPS = [
+  ['🤔 Versteh ich nicht', 'Das habe ich noch nicht verstanden. Erkläre es bitte noch einmal anders und einfacher, mit einem anderen Beispiel.'],
+  ['🧩 Beispiel', 'Gib mir bitte ein weiteres, konkretes Beispiel dazu.'],
+  ['🏋️ Übungsaufgabe', 'Gib mir eine passende Übungsaufgabe dazu (ohne Lösung). Ich versuche sie selbst.'],
+  ['➡️ Weiter', 'Weiter bitte.'],
+  ['📝 Lernnotiz', 'Fasse unser bisheriges Gespräch als kurze Lernnotiz in Stichpunkten zusammen (wichtigste Begriffe, Formeln, typische Fehler).']
+];
+
+const PRESETS = [
+  ['OpenAI', 'https://api.openai.com/v1', 'gpt-4o-mini'],
+  ['Gemini', 'https://generativelanguage.googleapis.com/v1beta/openai', 'gemini-2.5-flash'],
+  ['Groq', 'https://api.groq.com/openai/v1', 'llama-3.3-70b-versatile'],
+  ['OpenRouter', 'https://openrouter.ai/api/v1', ''],
+  ['Mistral', 'https://api.mistral.ai/v1', 'mistral-small-latest'],
+  ['LM Studio', 'http://192.168.178.20:1234/v1', '']
+];
+
+/* ---------- Zustand ---------- */
+function fresh() {
+  const subjects = DEFAULT_SUBJECTS.map(s => ({ id: 'sub-' + s.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'), updated: 0, ...s }));
+  return {
+    settings: {
+      provider: 'ollama',
+      ollama: { url: 'http://localhost:11434', model: '', ctx: 8192 },
+      openai: { url: 'https://api.openai.com/v1', key: '', model: 'gpt-4o-mini' },
+      anthropic: { key: '', model: 'claude-sonnet-5-5' },
+      whisper: { url: 'https://api.groq.com/openai/v1', key: '', model: 'whisper-large-v3-turbo' },
+      level: 'Studium', temp: 0.4
+    },
+    subjects, docs: [], chats: {}, recs: [], chatTs: {}, deleted: {},
+    sync: { clientId: '', device: '', enabled: false, auto: true, dirty: false, remoteMod: '', last: 0, base: {} },
+    active: subjects[0].id, activeDoc: {}, mode: 'erklaeren', ctx: true
+  };
+}
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY));
+    if (s && Array.isArray(s.subjects)) {
+      const f = fresh();
+      s.settings = Object.assign(f.settings, s.settings || {});
+      ['ollama', 'openai', 'anthropic', 'whisper'].forEach(k => s.settings[k] = Object.assign(fresh().settings[k], s.settings[k] || {}));
+      s.docs = s.docs || []; s.chatTs = s.chatTs || {}; s.deleted = s.deleted || {};
+      s.sync = Object.assign(fresh().sync, s.sync || {}); s.sync.base = s.sync.base || {};
+      s.recs = (s.recs || []).map(r => r.status === 'nimmt auf' ? Object.assign(r, { status: 'unterbrochen' }) : r); s.chats = s.chats || {}; s.activeDoc = s.activeDoc || {};
+      s.mode = MODES[s.mode] ? s.mode : 'erklaeren';
+      if (!s.subjects.length) s.subjects = f.subjects;
+      if (!s.subjects.find(x => x.id === s.active)) s.active = s.subjects[0].id;
+      return s;
+    }
+  } catch (e) {}
+  return fresh();
+}
+let S = load();
+let saveT;
+let rev = 0;
+function save(now, noDirty) {
+  if (!noDirty && S.sync) { S.sync.dirty = true; rev++; if (typeof scheduleSync === 'function') scheduleSync(); }
+  clearTimeout(saveT);
+  const w = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('Speichern fehlgeschlagen: ' + e.message); } };
+  now ? w() : saveT = setTimeout(w, 300);
+}
+window.addEventListener('pagehide', () => save(true));
+document.addEventListener('visibilitychange', () => { if (document.hidden) save(true); });
+
+const curSub = () => S.subjects.find(s => s.id === S.active) || S.subjects[0];
+const docsOf = id => S.docs.filter(d => d.subjectId === id).sort((a, b) => b.updated - a.updated);
+function curDoc() {
+  const sub = curSub();
+  let d = S.docs.find(x => x.id === S.activeDoc[sub.id] && x.subjectId === sub.id) || docsOf(sub.id)[0];
+  if (!d) { d = { id: 'notes-' + sub.id, subjectId: sub.id, title: 'Notizen', content: '', updated: S.deleted['notes-' + sub.id] ? Date.now() : 0 }; S.docs.push(d); }
+  S.activeDoc[sub.id] = d.id;
+  return d;
+}
+const chatOf = () => (S.chats[S.active] = S.chats[S.active] || []);
+
+/* ---------- Hilfen ---------- */
+let toastT;
+function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), 3200); }
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const narrow = () => window.matchMedia('(max-width:899px)').matches;
+function setTab(t) { document.body.dataset.tab = t; document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === t)); }
+
+/* ---------- Markdown + Formeln ---------- */
+function mathHTML(t, disp) {
+  if (window.katex) { try { return katex.renderToString(t, { displayMode: disp, throwOnError: false }); } catch (e) {} }
+  return '<code>' + esc(disp ? '$$' + t + '$$' : '$' + t + '$') + '</code>';
+}
+function md(src) {
+  const store = [];
+  const put = h => '\u0000' + (store.push(h) - 1) + '\u0000';
+  src = String(src || '')
+    .replace(/```[\w-]*\n?([\s\S]*?)(```|$)/g, (m, c) => '\n' + put('<pre><code>' + esc(c.replace(/\n$/, '')) + '</code></pre>') + '\n')
+    .replace(/\$\$([\s\S]+?)\$\$/g, (m, t) => put(mathHTML(t, true)))
+    .replace(/\\\[([\s\S]+?)\\\]/g, (m, t) => put(mathHTML(t, true)))
+    .replace(/\\\(([\s\S]+?)\\\)/g, (m, t) => put(mathHTML(t, false)))
+    .replace(/(^|[^\\$])\$([^\s$](?:[^$\n]*?[^\s$])?)\$(?!\d)/g, (m, p, t) => p + put(mathHTML(t, false)))
+    .replace(/`([^`\n]+)`/g, (m, c) => put('<code>' + esc(c) + '</code>'));
+  src = esc(src);
+  const inline = s => s
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[^*\w])\*([^*\n]+)\*/g, '$1<em>$2</em>')
+    .replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  const LI = /^\s*([-*+•]|\d+[.)])\s+/;
+  const BLOCK = /^\u0000\d+\u0000$/;
+  const lines = src.split('\n'), out = [];
+  let i = 0;
+  while (i < lines.length) {
+    const l = lines[i]; let m;
+    if (!l.trim()) { i++; continue; }
+    if ((m = l.match(/^(#{1,6})\s+(.*)$/))) { const n = Math.min(m[1].length + 1, 6); out.push(`<h${n}>${inline(m[2])}</h${n}>`); i++; continue; }
+    if (/^\s*(---|\*\*\*|___)\s*$/.test(l)) { out.push('<hr>'); i++; continue; }
+    if (BLOCK.test(l.trim())) { out.push('<div>' + l.trim() + '</div>'); i++; continue; }
+    if (/^&gt;\s?/.test(l)) { const b = []; while (i < lines.length && /^&gt;\s?/.test(lines[i])) b.push(lines[i++].replace(/^&gt;\s?/, '')); out.push('<blockquote>' + inline(b.join('<br>')) + '</blockquote>'); continue; }
+    if (/^\s*\|.*\|\s*$/.test(l)) {
+      const rows = []; while (i < lines.length && /^\s*\|.*\|\s*$/.test(lines[i])) rows.push(lines[i++].trim());
+      const cells = r => r.slice(1, -1).split('|').map(c => c.trim());
+      let h = '<div class="tbl"><table>';
+      rows.forEach((r, k) => { if (/^\|[\s:|-]+\|$/.test(r)) return; const tg = k === 0 ? 'th' : 'td'; h += '<tr>' + cells(r).map(c => `<${tg}>${inline(c)}</${tg}>`).join('') + '</tr>'; });
+      out.push(h + '</table></div>'); continue;
+    }
+    if (LI.test(l)) {
+      const ord = /^\s*\d/.test(l), items = [];
+      while (i < lines.length && LI.test(lines[i])) {
+        items.push(lines[i++].replace(LI, ''));
+        while (i < lines.length && /^\s{2,}\S/.test(lines[i]) && !LI.test(lines[i])) items[items.length - 1] += '<br>' + lines[i++].trim();
+      }
+      out.push(`<${ord ? 'ol' : 'ul'}>` + items.map(x => '<li>' + inline(x) + '</li>').join('') + `</${ord ? 'ol' : 'ul'}>`); continue;
+    }
+    const p = [];
+    while (i < lines.length && lines[i].trim() && !/^(#{1,6}\s|&gt;|\s*\|)/.test(lines[i]) && !LI.test(lines[i]) && !BLOCK.test(lines[i].trim())) p.push(lines[i++]);
+    if (!p.length) p.push(lines[i++]);
+    out.push('<p>' + inline(p.join('<br>')) + '</p>');
+  }
+  return out.join('\n').replace(/\u0000(\d+)\u0000/g, (m, k) => store[k]);
+}
+
+/* ---------- KI-Anbindung ---------- */
+async function check(r) {
+  if (!r.ok) { const t = await r.text().catch(() => ''); throw new Error(`HTTP ${r.status}: ${t.slice(0, 300)}`); }
+}
+async function readLines(r, fn) {
+  const rd = r.body.getReader(), dec = new TextDecoder(); let buf = '';
+  for (;;) {
+    const { value, done } = await rd.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    const parts = buf.split('\n'); buf = parts.pop();
+    for (const p of parts) if (p.trim()) { if (fn(p.trim()) === false) { rd.cancel().catch(() => {}); return; } }
+  }
+  if (buf.trim()) fn(buf.trim());
+}
+async function readSSE(r, fn) {
+  await readLines(r, line => {
+    if (!line.startsWith('data:')) return;
+    const d = line.slice(5).trim();
+    if (d === '[DONE]') return false;
+    try { fn(JSON.parse(d)); } catch (e) { if (e.isApi) throw e; }
+  });
+}
+function apiErr(msg) { const e = new Error(msg); e.isApi = true; return e; }
+const trimUrl = u => (u || '').trim().replace(/\/+$/, '');
+function netOpt(url, opt) {
+  try {
+    const host = new URL(url).hostname;
+    if (/^(localhost|127\.|\[::1\])/.test(host)) opt.targetAddressSpace = 'loopback';
+    else if (/^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)|\.local$/.test(host)) opt.targetAddressSpace = 'local';
+  } catch (_) {}
+  return opt;
+}
+
+async function stream(messages, signal, onDelta) {
+  const s = S.settings, p = s.provider, temp = +s.temp;
+  try {
+    if (p === 'ollama') {
+      if (!s.ollama.model) throw new Error('Kein Ollama-Modell gewählt (Einstellungen → Modelle laden).');
+      const r = await fetch(trimUrl(s.ollama.url) + '/api/chat', netOpt(s.ollama.url, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, signal,
+        body: JSON.stringify({ model: s.ollama.model, messages, stream: true, options: { temperature: temp, num_ctx: +s.ollama.ctx || 8192 } })
+      }));
+      await check(r);
+      await readLines(r, line => { const j = JSON.parse(line); if (j.error) throw apiErr(j.error); if (j.message && j.message.content) onDelta(j.message.content); if (j.done) return false; });
+    } else if (p === 'openai') {
+      const h = { 'Content-Type': 'application/json' };
+      if (s.openai.key) h.Authorization = 'Bearer ' + s.openai.key.trim();
+      const r = await fetch(trimUrl(s.openai.url) + '/chat/completions', netOpt(s.openai.url, {
+        method: 'POST', headers: h, signal,
+        body: JSON.stringify({ model: s.openai.model, messages, stream: true, temperature: temp })
+      }));
+      await check(r);
+      await readSSE(r, j => { if (j.error) throw apiErr(j.error.message || JSON.stringify(j.error)); const c = j.choices && j.choices[0] && j.choices[0].delta && j.choices[0].delta.content; if (c) onDelta(c); });
+    } else {
+      if (!s.anthropic.key) throw new Error('Kein Anthropic-API-Schlüssel eingetragen.');
+      const system = messages.filter(m => m.role === 'system').map(m => m.content).join('\n\n');
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST', signal,
+        headers: { 'Content-Type': 'application/json', 'x-api-key': s.anthropic.key.trim(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+        body: JSON.stringify({ model: s.anthropic.model, max_tokens: 4096, temperature: temp, system, stream: true, messages: messages.filter(m => m.role !== 'system') })
+      });
+      await check(r);
+      await readSSE(r, j => { if (j.type === 'error') throw apiErr(j.error && j.error.message || 'API-Fehler'); if (j.type === 'content_block_delta' && j.delta && j.delta.text) onDelta(j.delta.text); });
+    }
+  } catch (e) {
+    if (e.name === 'TypeError' && /fetch|network|load/i.test(e.message)) {
+      throw new Error('Keine Verbindung zum KI-Server. ' + (p === 'ollama'
+        ? 'Läuft Ollama? Ist die Adresse richtig? Bei Ollama am PC: OLLAMA_HOST=0.0.0.0 und OLLAMA_ORIGINS=* setzen und Ollama neu starten.'
+        : 'Internet, Basis-URL und API-Schlüssel prüfen.'));
+    }
+    throw e;
+  }
+}
+
+async function listModels() {
+  const s = S.settings;
+  if (s.provider === 'ollama') {
+    const r = await fetch(trimUrl(s.ollama.url) + '/api/tags', netOpt(s.ollama.url, {})); await check(r);
+    return ((await r.json()).models || []).map(m => m.name);
+  }
+  if (s.provider === 'openai') {
+    const h = {}; if (s.openai.key) h.Authorization = 'Bearer ' + s.openai.key.trim();
+    const r = await fetch(trimUrl(s.openai.url) + '/models', netOpt(s.openai.url, { headers: h })); await check(r);
+    return ((await r.json()).data || []).map(m => m.id).sort();
+  }
+  return ['claude-sonnet-5-5', 'claude-opus-5-5', 'claude-haiku-5-5'];
+}
+
+/* ---------- Tutor ---------- */
+function systemPrompt() {
+  const sub = curSub(), mode = MODES[S.mode], d = curDoc();
+  let p = `Du bist ein geduldiger, motivierender und fachlich sehr genauer Tutor für das Fach „${sub.name}“. Zielgruppe: ${S.settings.level}.
+Antworte auf Deutsch (außer der Lernende wünscht etwas anderes). Halte Antworten fokussiert und gut gegliedert (Markdown).
+Schreibe Formeln in LaTeX: inline mit $...$, abgesetzt mit $$...$$.
+Wenn eine Frage unklar ist, stelle eine kurze Rückfrage. Wenn du dir bei einem Fakt unsicher bist, sag das offen.
+Ziel ist, dass der Lernende es selbst versteht – nicht nur, dass er eine Lösung bekommt.`;
+  if (sub.prompt) p += `\n\nBesondere Hinweise zu diesem Fach: ${sub.prompt}`;
+  p += `\n\nAktueller Modus „${mode.label.replace(/^\S+\s/, '')}“: ${mode.prompt}`;
+  if (S.ctx && d.content.trim()) p += `\n\nNotizen des Lernenden (Dokument „${d.title}“), als Kontext:\n"""\n${d.content.slice(0, 12000)}\n"""`;
+  return p;
+}
+
+let busy = false, ctrl = null;
+function setBusy(b) { busy = b; $('#sendBtn').hidden = b; $('#stopBtn').hidden = !b; document.querySelectorAll('.aibar button,#follow button').forEach(x => x.disabled = b); }
+
+async function ask(text) {
+  text = (text || '').trim();
+  if (!text || busy) return;
+  if (narrow()) setTab('tutor');
+  const chat = chatOf();
+  chat.push({ role: 'user', content: text });
+  const ai = { role: 'assistant', content: '' };
+  chat.push(ai);
+  renderChat();
+  const body = $('#msgs').lastElementChild.querySelector('.body');
+  body.classList.add('typing');
+  setBusy(true);
+  ctrl = new AbortController();
+  const history = chat.slice(0, -1).filter(m => m.content && !m.err).slice(-24).map(m => ({ role: m.role, content: m.content }));
+  while (history.length && history[0].role !== 'user') history.shift();
+  const msgs = [{ role: 'system', content: systemPrompt() }, ...history];
+  let raf = 0;
+  try {
+    await stream(msgs, ctrl.signal, d => {
+      ai.content += d;
+      if (!raf) raf = requestAnimationFrame(() => { raf = 0; body.innerHTML = md(ai.content); scrollChat(); });
+    });
+  } catch (e) {
+    if (e.name !== 'AbortError') { ai.err = true; ai.content += (ai.content ? '\n\n' : '') + '⚠️ **Fehler:** ' + e.message; }
+  } finally {
+    cancelAnimationFrame(raf);
+    if (!ai.content.trim()) ai.content = '_(abgebrochen)_';
+    S.chatTs[S.active] = Date.now(); setBusy(false); save(); renderChat();
+  }
+}
+
+/* ---------- Rendering ---------- */
+function renderSide() {
+  $('#subjList').innerHTML = S.subjects.map(s =>
+    `<div class="subj ${s.id === S.active ? 'on' : ''}" data-id="${s.id}"><span class="ic">${esc(s.icon || '📘')}</span><span class="nm">${esc(s.name)}</span><button class="ghost ed" data-edit="${s.id}" title="Bearbeiten">✎</button></div>`).join('');
+  const sub = curSub();
+  $('#title').textContent = (sub.icon || '') + ' ' + sub.name;
+}
+function renderDocs() {
+  const d = curDoc();
+  $('#docSel').innerHTML = docsOf(S.active).map(x => `<option value="${x.id}" ${x.id === d.id ? 'selected' : ''}>${esc(x.title)}</option>`).join('');
+  if (ed.value !== d.content) { const a = ed.selectionStart, b = ed.selectionEnd, same = ed.dataset.doc === d.id; ed.value = d.content; if (same && document.activeElement === ed) ed.setSelectionRange(a, b); }
+  ed.dataset.doc = d.id;
+  if (!$('#preview').hidden) $('#preview').innerHTML = md(d.content);
+  status();
+}
+function status() {
+  const d = curDoc(), t = d.content.trim();
+  const w = t ? t.split(/\s+/).length : 0;
+  $('#status').textContent = `${w} Wörter · ${t.length} Zeichen · zuletzt geändert ${d.updated ? new Date(d.updated).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }) : '–'}`;
+}
+function renderModes() {
+  $('#modes').innerHTML = Object.entries(MODES).map(([k, m]) => `<button data-mode="${k}" class="${k === S.mode ? 'on' : ''}">${m.label}</button>`).join('');
+  $('#ctxChk').checked = !!S.ctx;
+}
+function renderChat() {
+  const chat = chatOf(), box = $('#msgs');
+  if (!chat.length) {
+    const sub = curSub();
+    box.innerHTML = `<div class="empty"><div style="font-size:40px">${esc(sub.icon || '🎓')}</div><b>Dein Tutor für ${esc(sub.name)}</b><br>Stell eine Frage, lass dich abfragen oder markiere links Text in deinen Notizen und wähle eine KI-Aktion.<br><br>Modus wählen: <b>Erklären</b>, <b>Sokratisch</b> (du kommst selbst drauf), <b>Abfragen</b> oder <b>Lösung prüfen</b>.</div>`;
+  } else {
+    box.innerHTML = chat.map((m, i) => `<div class="msg ${m.role}"><div class="body">${md(m.content)}</div>${m.role === 'assistant' && m.content ? `<div class="acts"><button data-ins="${i}">📥 In Notizen</button><button data-copy="${i}">📋 Kopieren</button></div>` : ''}</div>`).join('');
+  }
+  $('#follow').innerHTML = chat.length ? FOLLOWUPS.map((f, i) => `<button data-f="${i}" ${busy ? 'disabled' : ''}>${f[0]}</button>`).join('') : '';
+  scrollChat();
+}
+const scrollChat = () => { const b = $('#msgs'); b.scrollTop = b.scrollHeight; };
+function renderPill() {
+  const s = S.settings, m = s.provider === 'ollama' ? s.ollama.model : s.provider === 'openai' ? s.openai.model : s.anthropic.model;
+  const n = { ollama: 'Ollama', openai: 'API', anthropic: 'Claude' }[s.provider];
+  $('#modelPill').textContent = `🤖 ${n}: ${m || 'kein Modell'}`;
+}
+function renderAll() { renderSide(); renderDocs(); renderModes(); renderChat(); renderPill(); renderRecs(); }
+
+/* ---------- Editor ---------- */
+const ed = $('#editor');
+let lastCaret = 0;
+ed.addEventListener('input', () => { const d = curDoc(); d.content = ed.value; d.updated = Date.now(); save(); status(); });
+['keyup', 'mouseup', 'touchend', 'blur', 'select'].forEach(ev => ed.addEventListener(ev, () => lastCaret = ed.selectionEnd));
+
+function insertIntoDoc(text) {
+  const d = curDoc(), pos = Math.min(lastCaret || d.content.length, d.content.length);
+  const ins = (d.content && pos > 0 ? '\n\n' : '') + text.trim() + '\n';
+  d.content = d.content.slice(0, pos) + ins + d.content.slice(pos);
+  d.updated = Date.now(); lastCaret = pos + ins.length;
+  save(); renderDocs(); toast('In „' + d.title + '“ eingefügt');
+  if (narrow()) setTab('edit');
+}
+function selectedText() {
+  const a = ed.selectionStart, b = ed.selectionEnd;
+  return (a !== b ? ed.value.slice(a, b) : ed.value).trim().slice(0, 12000);
+}
+const ACTIONS = {
+  explain: t => `Erkläre mir diesen Abschnitt verständlich und Schritt für Schritt:\n\n"""\n${t}\n"""`,
+  summary: t => `Fasse diesen Text als kompakte Lernzusammenfassung zusammen (Stichpunkte, Kernbegriffe, wichtigste Formeln):\n\n"""\n${t}\n"""`,
+  correct: t => `Korrigiere Rechtschreibung, Grammatik und fachliche Fehler im folgenden Text. Gib zuerst den vollständigen korrigierten Text aus, danach eine kurze Liste der Änderungen mit Begründung:\n\n"""\n${t}\n"""`,
+  quiz: t => `Erstelle 5 Quizfragen (gemischt: Multiple Choice und offene Fragen) zu folgendem Inhalt. Schreibe die Lösungen erst ganz am Ende unter der Überschrift „Lösungen“:\n\n"""\n${t}\n"""`,
+  cards: t => `Erstelle Karteikarten zu folgendem Inhalt, jeweils im Format:\n**Vorderseite:** …\n**Rückseite:** …\n\n"""\n${t}\n"""`
+};
+document.querySelector('.aibar').addEventListener('click', e => {
+  const b = e.target.closest('button[data-act]'); if (!b) return;
+  const t = selectedText();
+  if (!t) return toast('Erst etwas schreiben oder Text markieren.');
+  if (b.dataset.act === 'ask') {
+    if (narrow()) setTab('tutor');
+    const q = $('#q'); q.value = `Zu dieser Stelle aus meinen Notizen:\n"${t.slice(0, 600)}"\n\nMeine Frage: `; q.focus(); q.setSelectionRange(q.value.length, q.value.length); autoGrow();
+    return;
+  }
+  ask(ACTIONS[b.dataset.act](t));
+});
+
+$('#prevBtn').onclick = () => {
+  const p = $('#preview'), show = p.hidden;
+  p.hidden = !show; ed.hidden = show;
+  $('#prevBtn').textContent = show ? '✏️ Bearbeiten' : '👁 Vorschau';
+  if (show) p.innerHTML = md(curDoc().content);
+};
+$('#docSel').onchange = e => { S.activeDoc[S.active] = e.target.value; save(); renderDocs(); };
+$('#newDoc').onclick = () => {
+  const t = prompt('Titel des neuen Dokuments:', 'Mitschrift ' + new Date().toLocaleDateString('de-DE'));
+  if (!t) return;
+  const d = { id: uid(), subjectId: S.active, title: t.trim(), content: '', updated: Date.now() };
+  S.docs.push(d); S.activeDoc[S.active] = d.id; save(); renderDocs(); ed.focus();
+};
+$('#renDoc').onclick = () => { const d = curDoc(), t = prompt('Neuer Titel:', d.title); if (t) { d.title = t.trim(); d.updated = Date.now(); save(); renderDocs(); } };
+$('#delDoc').onclick = () => {
+  const d = curDoc();
+  if (!confirm(`„${d.title}“ wirklich löschen? Das kann nicht rückgängig gemacht werden.`)) return;
+  S.docs = S.docs.filter(x => x.id !== d.id); S.deleted[d.id] = Date.now(); delete S.activeDoc[S.active]; save(); renderDocs();
+};
+
+/* ---------- Tutor-Bedienung ---------- */
+const q = $('#q');
+function autoGrow() { q.style.height = 'auto'; q.style.height = Math.min(q.scrollHeight, 180) + 'px'; }
+q.addEventListener('input', autoGrow);
+q.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); send(); } });
+function send() { const t = q.value; if (!t.trim() || busy) return; q.value = ''; autoGrow(); ask(t); }
+$('#sendBtn').onclick = send;
+$('#stopBtn').onclick = () => ctrl && ctrl.abort();
+$('#modes').onclick = e => {
+  const b = e.target.closest('[data-mode]'); if (!b) return;
+  S.mode = b.dataset.mode; save(); renderModes();
+  if (S.mode === 'abfragen' && !busy) ask('Bitte frag mich jetzt ab. Starte mit der ersten Frage.');
+};
+$('#ctxChk').onchange = e => { S.ctx = e.target.checked; save(); };
+$('#clearChat').onclick = () => { if (chatOf().length && confirm('Gesprächsverlauf für dieses Fach löschen?')) { S.chats[S.active] = []; S.chatTs[S.active] = Date.now(); save(); renderChat(); } };
+$('#follow').onclick = e => { const b = e.target.closest('[data-f]'); if (b) ask(FOLLOWUPS[+b.dataset.f][1]); };
+$('#msgs').onclick = async e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const chat = chatOf();
+  if (b.dataset.ins) insertIntoDoc(chat[+b.dataset.ins].content);
+  if (b.dataset.copy) { try { await navigator.clipboard.writeText(chat[+b.dataset.copy].content); toast('Kopiert'); } catch (_) { toast('Kopieren nicht erlaubt'); } }
+};
+
+/* ---------- Fächer ---------- */
+let editSubId = null;
+$('#subjList').onclick = e => {
+  const edb = e.target.closest('[data-edit]');
+  if (edb) return openSub(edb.dataset.edit);
+  const r = e.target.closest('.subj'); if (!r) return;
+  if (busy) return toast('Bitte warten, bis die Antwort fertig ist.');
+  S.active = r.dataset.id; save(); document.body.classList.remove('side'); renderAll();
+};
+function openSub(id) {
+  editSubId = id;
+  const s = S.subjects.find(x => x.id === id) || { icon: '📘', name: '', prompt: '' };
+  $('#subDlgT').textContent = id ? 'Fach bearbeiten' : 'Neues Fach';
+  $('#subIc').value = s.icon; $('#subNm').value = s.name; $('#subPr').value = s.prompt || '';
+  $('#subDel').hidden = !id;
+  $('#subDlg').showModal();
+}
+$('#addSubj').onclick = () => openSub(null);
+$('#subSave').onclick = e => {
+  const name = $('#subNm').value.trim();
+  if (!name) { e.preventDefault(); return toast('Bitte einen Namen eingeben.'); }
+  const data = { icon: $('#subIc').value.trim() || '📘', name, prompt: $('#subPr').value.trim() };
+  data.updated = Date.now();
+  if (editSubId) Object.assign(S.subjects.find(x => x.id === editSubId), data);
+  else { const s = { id: uid(), ...data }; S.subjects.push(s); S.active = s.id; }
+  save(); renderAll();
+};
+$('#subDel').onclick = () => {
+  if (S.subjects.length < 2) return toast('Mindestens ein Fach muss bleiben.');
+  const s = S.subjects.find(x => x.id === editSubId);
+  if (!confirm(`Fach „${s.name}“ mit allen Notizen und Chats löschen?`)) return;
+  S.subjects = S.subjects.filter(x => x.id !== editSubId);
+  const now = Date.now(); S.deleted[editSubId] = now;
+  S.docs.filter(d => d.subjectId === editSubId).forEach(d => S.deleted[d.id] = now);
+  S.docs = S.docs.filter(d => d.subjectId !== editSubId); delete S.chatTs[editSubId];
+  delete S.chats[editSubId]; delete S.activeDoc[editSubId];
+  if (S.active === editSubId) S.active = S.subjects[0].id;
+  $('#subDlg').close(); save(); renderAll();
+};
+
+/* ---------- Einstellungen ---------- */
+function showProv() { document.querySelectorAll('.prov').forEach(p => p.classList.toggle('on', p.dataset.p === $('#sProv').value)); }
+function readForm() {
+  const s = S.settings;
+  s.provider = $('#sProv').value;
+  s.ollama.url = $('#oUrl').value.trim(); s.ollama.model = $('#oModel').value.trim();
+  s.openai.url = $('#aUrl').value.trim(); s.openai.key = $('#aKey').value.trim(); s.openai.model = $('#aModel').value.trim();
+  s.anthropic.key = $('#cKey').value.trim(); s.anthropic.model = $('#cModel').value.trim();
+  s.level = $('#sLevel').value; s.temp = +$('#sTemp').value;
+  s.ollama.ctx = Math.max(2048, +$('#oCtx').value || 8192);
+  s.whisper.url = $('#wUrl').value.trim(); s.whisper.key = $('#wKey').value.trim(); s.whisper.model = $('#wModel').value.trim();
+}
+let backup;
+function openSettings() {
+  backup = JSON.stringify(S.settings);
+  const s = S.settings;
+  $('#sProv').value = s.provider; $('#oUrl').value = s.ollama.url; $('#oModel').value = s.ollama.model;
+  $('#aUrl').value = s.openai.url; $('#aKey').value = s.openai.key; $('#aModel').value = s.openai.model;
+  $('#cKey').value = s.anthropic.key; $('#cModel').value = s.anthropic.model;
+  $('#sLevel').value = s.level; $('#sTemp').value = s.temp; $('#testOut').textContent = '';
+  $('#oCtx').value = s.ollama.ctx; $('#wUrl').value = s.whisper.url; $('#wKey').value = s.whisper.key; $('#wModel').value = s.whisper.model;
+  showProv(); $('#setDlg').showModal();
+}
+$('#modelPill').onclick = openSettings; $('#setBtn').onclick = openSettings;
+$('#sProv').onchange = showProv;
+$('#presets').innerHTML = PRESETS.map((p, i) => `<button type="button" data-pre="${i}">${p[0]}</button>`).join('');
+const W_PRESETS = [
+  ['Groq', 'https://api.groq.com/openai/v1', 'whisper-large-v3-turbo'],
+  ['OpenAI', 'https://api.openai.com/v1', 'whisper-1'],
+  ['Eigener Server (PC)', 'http://192.168.178.20:8000/v1', 'Systran/faster-whisper-large-v3']
+];
+$('#wPresets').innerHTML = W_PRESETS.map((p, i) => `<button type="button" data-w="${i}">${p[0]}</button>`).join('');
+$('#wPresets').onclick = e => { const b = e.target.closest('[data-w]'); if (!b) return; const p = W_PRESETS[+b.dataset.w]; $('#wUrl').value = p[1]; $('#wModel').value = p[2]; if (b.dataset.w === '2') toast('IP-Adresse an deinen PC anpassen'); };
+$('#presets').onclick = e => { const b = e.target.closest('[data-pre]'); if (!b) return; const p = PRESETS[+b.dataset.pre]; $('#aUrl').value = p[1]; if (p[2]) $('#aModel').value = p[2]; if (p[0] === 'LM Studio') toast('IP-Adresse an deinen PC anpassen'); };
+$('#setDlg').addEventListener('close', () => {
+  if ($('#setDlg').returnValue === 'ok') { readForm(); save(); renderPill(); toast('Gespeichert'); }
+  else S.settings = JSON.parse(backup);
+});
+$('#loadModels').onclick = async () => {
+  const keep = JSON.stringify(S.settings); readForm();
+  $('#testOut').textContent = 'Lade Modelle …';
+  try {
+    const list = await listModels();
+    const dl = S.settings.provider === 'ollama' ? '#oList' : '#aList';
+    $(dl).innerHTML = list.map(m => `<option value="${esc(m)}">`).join('');
+    if (S.settings.provider === 'ollama' && !$('#oModel').value && list[0]) $('#oModel').value = list[0];
+    $('#testOut').textContent = list.length ? `✅ ${list.length} Modelle gefunden: ${list.slice(0, 8).join(', ')}${list.length > 8 ? ' …' : ''}` : '⚠️ Keine Modelle gefunden. Bei Ollama z. B. „ollama pull llama3.2“ ausführen.';
+  } catch (e) { $('#testOut').textContent = '❌ ' + (e.name === 'TypeError' ? 'Keine Verbindung – Adresse, OLLAMA_HOST/OLLAMA_ORIGINS bzw. Internet prüfen.' : e.message); }
+  S.settings = JSON.parse(keep);
+};
+$('#testBtn').onclick = async () => {
+  const keep = JSON.stringify(S.settings); readForm();
+  $('#testOut').textContent = 'Teste …'; let out = '';
+  try {
+    await stream([{ role: 'system', content: 'Antworte extrem kurz.' }, { role: 'user', content: 'Sag nur: Verbindung steht!' }], undefined, d => out += d);
+    $('#testOut').textContent = '✅ Antwort: ' + out.trim().slice(0, 120);
+  } catch (e) { $('#testOut').textContent = '❌ ' + e.message; }
+  S.settings = JSON.parse(keep);
+};
+
+/* ---------- Backup ---------- */
+$('#expBtn').onclick = async () => {
+  const data = JSON.parse(JSON.stringify(S));
+  if (confirm('API-Schlüssel aus dem Backup entfernen? (empfohlen)')) { data.settings.openai.key = ''; data.settings.anthropic.key = ''; data.settings.whisper.key = ''; }
+  data.transcripts = {};
+  for (const r of S.recs) { try { data.transcripts[r.id] = (await DB.get('tr:' + r.id)) || []; } catch (_) {} }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' }));
+  a.download = 'lerntutor-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+};
+$('#impBtn').onclick = () => $('#impFile').click();
+$('#impFile').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    if (!Array.isArray(d.subjects)) throw new Error('Keine LernTutor-Datei');
+    if (!confirm('Backup laden? Die aktuellen Daten werden ersetzt.')) return;
+    const keys = { o: S.settings.openai.key, a: S.settings.anthropic.key, w: S.settings.whisper.key };
+    const tr = d.transcripts || {}; delete d.transcripts;
+    localStorage.setItem(KEY, JSON.stringify(d)); S = load();
+    for (const [id, t] of Object.entries(tr)) await DB.set('tr:' + id, t);
+    if (!S.settings.openai.key) S.settings.openai.key = keys.o;
+    if (!S.settings.anthropic.key) S.settings.anthropic.key = keys.a;
+    if (!S.settings.whisper.key) S.settings.whisper.key = keys.w;
+    save(true); renderAll(); toast('Backup geladen');
+  } catch (err) { toast('Import fehlgeschlagen: ' + err.message); }
+  e.target.value = '';
+};
+
+/* ---------- Speicher für Audio & Transkripte (IndexedDB) ---------- */
+const DB = {
+  db: null,
+  open() {
+    if (this.db) return Promise.resolve(this.db);
+    return new Promise((res, rej) => { const r = indexedDB.open('lerntutor', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(this.db = r.result); r.onerror = () => rej(r.error); });
+  },
+  async tx(mode, fn) {
+    const db = await this.open();
+    return new Promise((res, rej) => { const t = db.transaction('kv', mode); const req = fn(t.objectStore('kv')); t.oncomplete = () => res(req && req.result); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error); });
+  },
+  get(k) { return this.tx('readonly', s => s.get(k)); },
+  set(k, v) { return this.tx('readwrite', s => { s.put(v, k); }); },
+  del(k) { return this.tx('readwrite', s => { s.delete(k); }); },
+  delPrefix(p) { return this.tx('readwrite', s => { s.delete(IDBKeyRange.bound(p, p + '\uffff')); }); }
+};
+
+/* ---------- Vorlesungen aufnehmen ---------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const IS_ANDROID = /Android/i.test(navigator.userAgent);
+const CHUNK_MS = 4 * 60 * 1000;
+const R = { active: false, paused: false, meta: null, stream: null, mr: null, mime: '', timer: 0, tick: 0, acc: 0, since: 0, sr: null, finalText: '', interim: '', note: '', wake: null, saves: [], queue: Promise.resolve() };
+const busyRecs = new Set();
+let openRecId = null;
+const getRec = id => S.recs.find(r => r.id === id);
+const fmtTime = ms => { const s = Math.floor(ms / 1000), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? h + ':' : '') + String(m).padStart(2, '0') + ':' + String(x).padStart(2, '0'); };
+const recName = r => r.title || 'Vorlesung ' + new Date(r.created).toLocaleDateString('de-DE');
+const whisperReady = () => !!(S.settings.whisper.url && S.settings.whisper.model);
+const extOf = t => /mp4|m4a|aac/.test(t) ? 'm4a' : /ogg/.test(t) ? 'ogg' : /mpeg|mp3/.test(t) ? 'mp3' : /wav/.test(t) ? 'wav' : 'webm';
+const elapsed = () => R.acc + (R.active && !R.paused ? Date.now() - R.since : 0);
+function setRecStatus(meta, st) { meta.status = st; meta.upd = Date.now(); save(); renderRecs(); if (openRecId === meta.id) $('#riProg').textContent = st; }
+async function complete(messages) { let out = ''; await stream(messages, undefined, d => out += d); return out; }
+
+async function wake(on) {
+  try {
+    if (on && 'wakeLock' in navigator) R.wake = await navigator.wakeLock.request('screen');
+    else if (!on && R.wake) { await R.wake.release(); R.wake = null; }
+  } catch (e) {}
+}
+document.addEventListener('visibilitychange', () => { if (R.active && !document.hidden) wake(true); });
+
+function recDialogSetup() {
+  $('#rSubj').innerHTML = '<option value="auto">🤖 Automatisch erkennen</option>' + S.subjects.map(s => `<option value="${s.id}">${esc((s.icon || '') + ' ' + s.name)}</option>`).join('');
+  if (!whisperReady() && SR) $('#rMethod').value = 'live';
+  methodHint();
+}
+function methodHint() {
+  const m = $('#rMethod').value;
+  $('#rMethodHint').textContent = m === 'live'
+    ? (SR ? 'Text erscheint live. Braucht Internet (Googles Spracherkennung in Chrome). Es wird kein Audio gespeichert.' : '⚠️ Dieser Browser hat keine Live-Spracherkennung – bitte Chrome verwenden.')
+    : (whisperReady() ? 'Audio wird in 4-Minuten-Teilen gespeichert und nebenbei transkribiert. Ohne Internet wird später transkribiert.' : '⚠️ Whisper ist noch nicht eingerichtet (⚙️ Einstellungen). Du kannst trotzdem aufnehmen und später transkribieren.');
+}
+function recUI() {
+  const on = R.active;
+  $('#recSetup').hidden = on; $('#recLive').hidden = !on;
+  $('#rStart').hidden = on; $('#rImport').hidden = on;
+  $('#rPause').hidden = !on; $('#rStop').hidden = !on;
+  $('#rPause').textContent = R.paused ? '▶ Weiter' : '⏸ Pause';
+  $('#rClose').textContent = on ? 'Ausblenden (läuft weiter)' : 'Schließen';
+  const b = $('#recBtn'); b.classList.toggle('live', on);
+  b.textContent = on ? (R.paused ? '⏸ ' : '🔴 ') + fmtTime(elapsed()) : '🎙 Vorlesung';
+  $('#rTime').textContent = fmtTime(elapsed());
+  $('#rState').textContent = !on ? '' : R.paused ? 'pausiert' : R.note || (R.meta.method === 'live' ? 'hört zu …' : `nimmt auf · Teil ${R.meta.chunks}`);
+}
+async function showLiveText() {
+  if (!R.meta) return;
+  let txt;
+  if (R.meta.method === 'live') txt = esc(R.finalText) + (R.interim ? '<i style="opacity:.6">' + esc(R.interim) + '</i>' : '');
+  else {
+    const parts = (await DB.get('tr:' + R.meta.id)) || [];
+    txt = esc(parts.filter(Boolean).join(' ')) || '<span class="hint">' + (whisperReady() ? 'Der Text erscheint hier jeweils nach einem 4-Minuten-Teil …' : 'Aufnahme läuft – transkribiert wird später.') + '</span>';
+  }
+  const el = $('#rText'), stick = el.scrollTop + el.clientHeight >= el.scrollHeight - 30;
+  el.innerHTML = txt || '<span class="hint">Warte auf Sprache …</span>';
+  if (stick) el.scrollTop = el.scrollHeight;
+}
+
+async function startRecording() {
+  const method = $('#rMethod').value;
+  if (method === 'live' && !SR) return toast('Live-Spracherkennung wird hier nicht unterstützt.');
+  if (method === 'whisper' && !(navigator.mediaDevices && window.MediaRecorder)) return toast('Audioaufnahme wird von diesem Browser nicht unterstützt.');
+  let stream = null, mime = '';
+  try {
+    if (method === 'whisper') {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: true, autoGainControl: true } });
+      mime = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'].find(t => MediaRecorder.isTypeSupported(t)) || '';
+    }
+  } catch (e) { return toast('Kein Mikrofonzugriff: ' + e.message); }
+  const meta = { id: uid(), created: Date.now(), title: $('#rTitle').value.trim(), subjectId: $('#rSubj').value === 'auto' ? null : $('#rSubj').value, lang: $('#rLang').value, method, chunks: 0, dur: 0, status: 'nimmt auf', device: DEVICE, upd: Date.now() };
+  S.recs.unshift(meta); save(); await DB.set('tr:' + meta.id, []);
+  Object.assign(R, { active: true, paused: false, meta, stream, mime, mr: null, sr: null, acc: 0, since: Date.now(), finalText: '', interim: '', note: '', saves: [] });
+  if (method === 'whisper') startChunk(); else startSR();
+  R.tick = setInterval(() => { meta.dur = elapsed(); recUI(); }, 1000);
+  wake(true); recUI(); renderRecs(); showLiveText();
+}
+
+function startChunk() {
+  const meta = R.meta, idx = meta.chunks++, parts = [];
+  const mr = new MediaRecorder(R.stream, R.mime ? { mimeType: R.mime, audioBitsPerSecond: 32000 } : { audioBitsPerSecond: 32000 });
+  mr.ondataavailable = e => { if (e.data && e.data.size) parts.push(e.data); };
+  R.saves.push(new Promise(done => {
+    mr.onstop = async () => {
+      try {
+        const blob = new Blob(parts, { type: mr.mimeType || R.mime || 'audio/webm' });
+        if (blob.size > 2000) { await DB.set(`a:${meta.id}:${idx}`, blob); queueTranscribe(meta, idx); }
+      } catch (e) { toast('Audio konnte nicht gespeichert werden: ' + e.message); }
+      save(); done();
+    };
+  }));
+  mr.start(10000);
+  R.mr = mr;
+  clearTimeout(R.timer);
+  R.timer = setTimeout(rotateChunk, CHUNK_MS);
+}
+function rotateChunk() { if (!R.active || R.paused) return; const old = R.mr; startChunk(); old.stop(); }
+
+function queueTranscribe(meta, i) {
+  if (!whisperReady() || !navigator.onLine) return;
+  R.queue = R.queue.then(() => transcribeChunk(meta, i)).then(() => { if (R.meta === meta) showLiveText(); }).catch(e => { meta.lastErr = e.message; });
+}
+window.addEventListener('online', () => { if (R.active && R.meta.method === 'whisper') for (let i = 0; i < R.meta.chunks - 1; i++) queueTranscribe(R.meta, i); });
+
+async function transcribeChunk(meta, i) {
+  const parts = (await DB.get('tr:' + meta.id)) || [];
+  if (parts[i]) return;
+  const blob = await DB.get(`a:${meta.id}:${i}`);
+  if (!blob) { parts[i] = ' '; await DB.set('tr:' + meta.id, parts); return; }
+  const w = S.settings.whisper;
+  const key = w.key || (trimUrl(w.url) === trimUrl(S.settings.openai.url) ? S.settings.openai.key : '');
+  const fd = new FormData();
+  fd.append('file', blob, `teil${i + 1}.${extOf(blob.type)}`);
+  fd.append('model', w.model);
+  if (meta.lang && meta.lang !== 'auto') fd.append('language', meta.lang);
+  const prev = parts.slice(0, i).filter(Boolean).join(' ').slice(-200);
+  if (prev.trim()) fd.append('prompt', prev);
+  fd.append('response_format', 'json');
+  let r;
+  try { r = await fetch(trimUrl(w.url) + '/audio/transcriptions', netOpt(w.url, { method: 'POST', headers: key ? { Authorization: 'Bearer ' + key } : {}, body: fd })); }
+  catch (e) { throw new Error('Keine Verbindung zum Whisper-Server (' + trimUrl(w.url) + ').'); }
+  await check(r);
+  const j = await r.json();
+  const now = (await DB.get('tr:' + meta.id)) || [];
+  now[i] = (j.text || '').trim() || ' ';
+  await DB.set('tr:' + meta.id, now);
+}
+async function transcribeAll(meta) {
+  if (meta.method === 'live' || meta.edited) return;
+  const have = (await DB.get('tr:' + meta.id)) || [];
+  let missing = false; for (let i = 0; i < meta.chunks; i++) if (!have[i]) missing = true;
+  if (!missing) return;
+  if (meta.device && meta.device !== DEVICE && !(await DB.get(`a:${meta.id}:0`))) throw new Error('Das Audio liegt nur auf dem Gerät, auf dem aufgenommen wurde – dort transkribieren.');
+  if (!whisperReady()) throw new Error('Whisper ist nicht eingerichtet (⚙️ Einstellungen → Spracherkennung).');
+  await R.queue.catch(() => {});
+  for (let i = 0; i < meta.chunks; i++) {
+    setRecStatus(meta, `transkribiere Teil ${i + 1}/${meta.chunks} …`);
+    await transcribeChunk(meta, i);
+  }
+}
+async function transcriptOf(meta) { return ((await DB.get('tr:' + meta.id)) || []).filter(Boolean).join(' ').replace(/\s+/g, ' ').trim(); }
+
+let liveT;
+function saveLive() { clearTimeout(liveT); const m = R.meta, t = R.finalText; liveT = setTimeout(() => DB.set('tr:' + m.id, [t]), 1500); }
+function startSR() {
+  const r = new SR();
+  r.lang = R.meta.lang === 'en' ? 'en-US' : 'de-DE';
+  r.continuous = !IS_ANDROID; r.interimResults = true;
+  r.onresult = e => {
+    let interim = '';
+    for (let k = e.resultIndex; k < e.results.length; k++) {
+      const res = e.results[k];
+      if (res.isFinal) R.finalText += res[0].transcript.trim() + ' ';
+      else interim += res[0].transcript;
+    }
+    R.interim = interim; R.note = ''; showLiveText(); saveLive();
+  };
+  r.onerror = e => {
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { toast('Mikrofon bzw. Spracherkennung wurde nicht erlaubt.'); stopRecording(); }
+    else if (e.error === 'network') R.note = 'keine Internetverbindung – versuche erneut …';
+  };
+  r.onend = () => { if (R.active && !R.paused && R.sr === r) setTimeout(() => { if (R.active && !R.paused) try { r.start(); } catch (_) {} }, 250); };
+  R.sr = r; r.start();
+}
+
+function togglePause() {
+  if (!R.active) return;
+  if (!R.paused) {
+    R.acc = elapsed(); R.paused = true; clearTimeout(R.timer);
+    if (R.mr && R.mr.state === 'recording') R.mr.pause();
+    if (R.sr) try { R.sr.stop(); } catch (_) {}
+  } else {
+    R.paused = false; R.since = Date.now();
+    if (R.mr && R.mr.state === 'paused') { R.mr.resume(); R.timer = setTimeout(rotateChunk, CHUNK_MS); }
+    if (R.sr) try { R.sr.start(); } catch (_) {}
+  }
+  recUI();
+}
+
+async function stopRecording() {
+  if (!R.active) return;
+  const meta = R.meta;
+  meta.dur = elapsed();
+  R.active = false; R.paused = false; clearTimeout(R.timer); clearInterval(R.tick);
+  if (R.mr && R.mr.state !== 'inactive') R.mr.stop();
+  if (R.sr) { try { R.sr.stop(); } catch (_) {} R.finalText += R.interim; R.interim = ''; clearTimeout(liveT); await DB.set('tr:' + meta.id, [R.finalText]); R.sr = null; }
+  await Promise.all(R.saves);
+  if (R.stream) R.stream.getTracks().forEach(t => t.stop());
+  R.stream = null; R.mr = null;
+  wake(false); recUI();
+  if ($('#recDlg').open) $('#recDlg').close();
+  toast('Aufnahme gespeichert (' + fmtTime(meta.dur) + ')');
+  if (meta.method === 'live' || whisperReady()) processRec(meta.id);
+  else setRecStatus(meta, 'wartet auf Transkription');
+}
+
+/* Zuordnen + Zusammenfassen */
+async function processRec(id) {
+  const meta = getRec(id);
+  if (!meta || busyRecs.has(id)) return;
+  busyRecs.add(id);
+  try {
+    await transcribeAll(meta);
+    const text = await transcriptOf(meta);
+    if (text.length < 40) throw new Error('Das Transkript ist leer oder zu kurz.');
+    setRecStatus(meta, 'transkribiert – ordne zu …');
+    const sug = await suggestTarget(meta, text);
+    const ch = await askAssign(sug);
+    if (!ch) { setRecStatus(meta, 'transkribiert'); return; }
+    meta.title = ch.title; meta.subjectId = ch.subjectId;
+    let block = '';
+    if (ch.sum) {
+      const sum = await summarize(meta, text, st => setRecStatus(meta, st));
+      await DB.set('sum:' + meta.id, sum);
+      block += sum;
+    }
+    if (ch.tr) block += `\n\n### Transkript\n${text}`;
+    let doc = S.docs.find(d => d.id === ch.docId);
+    if (!doc) { doc = { id: uid(), subjectId: ch.subjectId, title: ch.title, content: '', updated: Date.now() }; S.docs.push(doc); }
+    meta.docId = doc.id;
+    if (block.trim()) { doc.content = (doc.content.trim() ? doc.content.replace(/\s+$/, '') + '\n\n---\n\n' : '') + block.trim() + '\n'; doc.updated = Date.now(); }
+    S.active = ch.subjectId; S.activeDoc[ch.subjectId] = doc.id;
+    setRecStatus(meta, 'fertig');
+    renderAll(); if (narrow()) setTab('edit');
+    toast(`„${meta.title}“ → ${curSub().name} / ${doc.title}`);
+  } catch (e) {
+    meta.err = e.message; setRecStatus(meta, 'Fehler: ' + e.message.slice(0, 90));
+    toast('Verarbeitung fehlgeschlagen: ' + e.message);
+  } finally { busyRecs.delete(id); save(); renderRecs(); }
+}
+
+async function suggestTarget(meta, text) {
+  const subs = meta.subjectId ? S.subjects.filter(s => s.id === meta.subjectId) : S.subjects;
+  const list = subs.length ? subs : S.subjects;
+  const date = new Date(meta.created).toLocaleDateString('de-DE');
+  const fallback = { subjectId: list[0].id, docId: 'new', title: meta.title || 'Vorlesung ' + date, reason: 'Keine automatische Zuordnung möglich – bitte selbst wählen.' };
+  const catalog = list.map(s => `Fach-ID ${s.id}: ${s.name}\n` + (docsOf(s.id).slice(0, 15).map(d => `  - Dokument-ID ${d.id}: „${d.title}“ – ${d.content.replace(/\s+/g, ' ').slice(0, 160)}`).join('\n') || '  (noch keine Dokumente)')).join('\n');
+  const mid = Math.floor(text.length / 2);
+  const sample = text.slice(0, 3000) + (text.length > 6000 ? ' … ' + text.slice(mid, mid + 1500) : '');
+  try {
+    const out = await complete([
+      { role: 'system', content: 'Du ordnest Vorlesungsmitschnitte den richtigen Fächern und Dokumenten zu. Antworte ausschließlich mit einem JSON-Objekt.' },
+      { role: 'user', content: `Fächer und vorhandene Dokumente:\n${catalog}\n\nAusschnitt aus dem Transkript der Vorlesung:\n"""\n${sample}\n"""\n\nZu welchem Fach gehört die Vorlesung? Passt sie in ein vorhandenes Dokument (gleiche Vorlesungsreihe oder gleiches Kapitel) oder braucht sie ein neues? Antworte genau in diesem Format:\n{"subjectId":"…","docId":"… oder new","title":"kurzer Titel mit dem Thema der Vorlesung","reason":"ein Satz Begründung"}` }
+    ]);
+    const j = JSON.parse(out.match(/\{[\s\S]*\}/)[0]);
+    const sub = list.find(s => s.id === j.subjectId) || list.find(s => s.name.toLowerCase() === String(j.subjectId || '').toLowerCase()) || list[0];
+    const doc = S.docs.find(d => d.id === j.docId && d.subjectId === sub.id);
+    return { subjectId: sub.id, docId: doc ? doc.id : 'new', title: meta.title || String(j.title || fallback.title).slice(0, 80), reason: String(j.reason || '') };
+  } catch (e) { return fallback; }
+}
+
+let asgResolve = null;
+function askAssign(sug) {
+  $('#asgSubj').innerHTML = S.subjects.map(s => `<option value="${s.id}" ${s.id === sug.subjectId ? 'selected' : ''}>${esc((s.icon || '') + ' ' + s.name)}</option>`).join('');
+  fillAsgDocs(sug.docId);
+  $('#asgTitle').value = sug.title;
+  $('#asgWhy').textContent = sug.reason ? '🤖 ' + sug.reason : '';
+  $('#asgSum').checked = true; $('#asgTr').checked = false;
+  $('#asgDlg').returnValue = '';
+  $('#asgDlg').showModal();
+  return new Promise(res => asgResolve = res);
+}
+function fillAsgDocs(sel) {
+  const sid = $('#asgSubj').value;
+  $('#asgDoc').innerHTML = '<option value="new">＋ Neues Dokument</option>' + docsOf(sid).map(d => `<option value="${d.id}" ${d.id === sel ? 'selected' : ''}>${esc(d.title)}</option>`).join('');
+}
+$('#asgSubj').onchange = () => fillAsgDocs('new');
+$('#asgDlg').addEventListener('close', () => {
+  if (!asgResolve) return;
+  const res = asgResolve; asgResolve = null;
+  if ($('#asgDlg').returnValue !== 'ok') return res(null);
+  res({ subjectId: $('#asgSubj').value, docId: $('#asgDoc').value, title: $('#asgTitle').value.trim() || 'Vorlesung', sum: $('#asgSum').checked, tr: $('#asgTr').checked });
+});
+
+function splitText(t, size) {
+  const out = [];
+  while (t.length > size) {
+    let cut = t.lastIndexOf('. ', size);
+    if (cut < size * 0.6) cut = t.lastIndexOf(' ', size);
+    if (cut <= 0) cut = size;
+    out.push(t.slice(0, cut + 1)); t = t.slice(cut + 1);
+  }
+  if (t.trim()) out.push(t);
+  return out;
+}
+async function summarize(meta, text, prog) {
+  const sub = (S.subjects.find(s => s.id === meta.subjectId) || curSub()).name;
+  const size = S.settings.provider === 'ollama' ? Math.max(5000, Math.round((+S.settings.ollama.ctx || 8192) * 1.4)) : 60000;
+  let src = text, round = 0;
+  while (src.length > size && round < 3) {
+    const chunks = splitText(src, size), notes = [];
+    for (let i = 0; i < chunks.length; i++) {
+      prog(`fasse zusammen: Abschnitt ${i + 1}/${chunks.length}${round ? ' (Runde ' + (round + 1) + ')' : ''} …`);
+      notes.push(await complete([
+        { role: 'system', content: `Du schreibst präzise Mitschriften einer Vorlesung im Fach ${sub}.` },
+        { role: 'user', content: `Abschnitt ${i + 1} von ${chunks.length} ${round ? 'aus Notizen zu einer Vorlesung' : 'eines Vorlesungstranskripts (automatische Spracherkennung, kann Fehler enthalten)'}. Erstelle ausführliche Notizen in Stichpunkten: Inhalte, Definitionen, Formeln (LaTeX mit $…$), Beispiele, Hinweise der Lehrperson (z. B. „prüfungsrelevant“, Termine, Aufgaben). Nichts erfinden.\n\n"""\n${chunks[i]}\n"""` }
+      ]));
+    }
+    src = notes.map((n, i) => `[Abschnitt ${i + 1}]\n${n.trim()}`).join('\n\n');
+    round++;
+  }
+  prog('schreibe Zusammenfassung …');
+  const out = await complete([
+    { role: 'system', content: `Du bist ein sehr guter Tutor im Fach ${sub} und erstellst Lernzusammenfassungen aus Vorlesungen. Niveau: ${S.settings.level}.` },
+    { role: 'user', content: `Erstelle aus ${round ? 'diesen Notizen' : 'diesem Transkript (automatische Spracherkennung, kann Fehler enthalten)'} einer Vorlesung eine saubere Lernzusammenfassung in Markdown mit diesen Abschnitten:\n### Überblick\n(3–5 Sätze)\n### Inhalte im Detail\n### Begriffe & Definitionen\n### Formeln\n(LaTeX mit $…$ bzw. $$…$$, mit Bedeutung der Größen)\n### Beispiele\n### Hinweise der Lehrperson / Prüfungsrelevantes\n### Offene Fragen zum Nacharbeiten\n\nLass Abschnitte weg, zu denen nichts gesagt wurde. Korrigiere offensichtliche Erkennungsfehler bei Fachbegriffen. Erfinde nichts dazu.\n\n"""\n${src}\n"""` }
+  ]);
+  const date = new Date(meta.created).toLocaleDateString('de-DE');
+  return `## 🎙 Vorlesung: ${meta.title} (${date})\n\n${out.trim()}`;
+}
+
+/* Aufnahme-Liste & Details */
+function renderRecs() {
+  const el = $('#recList'); if (!el) return;
+  if (!S.recs.length) { el.innerHTML = '<p class="hint" style="padding:4px 14px">Noch keine Aufnahmen.</p>'; return; }
+  el.innerHTML = S.recs.slice(0, 40).map(r => {
+    const s = S.subjects.find(x => x.id === r.subjectId);
+    const ic = R.active && R.meta === r ? '🔴' : (s ? s.icon : '🎙');
+    return `<div class="subj rec" data-rec="${r.id}"><span class="ic">${esc(ic || '🎙')}</span><span class="nm">${esc(recName(r))}<small>${new Date(r.created).toLocaleDateString('de-DE')} · ${fmtTime(r.dur || 0)} · ${esc(r.status || '')}</small></span></div>`;
+  }).join('');
+}
+$('#recList').onclick = e => { const r = e.target.closest('[data-rec]'); if (r) { document.body.classList.remove('side'); openRec(r.dataset.rec); } };
+
+async function openRec(id) {
+  const r = getRec(id); if (!r) return;
+  if (R.active && R.meta === r) { recUI(); showLiveText(); return $('#recDlg').showModal(); }
+  openRecId = id;
+  const s = S.subjects.find(x => x.id === r.subjectId), d = S.docs.find(x => x.id === r.docId);
+  $('#riTitle').textContent = '🎙 ' + recName(r);
+  $('#riMeta').textContent = `${new Date(r.created).toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' })} · ${fmtTime(r.dur || 0)} · ${r.method === 'live' ? 'Live-Erkennung' : r.chunks + ' Audioteil(e)'}${s ? ' · ' + s.name : ''}${d ? ' → „' + d.title + '“' : ''}`;
+  $('#riText').value = await transcriptOf(r);
+  $('#riText').placeholder = r.method === 'live' ? '' : 'Noch nicht transkribiert – „Neu transkribieren“ oder „Zuordnen & zusammenfassen“ tippen.';
+  $('#riProg').textContent = r.status || '';
+  $('#riTrans').hidden = r.method === 'live';
+  $('#riAudio').hidden = r.method === 'live' || !r.chunks;
+  $('#riDlg').showModal();
+}
+$('#riDlg').addEventListener('close', () => openRecId = null);
+let riT;
+$('#riText').addEventListener('input', () => {
+  const r = getRec(openRecId), v = $('#riText').value; if (!r) return;
+  r.edited = true; r.upd = Date.now(); save(); clearTimeout(riT); riT = setTimeout(() => DB.set('tr:' + r.id, [v]), 600);
+});
+async function flushRiText() { const r = getRec(openRecId); if (r && r.edited) { clearTimeout(riT); await DB.set('tr:' + r.id, [$('#riText').value]); } }
+$('#riProc').onclick = async () => { const id = openRecId; await flushRiText(); $('#riDlg').close(); processRec(id); };
+$('#riTrans').onclick = async () => {
+  const r = getRec(openRecId); if (!r || busyRecs.has(r.id)) return;
+  if (r.edited && !confirm('Neu transkribieren? Deine Änderungen am Transkript gehen verloren.')) return;
+  if (!(await DB.get(`a:${r.id}:0`))) return toast('Das Audio liegt nur auf dem Gerät, auf dem aufgenommen wurde.');
+  r.edited = false; await DB.set('tr:' + r.id, []);
+  busyRecs.add(r.id);
+  try { await transcribeAll(r); if (openRecId === r.id) $('#riText').value = await transcriptOf(r); setRecStatus(r, 'transkribiert'); }
+  catch (e) { setRecStatus(r, 'Fehler: ' + e.message.slice(0, 90)); toast(e.message); }
+  finally { busyRecs.delete(r.id); }
+};
+$('#riTutor').onclick = async () => {
+  const r = getRec(openRecId); if (!r) return;
+  const sum = await DB.get('sum:' + r.id);
+  if (!sum) return toast('Erst „Zuordnen & zusammenfassen“ ausführen.');
+  if (busy) return toast('Bitte warten, bis die aktuelle Antwort fertig ist.');
+  if (r.subjectId && getSubjectExists(r.subjectId)) S.active = r.subjectId;
+  S.mode = 'abfragen'; $('#riDlg').close(); renderAll(); setTab('tutor');
+  ask(`Hier ist die Zusammenfassung meiner Vorlesung „${recName(r)}“:\n\n${sum}\n\nHilf mir beim Nacharbeiten: Frag mich nacheinander zu den wichtigsten Punkten ab und kläre meine Rückfragen.`);
+};
+const getSubjectExists = id => S.subjects.some(s => s.id === id);
+$('#riAudio').onclick = async () => {
+  const r = getRec(openRecId); if (!r) return;
+  for (let i = 0; i < r.chunks; i++) {
+    const b = await DB.get(`a:${r.id}:${i}`); if (!b) continue;
+    const a = document.createElement('a'); a.href = URL.createObjectURL(b);
+    a.download = `${recName(r).replace(/[^\wäöüÄÖÜß .-]/g, '')}_Teil${i + 1}.${extOf(b.type)}`;
+    document.body.appendChild(a); a.click(); a.remove();
+    await new Promise(x => setTimeout(x, 500));
+  }
+};
+$('#riDel').onclick = async () => {
+  const r = getRec(openRecId); if (!r) return;
+  if (!confirm(`Aufnahme „${recName(r)}“ mit Audio und Transkript löschen? Die Zusammenfassung in deinen Notizen bleibt erhalten.`)) return;
+  await DB.delPrefix(`a:${r.id}:`); await DB.del('tr:' + r.id); await DB.del('sum:' + r.id);
+  S.recs = S.recs.filter(x => x !== r); S.deleted[r.id] = Date.now(); save(); $('#riDlg').close(); renderRecs();
+};
+
+$('#recBtn').onclick = () => { if (!R.active) recDialogSetup(); recUI(); showLiveText(); $('#recDlg').showModal(); };
+$('#rMethod').onchange = methodHint;
+$('#rStart').onclick = startRecording;
+$('#rPause').onclick = togglePause;
+$('#rStop').onclick = () => { if (confirm('Aufnahme beenden und verarbeiten?')) stopRecording(); };
+$('#rImport').onclick = () => { if (!whisperReady()) return toast('Bitte zuerst Whisper in den Einstellungen einrichten.'); $('#rFile').click(); };
+$('#rFile').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  if (f.size > 24 * 1024 * 1024) return toast('Datei zu groß (max. 24 MB). Längere Vorlesungen direkt in der App aufnehmen – dann wird in Teilen übertragen.');
+  const meta = { id: uid(), created: f.lastModified || Date.now(), title: $('#rTitle').value.trim(), subjectId: $('#rSubj').value === 'auto' ? null : $('#rSubj').value, lang: $('#rLang').value, method: 'whisper', chunks: 1, dur: 0, status: 'importiert', device: DEVICE, upd: Date.now() };
+  await DB.set(`a:${meta.id}:0`, f); await DB.set('tr:' + meta.id, []);
+  S.recs.unshift(meta); save(); renderRecs(); $('#recDlg').close(); processRec(meta.id);
+};
+
+/* ---------- Google-Drive-Synchronisation ---------- */
+// Optional: Client-ID hier fest eintragen, dann muss sie nicht auf jedem Gerät eingegeben werden.
+const DEFAULT_CLIENT_ID = '';
+const DEVICE = (() => { try { let d = localStorage.getItem('lerntutor.device'); if (!d) { d = uid() + uid(); localStorage.setItem('lerntutor.device', d); } return d; } catch (_) { return 'dev-' + uid(); } })();
+const SYNC_FILE = 'lerntutor-sync.json';
+const DRIVE = 'https://www.googleapis.com/drive/v3/files';
+const DRIVE_UP = 'https://www.googleapis.com/upload/drive/v3/files';
+let gTok = null, gExp = 0, syncing = false, syncT = 0, syncErr = '';
+const clientId = () => (S.sync.clientId || DEFAULT_CLIENT_ID).trim();
+const tokenValid = () => gTok && Date.now() < gExp - 60000;
+
+function loadGIS() {
+  return new Promise((res, rej) => {
+    if (window.google && google.accounts && google.accounts.oauth2) return res();
+    const s = document.createElement('script');
+    s.src = 'https://accounts.google.com/gsi/client'; s.async = true;
+    s.onload = () => res(); s.onerror = () => rej(new Error('Google-Anmeldung konnte nicht geladen werden (offline?).'));
+    document.head.appendChild(s);
+  });
+}
+async function getToken(interactive) {
+  if (tokenValid()) return gTok;
+  if (!interactive) return null;
+  if (!clientId()) throw new Error('Keine Google Client-ID eingetragen.');
+  await loadGIS();
+  return new Promise((res, rej) => {
+    const tc = google.accounts.oauth2.initTokenClient({
+      client_id: clientId(),
+      scope: 'https://www.googleapis.com/auth/drive.appdata',
+      prompt: S.sync.enabled ? '' : 'consent',
+      callback: r => { if (r.error) return rej(new Error(r.error_description || r.error)); gTok = r.access_token; gExp = Date.now() + (+r.expires_in || 3600) * 1000; res(gTok); },
+      error_callback: e => rej(new Error(e.type === 'popup_closed' ? 'Anmeldung abgebrochen.' : e.type === 'popup_failed_to_open' ? 'Anmeldefenster wurde blockiert – Pop-ups erlauben.' : (e.message || 'Anmeldung fehlgeschlagen.')))
+    });
+    tc.requestAccessToken();
+  });
+}
+async function gfetch(url, opt = {}) {
+  if (!tokenValid()) { const e = new Error('Anmeldung nötig'); e.auth = true; throw e; }
+  opt.headers = Object.assign({ Authorization: 'Bearer ' + gTok }, opt.headers || {});
+  const r = await fetch(url, opt);
+  if (r.status === 401) { gTok = null; const e = new Error('Anmeldung abgelaufen'); e.auth = true; throw e; }
+  await check(r);
+  return r;
+}
+async function findSyncFile() {
+  const q = encodeURIComponent(`name='${SYNC_FILE}'`);
+  const j = await (await gfetch(`${DRIVE}?spaces=appDataFolder&q=${q}&orderBy=modifiedTime desc&fields=files(id,modifiedTime)`)).json();
+  return (j.files || [])[0] || null;
+}
+async function uploadSync(fileId, body) {
+  if (fileId) return (await gfetch(`${DRIVE_UP}/${fileId}?uploadType=media&fields=id,modifiedTime`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body })).json();
+  const b = 'lt' + uid();
+  const multi = `--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify({ name: SYNC_FILE, parents: ['appDataFolder'] })}\r\n--${b}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${b}--`;
+  return (await gfetch(`${DRIVE_UP}?uploadType=multipart&fields=id,modifiedTime`, { method: 'POST', headers: { 'Content-Type': 'multipart/related; boundary=' + b }, body: multi })).json();
+}
+
+async function buildPayload() {
+  const transcripts = {}, summaries = {};
+  for (const r of S.recs) {
+    if (R.active && R.meta === r) continue;
+    try { const t = await DB.get('tr:' + r.id); if (t && t.length) transcripts[r.id] = t; const s = await DB.get('sum:' + r.id); if (s) summaries[r.id] = s; } catch (_) {}
+  }
+  return {
+    v: 1, at: Date.now(), from: S.sync.device || 'Gerät',
+    subjects: S.subjects, docs: S.docs, chats: S.chats, chatTs: S.chatTs, deleted: S.deleted,
+    recs: S.recs.filter(r => !(R.active && R.meta === r)), transcripts, summaries
+  };
+}
+function lww(a, b, key) {
+  const m = new Map(a.map(x => [x.id, x]));
+  for (const x of b || []) { const l = m.get(x.id); if (!l || (x[key] || 0) > (l[key] || 0)) m.set(x.id, x); }
+  return [...m.values()];
+}
+async function mergeRemote(rem) {
+  let conflicts = 0;
+  const del = Object.assign({}, rem.deleted || {});
+  for (const [k, t] of Object.entries(S.deleted)) del[k] = Math.max(del[k] || 0, t);
+  const old = Date.now() - 120 * 864e5;
+  for (const k of Object.keys(del)) if (del[k] < old) delete del[k];
+  S.deleted = del;
+  const alive = (id, ts) => !(del[id] && del[id] >= (ts || 0));
+
+  S.subjects = lww(S.subjects, rem.subjects, 'updated').filter(s => alive(s.id, s.updated));
+  if (!S.subjects.length) S.subjects = fresh().subjects;
+
+  const base = S.sync.base, local = new Map(S.docs.map(d => [d.id, d])), out = [];
+  for (const r of rem.docs || []) {
+    const l = local.get(r.id); local.delete(r.id);
+    if (!l) { out.push(r); continue; }
+    if (l.content === r.content && l.title === r.title) { out.push((l.updated || 0) >= (r.updated || 0) ? l : r); continue; }
+    const b = base[r.id] != null ? base[r.id] : -1;
+    const lCh = (l.updated || 0) > b, rCh = (r.updated || 0) > b;
+    if (lCh && rCh && l.content.trim() && r.content.trim()) {
+      const [win, lose] = (l.updated || 0) >= (r.updated || 0) ? [l, r] : [r, l];
+      out.push(win);
+      out.push(Object.assign({}, lose, { id: uid(), updated: Date.now(), title: `${lose.title} (Konflikt ${new Date(lose.updated || Date.now()).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })})` }));
+      conflicts++;
+    } else out.push(!lCh ? r : !rCh ? l : ((l.updated || 0) >= (r.updated || 0) ? l : r));
+  }
+  out.push(...local.values());
+  S.docs = out.filter(d => alive(d.id, d.updated) && S.subjects.some(s => s.id === d.subjectId));
+
+  const rc = rem.chats || {}, rt = rem.chatTs || {};
+  for (const sid of Object.keys(rt)) if ((rt[sid] || 0) > (S.chatTs[sid] || 0) && Array.isArray(rc[sid])) { S.chats[sid] = rc[sid]; S.chatTs[sid] = rt[sid]; }
+
+  const before = new Map(S.recs.map(r => [r.id, r]));
+  const recs = lww(S.recs, rem.recs, 'upd').filter(r => alive(r.id, r.upd));
+  for (const r of rem.recs || []) {
+    const l = before.get(r.id);
+    if (recs.includes(r) && (!l || (r.upd || 0) > (l.upd || 0))) {
+      if (rem.transcripts && rem.transcripts[r.id]) await DB.set('tr:' + r.id, rem.transcripts[r.id]);
+      if (rem.summaries && rem.summaries[r.id]) await DB.set('sum:' + r.id, rem.summaries[r.id]);
+    }
+  }
+  if (R.active && R.meta && !recs.includes(R.meta)) recs.push(R.meta);
+  S.recs = recs.sort((a, b) => b.created - a.created);
+  if (!S.subjects.find(s => s.id === S.active)) S.active = S.subjects[0].id;
+  return conflicts;
+}
+
+async function syncNow(interactive) {
+  if (syncing || !clientId()) { renderSync(); return; }
+  if (!navigator.onLine) { syncErr = 'offline'; renderSync(); return; }
+  syncing = true; syncErr = ''; renderSync();
+  try {
+    if (!(await getToken(interactive))) return;
+    const r0 = rev, wasDirty = S.sync.dirty;
+    const f = await findSyncFile();
+    let conflicts = 0, merged = false;
+    if (f && f.modifiedTime !== S.sync.remoteMod) {
+      const rem = await (await gfetch(`${DRIVE}/${f.id}?alt=media`)).json();
+      conflicts = await mergeRemote(rem); merged = true;
+    }
+    if (!f || wasDirty || conflicts || !S.sync.remoteMod) {
+      const payload = await buildPayload();
+      const res = await uploadSync(f && f.id, JSON.stringify(payload));
+      S.sync.remoteMod = res.modifiedTime;
+      payload.docs.forEach(d => S.sync.base[d.id] = d.updated || 0);
+    } else {
+      S.sync.remoteMod = f.modifiedTime;
+      S.docs.forEach(d => S.sync.base[d.id] = d.updated || 0);
+    }
+    if (rev === r0) S.sync.dirty = false;
+    S.sync.enabled = true; S.sync.last = Date.now();
+    save(true, true);
+    if (merged) { renderAll(); if (conflicts) toast(`⚠️ ${conflicts} Dokument(e) wurden auf zwei Geräten geändert – beide Fassungen behalten.`); }
+  } catch (e) {
+    syncErr = e.auth ? 'auth' : e.message;
+    if (interactive && !e.auth) toast('Sync fehlgeschlagen: ' + e.message);
+  } finally { syncing = false; renderSync(); }
+}
+function scheduleSync() { clearTimeout(syncT); if (S.sync.enabled && tokenValid()) syncT = setTimeout(() => syncNow(false), 15000); }
+setInterval(() => { if (S.sync.enabled && tokenValid() && !document.hidden) syncNow(false); }, 60000);
+document.addEventListener('visibilitychange', () => { if (S.sync.enabled && tokenValid()) syncNow(false); });
+window.addEventListener('online', () => { if (S.sync.enabled && tokenValid()) syncNow(false); });
+// Nach dem Start: beim ersten Tippen still bei Google anmelden (braucht eine Nutzeraktion)
+document.addEventListener('pointerdown', function first(e) {
+  document.removeEventListener('pointerdown', first, true);
+  if (S.sync.enabled && S.sync.auto && clientId() && !tokenValid() && !e.target.closest('#syncBtn')) syncNow(true);
+}, true);
+
+function renderSync() {
+  const b = $('#syncBtn'), on = S.sync.enabled && clientId();
+  const t = S.sync.last ? new Date(S.sync.last).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '';
+  b.textContent = !clientId() ? '☁️ Sync' : syncing ? '☁️ …' : syncErr === 'auth' || (on && !tokenValid()) ? '☁️ Anmelden' : syncErr === 'offline' ? '☁️ offline' : syncErr ? '☁️ ⚠️' : on ? '☁️ ✓ ' + t : '☁️ Sync';
+  b.title = syncErr && syncErr !== 'auth' ? 'Fehler: ' + syncErr : 'Google-Drive-Synchronisation';
+  if ($('#syncDlg').open) $('#gStatus').textContent = !clientId() ? 'Noch nicht eingerichtet.' : syncing ? 'Synchronisiere …' : syncErr && syncErr !== 'auth' ? '⚠️ ' + syncErr : S.sync.last ? `✅ Zuletzt synchronisiert: ${new Date(S.sync.last).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })}` : 'Bereit zum Verbinden.';
+}
+function openSyncDlg() {
+  $('#gClient').value = S.sync.clientId || DEFAULT_CLIENT_ID; $('#gDevice').value = S.sync.device; $('#gAuto').checked = S.sync.auto !== false;
+  $('#syncDlg').showModal(); renderSync();
+}
+function readSyncForm() { S.sync.clientId = $('#gClient').value.trim(); S.sync.device = $('#gDevice').value.trim(); S.sync.auto = $('#gAuto').checked; save(true, true); }
+$('#syncSetBtn').onclick = openSyncDlg;
+$('#syncBtn').onclick = () => { if (!clientId()) return openSyncDlg(); syncNow(true); };
+$('#gConnect').onclick = () => { readSyncForm(); if (!clientId()) return toast('Bitte Client-ID eintragen.'); S.sync.dirty = true; syncNow(true); };
+$('#gOff').onclick = () => {
+  if (!confirm('Synchronisation auf diesem Gerät beenden? Deine Daten bleiben hier und in Google Drive erhalten.')) return;
+  if (gTok && window.google && google.accounts) try { google.accounts.oauth2.revoke(gTok); } catch (_) {}
+  gTok = null; S.sync.enabled = false; S.sync.remoteMod = ''; save(true, true); renderSync();
+};
+$('#syncDlg').addEventListener('close', () => { readSyncForm(); renderSync(); });
+if (S.sync.enabled && clientId()) loadGIS().catch(() => {});
+
+/* ---------- Als App installieren (Windows, Android) ---------- */
+let installEvt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; $('#installBtn').hidden = false; });
+$('#installBtn').onclick = async () => { if (!installEvt) return; installEvt.prompt(); await installEvt.userChoice; installEvt = null; $('#installBtn').hidden = true; };
+window.addEventListener('appinstalled', () => toast('LernTutor ist jetzt als App installiert.'));
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+/* ---------- Layout ---------- */
+$('#menuBtn').onclick = () => document.body.classList.toggle('side');
+document.querySelector('main').addEventListener('click', () => document.body.classList.remove('side'));
+document.querySelector('.tabs').onclick = e => { const b = e.target.closest('[data-tab]'); if (b) setTab(b.dataset.tab); };
+
+setTab('edit');
+renderAll();
+renderSync();
+if (S.sync.enabled && clientId()) setTimeout(() => { if (!tokenValid()) toast('☁️ Tippe irgendwo hin, um mit Google Drive zu synchronisieren.'); }, 1200);
+window.addEventListener('load', () => { if (window.katex) { renderChat(); if (!$('#preview').hidden) $('#preview').innerHTML = md(curDoc().content); } });
+if (!S.settings.ollama.model && S.settings.provider === 'ollama') setTimeout(() => toast('Tipp: Oben rechts auf 🤖 tippen und die KI einrichten.'), 800);
+</script>
+</body>
+</html>

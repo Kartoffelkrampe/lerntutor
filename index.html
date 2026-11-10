@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#161d28">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1c1c1e" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -12,151 +13,241 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
 <style>
-:root{--bg:#f6f7fb;--panel:#fff;--panel2:#eef1f7;--text:#1b2230;--muted:#667085;--line:#dde2ec;--acc:#3b6ef5;--acc2:#e8eeff;--user:#e8eeff;--ai:#fff;--danger:#d9363e}
-@media (prefers-color-scheme:dark){:root{--bg:#0f141c;--panel:#161d28;--panel2:#1f2835;--text:#e6eaf2;--muted:#94a0b4;--line:#2a3443;--acc:#6b93ff;--acc2:#22304d;--user:#22304d;--ai:#161d28}}
+:root{--bg:#f2f2f7;--panel:#fff;--panel2:#ececf1;--text:#1c1c1e;--muted:#8a8a8e;--line:#e2e2e7;--acc:#2f6bff;--acc2:#e7eeff;--danger:#e5484d;--user:#e7eeff;--ai:#fff;--canvas:#e6e7ec;--paper:#fff;--ink:#1c1c1e;--rule:#cddbf3;--rule2:#e1e6ef;--dot:#b6c0d4;--shadow:0 1px 2px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.08);--blend:multiply}
+@media (prefers-color-scheme:dark){:root{--bg:#000;--panel:#1c1c1e;--panel2:#2c2c2e;--text:#f2f2f7;--muted:#98989f;--line:#38383a;--acc:#5b8cff;--acc2:#1c2a4a;--user:#1c2a4a;--ai:#1c1c1e;--canvas:#0e0e10;--paper:#1f1f22;--ink:#f2f2f7;--rule:#2f3b55;--rule2:#2a2f3a;--dot:#4a5368;--shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.5);--blend:screen}}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:16px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+body{overflow:hidden}
 button,select,input,textarea{font:inherit;color:inherit}
 button{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;min-height:40px;cursor:pointer;touch-action:manipulation}
 button.pri{background:var(--acc);border-color:var(--acc);color:#fff}
 button.ghost{background:transparent;border-color:transparent}
 button.danger{color:var(--danger)}
-button:disabled{opacity:.45}
-select,input[type=text],input[type=password],input[type=url],input[type=number],textarea{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:40px;width:100%}
-.top{height:56px;display:flex;align-items:center;gap:8px;padding:0 10px;background:var(--panel);border-bottom:1px solid var(--line)}
-.top h1{font-size:18px;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.menu{display:none}
-.tabs{display:none;gap:4px}
-.tabs button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
-.pill{font-size:13px;padding:4px 12px;min-height:34px;border-radius:999px;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.app{display:grid;grid-template-columns:230px 1fr;height:calc(100dvh - 56px)}
-aside{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;overflow:auto}
-.side-h{padding:12px 14px 4px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-.subj{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 12px;border-left:4px solid transparent;cursor:pointer}
-.subj.on{background:var(--acc2);border-left-color:var(--acc);font-weight:600}
-.subj .ic{font-size:20px;width:26px;text-align:center}
-.subj .nm{flex:1;overflow:hidden;text-overflow:ellipsis}
-.subj .ed{opacity:.55;min-height:32px;padding:2px 8px}
-.side-foot{margin-top:auto;padding:10px;display:grid;gap:8px;border-top:1px solid var(--line)}
-main{display:grid;grid-template-columns:1fr 1fr;min-height:0}
-.pane{display:flex;flex-direction:column;min-height:0;min-width:0}
-#editorPane{border-right:1px solid var(--line)}
-.bar{display:flex;flex-wrap:wrap;gap:6px;padding:8px;border-bottom:1px solid var(--line);background:var(--panel);align-items:center}
-.bar select{flex:1;min-width:120px;width:auto}
-.aibar button{font-size:14px;padding:6px 10px;min-height:36px}
-#editor{flex:1;border:0;border-radius:0;resize:none;padding:16px;font-size:17px;line-height:1.6;background:var(--panel);outline:none}
-#preview{flex:1;overflow:auto;padding:16px;background:var(--panel)}
-.status{font-size:12px;color:var(--muted);padding:4px 12px;border-top:1px solid var(--line);background:var(--panel)}
+button:disabled{opacity:.4}
+select,input[type=text],input[type=password],input[type=url],input[type=number],input[type=search],textarea{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:40px;width:100%}
+.ib{background:transparent;border:0;border-radius:10px;min-width:40px;min-height:40px;padding:6px 10px;color:var(--acc);font-size:15px;white-space:nowrap}
+.ib:hover{background:var(--panel2)}
+.ib.on{background:var(--acc2)}
+/* Kopfzeile */
+.top{height:56px;display:flex;align-items:center;gap:2px;padding:0 8px;background:var(--panel);border-bottom:1px solid var(--line);position:relative;z-index:10}
+.back{font-size:17px;max-width:32vw;overflow:hidden;text-overflow:ellipsis;padding-left:2px}
+.back b{font-size:26px;font-weight:300;line-height:0;vertical-align:-3px;margin-right:2px}
+.crumbs{flex:1;min-width:0;font-weight:700;font-size:23px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 8px}
+.doc-wrap{flex:1;min-width:0;display:flex;justify-content:center}
+.doc-title{background:none;border:0;font-weight:600;font-size:16px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:36px}
+#search{width:clamp(110px,22vw,260px);min-height:36px;border:0;background:var(--panel2);border-radius:10px;padding:6px 12px;margin-right:4px}
+#recBtn.live{background:var(--danger);color:#fff}
+body[data-view=lib] .v-doc,body[data-view=doc] .v-lib{display:none!important}
+/* Gerüst */
+.shell{display:flex;height:calc(100dvh - 56px);min-height:0}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+/* Bibliothek */
+#lib{flex:1;overflow:auto;padding:22px clamp(16px,4vw,44px) 90px}
+.sec-h{display:flex;align-items:center;justify-content:space-between;margin:4px 0 14px;color:var(--muted);font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;min-height:32px}
+.sec-h .ib{font-size:13px;text-transform:none;letter-spacing:0;min-height:30px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:30px 22px;margin-bottom:36px}
+.tile{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;min-width:0}
+.art{width:100%;aspect-ratio:3/4;display:flex;align-items:flex-end;justify-content:center;transition:transform .15s}
+.tile:active .art{transform:scale(.96)}
+.folder-art svg{width:96%;filter:drop-shadow(0 6px 10px rgba(0,0,0,.14))}
+.nm{display:flex;align-items:center;justify-content:center;max-width:100%;font-size:14px;font-weight:600;gap:2px}
+.nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chev{border:0;background:none;min-height:26px;min-width:26px;padding:0 4px;color:var(--muted);font-size:12px;flex:0 0 auto}
+.tile .sub{font-size:12px;color:var(--muted);margin-top:-7px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.thumb{width:100%;height:100%;border-radius:3px 10px 10px 3px;box-shadow:var(--shadow);overflow:hidden;position:relative;padding:12% 9% 0 14%;font-size:5.6px;--lh:7.4px;line-height:var(--lh)}
+.thumb::before{content:'';position:absolute;left:0;top:0;bottom:0;width:6%;background:var(--cover,#4f8cff);z-index:2}
+.thumb p{margin:0;white-space:pre-wrap;word-break:break-word;color:var(--text);opacity:.75;position:relative;z-index:1}
+.thumb svg{position:absolute;left:0;top:0;width:100%;height:100%;z-index:1;pointer-events:none}
+.thumb .hl{mix-blend-mode:var(--blend)}
+.new-art{width:100%;height:100%;border:2px dashed var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:46px;font-weight:200;color:var(--acc)}
+.rows{background:var(--panel);border-radius:14px;overflow:hidden;margin-bottom:34px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.rrow{display:flex;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);cursor:pointer}
+.rrow:last-child{border-bottom:0}
+.rrow .ric{font-size:22px}
+.rrow small{display:block;color:var(--muted);font-size:12px}
+.ell{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty-lib{text-align:center;color:var(--muted);padding:8vh 20px;max-width:470px;margin:0 auto}
+.empty-lib svg{width:140px;margin-bottom:12px}
+.empty-lib h2{color:var(--text);margin:0 0 6px;font-size:22px}
+.empty-lib .row{justify-content:center;margin-top:22px}
+.empty-lib .row button{flex:0 0 auto}
+/* Papier */
+.paper{background-color:var(--paper);background-origin:content-box}
+.p-lined{background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(var(--lh) - 1px),var(--rule) calc(var(--lh) - 1px),var(--rule) var(--lh))}
+.p-grid{background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(var(--lh) - 1px),var(--rule2) calc(var(--lh) - 1px),var(--rule2) var(--lh)),repeating-linear-gradient(to right,transparent 0,transparent calc(var(--lh) - 1px),var(--rule2) calc(var(--lh) - 1px),var(--rule2) var(--lh))}
+.p-dots{background-image:radial-gradient(circle at 1px 1px,var(--dot) 1.1px,transparent 1.6px);background-size:var(--lh) var(--lh)}
+/* Editor */
+#editorView{flex:1;display:flex;flex-direction:column;min-height:0;min-width:0}
+.edbar{display:flex;align-items:center;gap:3px;padding:6px 10px;border-bottom:1px solid var(--line);background:var(--panel);overflow-x:auto;scrollbar-width:none;flex:0 0 auto}
+.edbar::-webkit-scrollbar{display:none}
+.tool{flex:0 0 auto;background:none;border:0;border-radius:10px;min-width:42px;min-height:40px;padding:4px 8px;color:var(--text);display:flex;align-items:center;justify-content:center}
+.tool svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tool.on{background:var(--acc2);color:var(--acc)}
+.sep{width:1px;height:24px;background:var(--line);flex:0 0 auto;margin:0 5px}
+.opts{display:flex;align-items:center;gap:2px;flex:0 0 auto}
+.cdot{flex:0 0 auto;width:26px;height:26px;min-height:0;border-radius:50%;padding:0;border:2px solid var(--panel);box-shadow:0 0 0 1px var(--line);margin:0 3px}
+.cdot.on{box-shadow:0 0 0 2.5px var(--acc)}
+.wdot{flex:0 0 auto;width:32px;height:32px;min-height:0;padding:0;border:0;background:none;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.wdot i{display:block;border-radius:50%;background:var(--text)}
+.wdot.on{background:var(--acc2)}
+.chip{flex:0 0 auto;border-radius:999px;font-size:14px;padding:4px 12px;min-height:34px;background:var(--panel2);border:0}
+.chip.on{background:var(--acc);color:#fff}
+.aibar{display:flex;gap:6px;flex:0 0 auto}
+#canvas{flex:1;overflow:auto;background:var(--canvas);padding:24px 12px 140px;overscroll-behavior:contain}
+#page{width:820px;margin:0 auto;position:relative;border-radius:4px;box-shadow:var(--shadow);--lh:32px;padding:64px 60px 64px 72px}
+body.draw #page{touch-action:none;cursor:crosshair}
+#editor{display:block;width:100%;border:0;border-radius:0;resize:none;background:transparent;outline:none;padding:0;font-size:18px;line-height:var(--lh);overflow:hidden;color:var(--text);min-height:var(--lh);position:relative;z-index:1}
+body.draw #editor{pointer-events:none;-webkit-user-select:none;user-select:none}
+#preview{font-size:17px;line-height:1.65;position:relative;z-index:1}
+#ink{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:2}
+#ink .hl{mix-blend-mode:var(--blend)}
+.pstatus{max-width:820px;margin:12px auto 0;font-size:12px;color:var(--muted);text-align:right}
+/* Tutor */
+#tutor{width:420px;flex:0 0 420px;display:none;flex-direction:column;background:var(--panel);border-left:1px solid var(--line);min-height:0}
+body.tutor-open #tutor{display:flex}
+.t-head{display:flex;align-items:center;gap:4px;padding:6px 8px 6px 14px;border-bottom:1px solid var(--line)}
+.t-head b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:16px}
+#modelPill{font-size:12px;min-height:30px;padding:2px 10px;border-radius:999px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:0}
+.t-bar{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;border-bottom:1px solid var(--line);align-items:center}
+#scrim{display:none;position:fixed;left:0;right:0;top:56px;bottom:0;background:rgba(0,0,0,.3);z-index:25}
 #msgs{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
-.msg{max-width:94%;padding:10px 14px;border-radius:14px;border:1px solid var(--line);overflow-wrap:anywhere}
+.msg{max-width:94%;padding:10px 14px;border-radius:16px;overflow-wrap:anywhere}
 .msg.user{align-self:flex-end;background:var(--user)}
-.msg.assistant{align-self:flex-start;background:var(--ai)}
+.msg.assistant{align-self:flex-start;background:var(--bg)}
 .msg .acts{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
-.msg .acts button{font-size:12px;min-height:30px;padding:2px 9px}
+.msg .acts button{font-size:12px;min-height:30px;padding:2px 9px;background:var(--panel);border-color:var(--line)}
 .msg p{margin:.4em 0}.msg h2,.msg h3,.msg h4{margin:.6em 0 .3em;font-size:1.05em}
 .msg ul,.msg ol{padding-left:1.3em;margin:.3em 0}
 .empty{color:var(--muted);text-align:center;margin:auto;padding:20px;max-width:420px}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
-.chips button{border-radius:999px;font-size:14px;padding:4px 12px;min-height:34px}
-.chips button.on{background:var(--acc);border-color:var(--acc);color:#fff}
-.follow{padding:6px 12px 0;background:var(--bg)}
-.composer{display:flex;gap:8px;padding:8px;border-top:1px solid var(--line);background:var(--panel);align-items:flex-end}
-#q{flex:1;resize:none;max-height:180px}
+.chips button{border-radius:999px;font-size:14px;padding:4px 12px;min-height:34px;border:0}
+.chips button.on{background:var(--acc);color:#fff}
+.follow{padding:6px 12px 0}
+.composer{display:flex;gap:8px;padding:8px;border-top:1px solid var(--line);align-items:flex-end}
+#q{flex:1;resize:none;max-height:180px;background:var(--bg);border:0}
 .ctxrow{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-left:auto}
 pre{background:var(--panel2);padding:10px;border-radius:8px;overflow:auto;font-size:14px}
 code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92em}
 blockquote{border-left:3px solid var(--acc);margin:.5em 0;padding:.2em .8em;color:var(--muted)}
 .tbl{overflow:auto}table{border-collapse:collapse;margin:.4em 0}td,th{border:1px solid var(--line);padding:4px 8px}
 .katex-display{overflow-x:auto;overflow-y:hidden;padding:2px 0}
-dialog{border:1px solid var(--line);border-radius:16px;background:var(--panel);color:var(--text);width:min(580px,94vw);padding:0}
-dialog::backdrop{background:#0009}
-dialog form{padding:16px;display:grid;gap:12px;max-height:86dvh;overflow:auto}
+/* Menü */
+#menu{position:fixed;z-index:60;min-width:220px;max-width:90vw;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 44px rgba(0,0,0,.22);padding:6px;display:none}
+#menu.on{display:block}
+#menu button{display:flex;width:100%;gap:10px;align-items:center;background:none;border:0;border-radius:9px;padding:9px 12px;text-align:left;min-height:42px}
+#menu button:hover{background:var(--panel2)}
+#menu .danger{color:var(--danger)}
+#menu hr{border:0;border-top:1px solid var(--line);margin:4px 0}
+/* Dialoge */
+dialog{border:0;border-radius:18px;background:var(--panel);color:var(--text);width:min(560px,94vw);padding:0;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+dialog form{padding:20px;display:grid;gap:14px;max-height:86dvh;overflow:auto}
 dialog label{display:grid;gap:4px;font-size:14px;color:var(--muted)}
-dialog h2{margin:0;font-size:19px}
+dialog h2{margin:0;font-size:20px}
+dialog h3{margin:6px 0 0;font-size:16px}
+dialog summary{cursor:pointer;color:var(--acc);font-size:14px}
+.lbl-s{font-size:14px;color:var(--muted);margin-bottom:6px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .row>*{flex:1}
 .hint{font-size:13px;color:var(--muted);margin:0}
 .prov{display:none;gap:10px}.prov.on{display:grid}
 .presets button{font-size:13px;min-height:32px;padding:2px 10px;flex:0 0 auto}
-#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:10px;opacity:0;transition:.2s;pointer-events:none;z-index:99;max-width:90vw}
+.swatches{display:flex;gap:10px;flex-wrap:wrap}
+.sw{width:34px;height:34px;min-height:0;border-radius:50%;border:3px solid var(--panel);box-shadow:0 0 0 1px var(--line);padding:0}
+.sw.on{box-shadow:0 0 0 3px var(--text)}
+.papers{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.pp{aspect-ratio:3/4;border-radius:8px;border:2px solid var(--line);--lh:11px;padding:6px;font-size:12px;display:flex;align-items:flex-end;justify-content:center;color:var(--muted);background-color:var(--paper)}
+.pp.on{border-color:var(--acc);color:var(--acc)}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:12px;opacity:0;transition:.2s;pointer-events:none;z-index:99;max-width:90vw}
 #toast.on{opacity:1}
 .typing::after{content:'▍';animation:blink 1s steps(2) infinite}@keyframes blink{50%{opacity:0}}
-#recBtn.live{background:var(--danger);border-color:var(--danger);color:#fff}
-.rec small{display:block;color:var(--muted);font-size:12px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rec-top{display:flex;align-items:center;gap:10px;font-size:22px;font-variant-numeric:tabular-nums}
 .rec-top .hint{font-size:14px}
 .dot{width:14px;height:14px;border-radius:50%;background:var(--danger);animation:pulse 1.4s infinite}
 @keyframes pulse{50%{opacity:.25}}
 .rtext{max-height:42dvh;min-height:120px;overflow:auto;background:var(--panel2);border-radius:10px;padding:10px;font-size:14px;white-space:pre-wrap}
-dialog h3{margin:6px 0 0;font-size:16px}
-@media (max-width:1100px){.menu{display:inline-block}.app{grid-template-columns:1fr}aside{position:fixed;top:56px;bottom:0;left:0;width:270px;z-index:20;transform:translateX(-105%);transition:transform .2s;box-shadow:0 0 30px #0006}body.side aside{transform:none}}
-@media (max-width:899px){main{grid-template-columns:1fr}.tabs{display:flex}body[data-tab=edit] #tutorPane,body[data-tab=tutor] #editorPane{display:none}#editorPane{border-right:0}.pill{max-width:120px}}
+@media (max-width:1000px){#tutor{position:fixed;right:0;top:56px;bottom:0;width:min(100vw,460px);z-index:30;box-shadow:-12px 0 40px rgba(0,0,0,.25)}body.tutor-open #scrim{display:block}}
+@media (max-width:700px){.lbl{display:none}#search{width:100px}.crumbs{font-size:19px}.grid{grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:24px 16px}}
 </style>
 </head>
-<body data-tab="edit">
+<body data-view="lib">
 <header class="top">
-  <button class="ghost menu" id="menuBtn" aria-label="Fächer">☰</button>
-  <h1 id="title">LernTutor</h1>
-  <div class="tabs"><button data-tab="edit">✏️ Schreiben</button><button data-tab="tutor">🎓 Tutor</button></div>
-  <button class="pill" id="recBtn" title="Vorlesung aufnehmen">🎙 Vorlesung</button>
-  <button class="pill" id="syncBtn" title="Google-Drive-Synchronisation">☁️ Sync</button>
-  <button class="pill" id="modelPill" title="KI-Einstellungen">⚙️ KI</button>
+  <button class="ib back" id="backBtn" hidden></button>
+  <div class="crumbs v-lib" id="crumbs">Bibliothek</div>
+  <div class="doc-wrap v-doc"><button id="docTitle" class="doc-title" title="Umbenennen, Papier, Farbe">Dokument</button></div>
+  <input type="search" id="search" class="v-lib" placeholder="🔍 Suchen" autocomplete="off">
+  <button class="ib" id="tutorBtn" title="KI-Tutor">🎓<span class="lbl"> Tutor</span></button>
+  <button class="ib" id="recBtn" title="Vorlesung aufnehmen">🎙<span class="lbl"> Aufnahme</span></button>
+  <button class="ib" id="syncBtn" title="Google-Drive-Synchronisation">☁️</button>
+  <button class="ib" id="moreBtn" title="Mehr">•••</button>
 </header>
 
-<div class="app">
-  <aside id="side">
-    <div class="side-h">Fächer</div>
-    <div id="subjList"></div>
-    <div style="padding:8px 10px"><button id="addSubj" style="width:100%">＋ Fach hinzufügen</button></div>
-    <div class="side-h">Vorlesungsaufnahmen</div>
-    <div id="recList"></div>
-    <div class="side-foot">
-      <button id="setBtn">⚙️ KI-Einstellungen</button>
-      <button id="syncSetBtn">☁️ Google-Drive-Sync</button>
-      <button id="installBtn" hidden>💻 Als App installieren</button>
-      <div class="row"><button id="expBtn">⬇️ Backup</button><button id="impBtn">⬆️ Laden</button></div>
-      <input type="file" id="impFile" accept=".json,application/json" hidden>
+<div class="shell">
+  <div class="main">
+    <section id="lib" class="v-lib"></section>
+
+    <section id="editorView" class="v-doc">
+      <div class="edbar">
+        <button class="tool" data-tool="text" title="Tippen (Tastatur)"><svg viewBox="0 0 24 24"><path d="M5 6.5V5h14v1.5M12 5v14M9 19h6"/></svg></button>
+        <button class="tool" data-tool="pen" title="Stift"><svg viewBox="0 0 24 24"><path d="M4 20l1.2-4.4L16.4 4.4a2 2 0 0 1 2.8 0l.4.4a2 2 0 0 1 0 2.8L8.4 18.8z"/><path d="M14.5 6.3l3.2 3.2"/></svg></button>
+        <button class="tool" data-tool="hl" title="Textmarker"><svg viewBox="0 0 24 24"><path d="M9.5 14.5L6 19h5l2.2-2.6"/><path d="M9.5 14.5l7.8-10.2 3.8 2.9-7.9 10.2z"/></svg></button>
+        <button class="tool" data-tool="eraser" title="Radierer (S Pen: Seitentaste gedrückt halten)"><svg viewBox="0 0 24 24"><path d="M8.5 20H20"/><path d="M5.4 13.6l7.2-7.2a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L11.2 20H8.6l-3.2-3.2a2 2 0 0 1 0-3.2z"/><path d="M9 10l5 5"/></svg></button>
+        <span class="opts" id="toolOpts"></span>
+        <button class="tool" id="undoBtn" title="Rückgängig"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+        <button class="tool" id="redoBtn" title="Wiederholen"><svg viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
+        <span class="sep"></span>
+        <button class="chip" id="paperBtn">📄 Papier</button>
+        <button class="chip" id="prevBtn">👁 Vorschau</button>
+        <span class="sep"></span>
+        <span class="aibar">
+          <button class="chip" data-act="explain">💬 Erklären</button>
+          <button class="chip" data-act="summary">📋 Zusammenfassen</button>
+          <button class="chip" data-act="correct">✅ Korrigieren</button>
+          <button class="chip" data-act="quiz">❓ Quiz</button>
+          <button class="chip" data-act="cards">🗂 Karteikarten</button>
+          <button class="chip" data-act="ask">🙋 Frage dazu</button>
+        </span>
+        <span class="sep"></span>
+        <button class="chip" id="docMore" title="Dokument">•••</button>
+      </div>
+      <div id="canvas">
+        <div id="page" class="paper p-lined">
+          <textarea id="editor" spellcheck="true" placeholder="Tippen oder mit dem Stift schreiben …&#10;Formeln mit $…$, z. B. $F = m \cdot a$.&#10;Text markieren → oben eine KI-Aktion wählen."></textarea>
+          <div id="preview" hidden></div>
+          <svg id="ink" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+        <div class="pstatus" id="status"></div>
+      </div>
+    </section>
+  </div>
+
+  <aside id="tutor">
+    <div class="t-head">
+      <b id="tutorTitle">Tutor</b>
+      <button class="chip" id="modelPill" title="KI-Einstellungen">🤖</button>
+      <button class="ib" id="clearChat" title="Verlauf löschen">🧹</button>
+      <button class="ib" id="tutorClose" title="Schließen">✕</button>
+    </div>
+    <div class="t-bar">
+      <div class="chips" id="modes"></div>
+      <label class="ctxrow" id="ctxRow"><input type="checkbox" id="ctxChk"> Dokument mitsenden</label>
+    </div>
+    <div id="msgs"></div>
+    <div class="follow chips" id="follow"></div>
+    <div class="composer">
+      <textarea id="q" rows="2" placeholder="Frag deinen Tutor … (Strg+Enter sendet)"></textarea>
+      <button class="pri" id="sendBtn">Senden</button>
+      <button id="stopBtn" hidden>■ Stopp</button>
     </div>
   </aside>
-
-  <main>
-    <section class="pane" id="editorPane">
-      <div class="bar">
-        <select id="docSel" aria-label="Dokument"></select>
-        <button id="newDoc" title="Neues Dokument">＋</button>
-        <button id="renDoc" title="Umbenennen">✎</button>
-        <button id="delDoc" title="Löschen" class="danger">🗑</button>
-        <button id="prevBtn" title="Vorschau mit Formeln">👁 Vorschau</button>
-      </div>
-      <div class="bar aibar">
-        <button data-act="explain">💬 Erklären</button>
-        <button data-act="summary">📋 Zusammenfassen</button>
-        <button data-act="correct">✅ Korrigieren</button>
-        <button data-act="quiz">❓ Quiz</button>
-        <button data-act="cards">🗂 Karteikarten</button>
-        <button data-act="ask">🙋 Frage dazu</button>
-      </div>
-      <textarea id="editor" spellcheck="true" placeholder="Hier schreiben … Mitschriften, Aufsätze, Lösungswege.&#10;Formeln gehen mit $…$, z. B. $F = m \cdot a$.&#10;&#10;Text markieren → oben eine KI-Aktion wählen."></textarea>
-      <div id="preview" hidden></div>
-      <div class="status" id="status"></div>
-    </section>
-
-    <section class="pane" id="tutorPane">
-      <div class="bar">
-        <div class="chips" id="modes"></div>
-        <label class="ctxrow"><input type="checkbox" id="ctxChk"> Notizen mitsenden</label>
-        <button class="ghost" id="clearChat" title="Verlauf dieses Fachs löschen">🧹</button>
-      </div>
-      <div id="msgs"></div>
-      <div class="follow chips" id="follow"></div>
-      <div class="composer">
-        <textarea id="q" rows="2" placeholder="Frag deinen Tutor … (Strg+Enter sendet)"></textarea>
-        <button class="pri" id="sendBtn">Senden</button>
-        <button id="stopBtn" hidden>■ Stopp</button>
-      </div>
-    </section>
-  </main>
+</div>
+<div id="scrim"></div>
+<div id="menu" role="menu"></div>
+<div hidden>
+  <button id="setBtn"></button><button id="syncSetBtn"></button><button id="installBtn"></button>
+  <button id="expBtn"></button><button id="impBtn"></button>
+  <input type="file" id="impFile" accept=".json,application/json">
 </div>
 
 <!-- Einstellungen -->
@@ -213,15 +304,39 @@ dialog h3{margin:6px 0 0;font-size:16px}
   </form>
 </dialog>
 
-<!-- Fach bearbeiten -->
-<dialog id="subDlg">
+<!-- Ordner -->
+<dialog id="fDlg">
   <form method="dialog">
-    <h2 id="subDlgT">Fach</h2>
-    <div class="row"><label style="flex:0 0 90px">Symbol <input type="text" id="subIc" maxlength="4"></label><label>Name <input type="text" id="subNm"></label></div>
-    <label>Besondere Anweisungen für den Tutor
-      <textarea id="subPr" rows="5" placeholder="z. B. „Vorlesung Technische Mechanik III. Nutze Vektorschreibweise und Freikörperbilder in Worten. Achte auf Einheiten.“"></textarea>
-    </label>
-    <div class="row"><button type="button" class="danger" id="subDel">Löschen</button><button value="cancel">Abbrechen</button><button class="pri" id="subSave" value="ok">Speichern</button></div>
+    <h2 id="fDlgT">Neuer Ordner</h2>
+    <label>Name <input type="text" id="fName" placeholder="z. B. Technische Mechanik" autocomplete="off"></label>
+    <div><div class="lbl-s">Farbe</div><div class="swatches" id="fColors"></div></div>
+    <details>
+      <summary>Tutor-Einstellungen für diesen Ordner</summary>
+      <label style="margin-top:8px">Besondere Anweisungen für den Tutor
+        <textarea id="fPrompt" rows="4" placeholder="z. B. „Vorlesung Dynamik, Maschinenbau 3. Semester. Achte auf Einheiten und Vorzeichen.“"></textarea>
+      </label>
+    </details>
+    <div class="row"><button type="button" class="danger" id="fDel">Löschen</button><button value="cancel">Abbrechen</button><button class="pri" id="fSave" value="ok">Erstellen</button></div>
+  </form>
+</dialog>
+
+<!-- Dokument -->
+<dialog id="dDlg">
+  <form method="dialog">
+    <h2 id="dDlgT">Neues Dokument</h2>
+    <label>Titel <input type="text" id="dName" autocomplete="off"></label>
+    <div><div class="lbl-s">Papier</div><div class="papers" id="dPaper"></div></div>
+    <div><div class="lbl-s">Farbe</div><div class="swatches" id="dColors"></div></div>
+    <div class="row"><button value="cancel">Abbrechen</button><button class="pri" id="dSave" value="ok">Erstellen</button></div>
+  </form>
+</dialog>
+
+<!-- Verschieben -->
+<dialog id="mvDlg">
+  <form method="dialog">
+    <h2 id="mvT">Verschieben nach</h2>
+    <label>Ziel <select id="mvSel"></select></label>
+    <div class="row"><button value="cancel">Abbrechen</button><button class="pri" id="mvOk" value="ok">Verschieben</button></div>
   </form>
 </dialog>
 
@@ -230,7 +345,7 @@ dialog h3{margin:6px 0 0;font-size:16px}
   <form method="dialog">
     <h2>🎙 Vorlesung aufnehmen</h2>
     <div id="recSetup" style="display:grid;gap:10px">
-      <label>Fach <select id="rSubj"></select></label>
+      <label>Ordner <select id="rSubj"></select></label>
       <label>Titel (optional – sonst schlägt die KI einen vor) <input type="text" id="rTitle" placeholder="z. B. Kapitel 3 – Kinematik des Punktes"></label>
       <div class="row">
         <label>Spracherkennung
@@ -284,7 +399,8 @@ dialog h3{margin:6px 0 0;font-size:16px}
   <form method="dialog">
     <h2>Wohin gehört die Vorlesung?</h2>
     <p class="hint" id="asgWhy"></p>
-    <label>Fach <select id="asgSubj"></select></label>
+    <label>Ordner <select id="asgSubj"></select></label>
+    <label id="asgNewWrap" hidden>Name des neuen Ordners <input type="text" id="asgNew" autocomplete="off"></label>
     <label>Dokument <select id="asgDoc"></select></label>
     <label>Titel der Vorlesung <input type="text" id="asgTitle"></label>
     <label class="ctxrow" style="margin:0"><input type="checkbox" id="asgSum"> Zusammenfassung ins Dokument schreiben</label>
@@ -316,16 +432,9 @@ const KEY = 'lerntutor.v1';
 const $ = s => document.querySelector(s);
 const uid = () => Math.random().toString(36).slice(2, 10);
 
-const DEFAULT_SUBJECTS = [
-  { icon: '📐', name: 'Mathematik', prompt: 'Rechne Schritt für Schritt und begründe jeden Umformungsschritt.' },
-  { icon: '⚛️', name: 'Physik', prompt: 'Achte auf Einheiten und physikalische Anschauung.' },
-  { icon: '⚙️', name: 'Technische Mechanik', prompt: 'Beschreibe Freikörperbilder in Worten, nutze Vektoren und achte auf Vorzeichen-Konventionen und Einheiten.' },
-  { icon: '💻', name: 'Informatik', prompt: 'Nutze kurze Codebeispiele.' },
-  { icon: '🧪', name: 'Chemie', prompt: '' },
-  { icon: '📖', name: 'Deutsch', prompt: 'Hilf bei Aufbau, Argumentation und Stil, ohne Texte komplett für den Lernenden zu schreiben.' },
-  { icon: '🇬🇧', name: 'Englisch', prompt: 'Antworte auf Wunsch auf Englisch und erkläre Grammatik auf Deutsch.' },
-  { icon: '🏛️', name: 'Geschichte', prompt: '' }
-];
+const FOLDER_COLORS = ['#4f8cff', '#34c759', '#ff9f0a', '#ff453a', '#bf5af2', '#32c3e6', '#ffcc00', '#ff6482', '#a2845e', '#8e8e93'];
+const PAPERS = { blank: 'Blanko', lined: 'Liniert', grid: 'Kariert', dots: 'Punkte' };
+const ROOT = { id: '_root', name: 'Allgemein', prompt: '' };
 
 const MODES = {
   erklaeren: { label: '💡 Erklären', prompt: 'Erkläre verständlich und strukturiert, Schritt für Schritt, mit einem konkreten Beispiel. Schließe mit einer kurzen Verständnisfrage ab.' },
@@ -353,7 +462,6 @@ const PRESETS = [
 
 /* ---------- Zustand ---------- */
 function fresh() {
-  const subjects = DEFAULT_SUBJECTS.map(s => ({ id: 'sub-' + s.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'), updated: 0, ...s }));
   return {
     settings: {
       provider: 'ollama',
@@ -363,10 +471,30 @@ function fresh() {
       whisper: { url: 'https://api.groq.com/openai/v1', key: '', model: 'whisper-large-v3-turbo' },
       level: 'Studium', temp: 0.4
     },
-    subjects, docs: [], chats: {}, recs: [], chatTs: {}, deleted: {},
-    sync: { clientId: '', device: '', enabled: false, auto: true, dirty: false, remoteMod: '', last: 0, base: {} },
-    active: subjects[0].id, activeDoc: {}, mode: 'erklaeren', ctx: true
+    subjects: [], docs: [], chats: {}, recs: [], chatTs: {}, deleted: {},
+    sync: { clientId: '', device: '', enabled: false, auto: true, dirty: false, remoteMod: '', last: 0, base: {}, inkBase: {} },
+    active: '_root', activeDoc: {}, mode: 'erklaeren', ctx: true, v2: true,
+    nav: { folder: null, doc: null }, sort: 'date',
+    tool: 'text', lastDraw: 'pen', pen: { c: 'auto', w: 1 }, hl: { c: '#ffe14d', w: 0 }, fingerDraw: false, lastPaper: 'lined'
   };
+}
+let migratedV2 = false;
+function migrateV2(s) {
+  const now = Date.now();
+  s.subjects = s.subjects.filter(f => {
+    const docs = s.docs.filter(d => d.subjectId === f.id);
+    const used = docs.some(d => (d.content || '').trim()) || (s.chats[f.id] || []).length || docs.length > 1 || (f.updated || 0) > 0;
+    if (!used && String(f.id).startsWith('sub-')) {
+      s.deleted[f.id] = now; docs.forEach(d => s.deleted[d.id] = now);
+      s.docs = s.docs.filter(d => d.subjectId !== f.id); delete s.chats[f.id];
+      return false;
+    }
+    return true;
+  });
+  s.subjects.forEach((f, i) => { f.parentId = f.parentId || null; f.color = f.color || FOLDER_COLORS[i % FOLDER_COLORS.length]; f.updated = f.updated || now; });
+  s.docs.forEach(d => { d.paper = d.paper || 'lined'; });
+  s.v2 = true; s.active = '_root'; s.nav = { folder: null, doc: null };
+  migratedV2 = true;
 }
 function load() {
   try {
@@ -376,11 +504,11 @@ function load() {
       s.settings = Object.assign(f.settings, s.settings || {});
       ['ollama', 'openai', 'anthropic', 'whisper'].forEach(k => s.settings[k] = Object.assign(fresh().settings[k], s.settings[k] || {}));
       s.docs = s.docs || []; s.chatTs = s.chatTs || {}; s.deleted = s.deleted || {};
-      s.sync = Object.assign(fresh().sync, s.sync || {}); s.sync.base = s.sync.base || {};
+      s.sync = Object.assign(fresh().sync, s.sync || {}); s.sync.base = s.sync.base || {}; s.sync.inkBase = s.sync.inkBase || {};
       s.recs = (s.recs || []).map(r => r.status === 'nimmt auf' ? Object.assign(r, { status: 'unterbrochen' }) : r); s.chats = s.chats || {}; s.activeDoc = s.activeDoc || {};
       s.mode = MODES[s.mode] ? s.mode : 'erklaeren';
-      if (!s.subjects.length) s.subjects = f.subjects;
-      if (!s.subjects.find(x => x.id === s.active)) s.active = s.subjects[0].id;
+      for (const k of ['nav', 'sort', 'tool', 'lastDraw', 'pen', 'hl', 'fingerDraw', 'lastPaper']) if (s[k] === undefined) s[k] = f[k];
+      if (!s.v2) migrateV2(s);
       return s;
     }
   } catch (e) {}
@@ -398,23 +526,36 @@ function save(now, noDirty) {
 window.addEventListener('pagehide', () => save(true));
 document.addEventListener('visibilitychange', () => { if (document.hidden) save(true); });
 
-const curSub = () => S.subjects.find(s => s.id === S.active) || S.subjects[0];
-const docsOf = id => S.docs.filter(d => d.subjectId === id).sort((a, b) => b.updated - a.updated);
-function curDoc() {
-  const sub = curSub();
-  let d = S.docs.find(x => x.id === S.activeDoc[sub.id] && x.subjectId === sub.id) || docsOf(sub.id)[0];
-  if (!d) { d = { id: 'notes-' + sub.id, subjectId: sub.id, title: 'Notizen', content: '', updated: S.deleted['notes-' + sub.id] ? Date.now() : 0 }; S.docs.push(d); }
-  S.activeDoc[sub.id] = d.id;
-  return d;
-}
+/* Ordner-Hilfen */
+const folderById = id => id ? S.subjects.find(f => f.id === id) : null;
+const childFolders = pid => S.subjects.filter(f => (f.parentId || null) === (pid || null));
+const docsOf = fid => S.docs.filter(d => (d.subjectId || null) === (fid || null)).sort((a, b) => b.updated - a.updated);
+function folderPath(fid) { const p = []; let f = folderById(fid), n = 0; while (f && n++ < 30) { p.unshift(f); f = folderById(f.parentId); } return p; }
+const pathName = fid => folderPath(fid).map(f => f.name).join(' › ') || 'Bibliothek';
+function descendants(fid) { const out = [fid]; for (let i = 0; i < out.length; i++) childFolders(out[i]).forEach(c => out.push(c.id)); return out; }
+const byName = (arr, k) => [...arr].sort((a, b) => (a[k] || '').localeCompare(b[k] || '', 'de', { numeric: true }));
+function folderActivity(f) { const ids = descendants(f.id); return Math.max(f.updated || 0, f.created || 0, ...S.docs.filter(d => ids.includes(d.subjectId)).map(d => d.updated || 0)); }
+const sortFolders = arr => S.sort === 'name' ? byName(arr, 'name') : [...arr].sort((a, b) => folderActivity(b) - folderActivity(a));
+const sortDocs = arr => S.sort === 'name' ? byName(arr, 'title') : [...arr].sort((a, b) => (b.updated || 0) - (a.updated || 0));
+const coverOf = d => d.color || (folderById(d.subjectId) || {}).color || FOLDER_COLORS[0];
+const curSub = () => folderById(S.active) || ROOT;
+const curDoc = () => S.nav.doc ? S.docs.find(d => d.id === S.nav.doc) || null : null;
 const chatOf = () => (S.chats[S.active] = S.chats[S.active] || []);
+function folderOptions(excl = [], sel = null, withRoot = true) {
+  const out = withRoot ? [`<option value="">📚 Bibliothek (oberste Ebene)</option>`] : [];
+  const walk = (pid, depth) => byName(childFolders(pid), 'name').forEach(f => {
+    if (excl.includes(f.id)) return;
+    out.push(`<option value="${f.id}" ${f.id === sel ? 'selected' : ''}>${'    '.repeat(depth)}📁 ${esc(f.name)}</option>`);
+    walk(f.id, depth + 1);
+  });
+  walk(null, 0);
+  return out.join('');
+}
 
 /* ---------- Hilfen ---------- */
 let toastT;
 function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), 3200); }
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const narrow = () => window.matchMedia('(max-width:899px)').matches;
-function setTab(t) { document.body.dataset.tab = t; document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === t)); }
 
 /* ---------- Markdown + Formeln ---------- */
 function mathHTML(t, disp) {
@@ -562,14 +703,16 @@ async function listModels() {
 /* ---------- Tutor ---------- */
 function systemPrompt() {
   const sub = curSub(), mode = MODES[S.mode], d = curDoc();
-  let p = `Du bist ein geduldiger, motivierender und fachlich sehr genauer Tutor für das Fach „${sub.name}“. Zielgruppe: ${S.settings.level}.
+  const fach = sub.id === '_root' ? '' : pathName(sub.id);
+  let p = `Du bist ein geduldiger, motivierender und fachlich sehr genauer Tutor${fach ? ` für den Ordner/das Fach „${fach}“` : ''}. Zielgruppe: ${S.settings.level}.
 Antworte auf Deutsch (außer der Lernende wünscht etwas anderes). Halte Antworten fokussiert und gut gegliedert (Markdown).
 Schreibe Formeln in LaTeX: inline mit $...$, abgesetzt mit $$...$$.
 Wenn eine Frage unklar ist, stelle eine kurze Rückfrage. Wenn du dir bei einem Fakt unsicher bist, sag das offen.
 Ziel ist, dass der Lernende es selbst versteht – nicht nur, dass er eine Lösung bekommt.`;
-  if (sub.prompt) p += `\n\nBesondere Hinweise zu diesem Fach: ${sub.prompt}`;
+  const hints = sub.id === '_root' ? [] : folderPath(sub.id).map(f => f.prompt).filter(Boolean);
+  if (hints.length) p += `\n\nBesondere Hinweise zu diesem Fach: ${hints.join(' ')}`;
   p += `\n\nAktueller Modus „${mode.label.replace(/^\S+\s/, '')}“: ${mode.prompt}`;
-  if (S.ctx && d.content.trim()) p += `\n\nNotizen des Lernenden (Dokument „${d.title}“), als Kontext:\n"""\n${d.content.slice(0, 12000)}\n"""`;
+  if (S.ctx && d && d.content.trim()) p += `\n\nNotizen des Lernenden (Dokument „${d.title}“), als Kontext:\n"""\n${d.content.slice(0, 12000)}\n"""`;
   return p;
 }
 
@@ -579,8 +722,8 @@ function setBusy(b) { busy = b; $('#sendBtn').hidden = b; $('#stopBtn').hidden =
 async function ask(text) {
   text = (text || '').trim();
   if (!text || busy) return;
-  if (narrow()) setTab('tutor');
-  const chat = chatOf();
+  openTutor();
+  const cid = S.active, chat = chatOf();
   chat.push({ role: 'user', content: text });
   const ai = { role: 'assistant', content: '' };
   chat.push(ai);
@@ -596,48 +739,125 @@ async function ask(text) {
   try {
     await stream(msgs, ctrl.signal, d => {
       ai.content += d;
-      if (!raf) raf = requestAnimationFrame(() => { raf = 0; body.innerHTML = md(ai.content); scrollChat(); });
+      if (!raf) raf = requestAnimationFrame(() => { raf = 0; if (body.isConnected) { body.innerHTML = md(ai.content); scrollChat(); } });
     });
   } catch (e) {
     if (e.name !== 'AbortError') { ai.err = true; ai.content += (ai.content ? '\n\n' : '') + '⚠️ **Fehler:** ' + e.message; }
   } finally {
     cancelAnimationFrame(raf);
     if (!ai.content.trim()) ai.content = '_(abgebrochen)_';
-    S.chatTs[S.active] = Date.now(); setBusy(false); save(); renderChat();
+    S.chatTs[cid] = Date.now(); setBusy(false); save(); renderChat();
   }
 }
+function openTutor() { document.body.classList.add('tutor-open'); $('#tutorBtn').classList.add('on'); renderTutor(); fitZoom(); }
+function closeTutor() { document.body.classList.remove('tutor-open'); $('#tutorBtn').classList.remove('on'); fitZoom(); }
+const tutorOverlay = () => window.matchMedia('(max-width:1000px)').matches;
+
+/* ---------- Menü ---------- */
+function showMenu(anchor, items) {
+  const m = $('#menu');
+  m.innerHTML = items.map((it, i) => it === '-' ? '<hr>' : `<button type="button" data-i="${i}" class="${it.danger ? 'danger' : ''}">${it.label}</button>`).join('');
+  m.classList.add('on');
+  const r = anchor.getBoundingClientRect(), mw = m.offsetWidth, mh = m.offsetHeight;
+  let x = Math.min(r.left, innerWidth - mw - 8), y = r.bottom + 6;
+  if (y + mh > innerHeight - 8) y = Math.max(8, r.top - mh - 6);
+  m.style.left = Math.max(8, x) + 'px'; m.style.top = y + 'px';
+  m.onclick = e => { const b = e.target.closest('[data-i]'); if (!b) return; hideMenu(); items[+b.dataset.i].fn(); };
+}
+function hideMenu() { $('#menu').classList.remove('on'); }
+document.addEventListener('pointerdown', e => { if (!e.target.closest('#menu')) hideMenu(); }, true);
+
+/* ---------- Navigation ---------- */
+function nav(to, push = true) {
+  to = Object.assign({ folder: null, doc: null }, to);
+  if (to.doc) { const d = S.docs.find(x => x.id === to.doc); if (d) to.folder = d.subjectId || null; else to.doc = null; }
+  if (to.folder && !folderById(to.folder)) to.folder = null;
+  S.nav = { folder: to.folder || null, doc: to.doc || null };
+  S.active = S.nav.folder || '_root';
+  if (push) try { history.pushState({ ...S.nav }, ''); } catch (_) {}
+  hideMenu(); save(false, true); render();
+}
+window.addEventListener('popstate', e => nav(e.state || { folder: null, doc: null }, false));
 
 /* ---------- Rendering ---------- */
-function renderSide() {
-  $('#subjList').innerHTML = S.subjects.map(s =>
-    `<div class="subj ${s.id === S.active ? 'on' : ''}" data-id="${s.id}"><span class="ic">${esc(s.icon || '📘')}</span><span class="nm">${esc(s.name)}</span><button class="ghost ed" data-edit="${s.id}" title="Bearbeiten">✎</button></div>`).join('');
-  const sub = curSub();
-  $('#title').textContent = (sub.icon || '') + ' ' + sub.name;
-}
-function renderDocs() {
+function render() {
+  if (S.nav.doc && !curDoc()) S.nav.doc = null;
+  if (S.nav.folder && !folderById(S.nav.folder)) S.nav.folder = null;
+  if (S.active !== '_root' && !folderById(S.active)) S.active = '_root';
   const d = curDoc();
-  $('#docSel').innerHTML = docsOf(S.active).map(x => `<option value="${x.id}" ${x.id === d.id ? 'selected' : ''}>${esc(x.title)}</option>`).join('');
-  if (ed.value !== d.content) { const a = ed.selectionStart, b = ed.selectionEnd, same = ed.dataset.doc === d.id; ed.value = d.content; if (same && document.activeElement === ed) ed.setSelectionRange(a, b); }
-  ed.dataset.doc = d.id;
-  if (!$('#preview').hidden) $('#preview').innerHTML = md(d.content);
-  status();
+  document.body.dataset.view = d ? 'doc' : 'lib';
+  renderTop();
+  if (d) renderEditor(); else renderLibrary();
+  renderTutor(); renderPill();
 }
-function status() {
-  const d = curDoc(), t = d.content.trim();
-  const w = t ? t.split(/\s+/).length : 0;
-  $('#status').textContent = `${w} Wörter · ${t.length} Zeichen · zuletzt geändert ${d.updated ? new Date(d.updated).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }) : '–'}`;
+const renderAll = () => render();
+function renderTop() {
+  const d = curDoc(), f = folderById(S.nav.folder), b = $('#backBtn');
+  if (d) { b.hidden = false; b.innerHTML = '<b>‹</b> ' + esc(f ? f.name : 'Bibliothek'); $('#docTitle').textContent = (d.title || 'Unbenannt') + ' ⌄'; }
+  else if (f) { b.hidden = false; const p = folderById(f.parentId); b.innerHTML = '<b>‹</b> ' + esc(p ? p.name : 'Bibliothek'); $('#crumbs').textContent = f.name; }
+  else { b.hidden = true; $('#crumbs').textContent = 'Bibliothek'; }
+  document.title = d ? (d.title || 'Unbenannt') + ' – LernTutor' : f ? f.name + ' – LernTutor' : 'LernTutor';
 }
+const fmtDate = t => { if (!t) return '–'; const d = new Date(t), n = new Date(); return d.toDateString() === n.toDateString() ? 'Heute, ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' }); };
+const previewText = c => (c || '').replace(/[#*_>`$|\\]/g, '').slice(0, 700);
+function folderSVG(color, n) {
+  const back = 'M6 16a9 9 0 0 1 9-9h28.5c2.6 0 5 1.1 6.7 3.1L56 17h49a9 9 0 0 1 9 9v6H6z';
+  return `<svg viewBox="0 0 120 94" aria-hidden="true"><path d="${back}" fill="${color}"/><path d="${back}" fill="#000" opacity=".2"/><rect x="6" y="26" width="108" height="64" rx="10" fill="${color}"/><rect x="6" y="26" width="108" height="22" rx="10" fill="#fff" opacity=".13"/>${n ? `<text x="60" y="68" text-anchor="middle" font-size="17" font-weight="600" fill="#fff" fill-opacity=".85" font-family="-apple-system,Segoe UI,Roboto,sans-serif">${n}</text>` : ''}</svg>`;
+}
+function folderTile(f) {
+  const n = docsOf(f.id).length + childFolders(f.id).length;
+  return `<div class="tile" data-folder="${f.id}"><div class="art folder-art">${folderSVG(f.color || FOLDER_COLORS[0], n)}</div><div class="nm"><span>${esc(f.name)}</span><button class="chev" data-menu="folder:${f.id}" aria-label="Optionen">⌄</button></div><div class="sub">${n} ${n === 1 ? 'Element' : 'Elemente'}</div></div>`;
+}
+function docTile(d, showPath) {
+  return `<div class="tile" data-doc="${d.id}"><div class="art"><div class="thumb paper p-${d.paper || 'lined'}" style="--cover:${coverOf(d)}"><p>${esc(previewText(d.content))}</p>${d.inkN ? `<svg data-ink="${d.id}" viewBox="0 0 820 1093" preserveAspectRatio="xMinYMin slice"></svg>` : ''}</div></div><div class="nm"><span>${esc(d.title || 'Unbenannt')}</span><button class="chev" data-menu="doc:${d.id}" aria-label="Optionen">⌄</button></div><div class="sub">${showPath ? esc(pathName(d.subjectId)) + ' · ' : ''}${fmtDate(d.updated)}</div></div>`;
+}
+function recRow(r) {
+  const live = R.active && R.meta === r;
+  return `<div class="rrow" data-rec="${r.id}"><span class="ric">${live ? '🔴' : '🎙'}</span><div style="flex:1;min-width:0"><div class="ell">${esc(recName(r))}</div><small>${new Date(r.created).toLocaleDateString('de-DE')} · ${fmtTime(r.dur || 0)} · ${esc(r.status || '')}</small></div><span class="hint">›</span></div>`;
+}
+const emptyFolderSVG = folderSVG('#4f8cff', 0);
+function renderLibrary() {
+  const fid = S.nav.folder, qy = $('#search').value.trim().toLowerCase();
+  let h = '';
+  if (qy) {
+    const fs = S.subjects.filter(f => f.name.toLowerCase().includes(qy));
+    const ds = S.docs.filter(d => ((d.title || '') + ' ' + d.content).toLowerCase().includes(qy));
+    h += `<div class="sec-h"><span>Suchergebnisse (${fs.length + ds.length})</span></div>`;
+    h += fs.length + ds.length ? `<div class="grid">${sortFolders(fs).map(folderTile).join('')}${sortDocs(ds).map(d => docTile(d, true)).join('')}</div>` : '<p class="hint">Nichts gefunden.</p>';
+  } else {
+    const subs = sortFolders(childFolders(fid)), docs = sortDocs(docsOf(fid));
+    if (!fid && !subs.length && !docs.length) {
+      h += `<div class="empty-lib">${emptyFolderSVG}<h2>Willkommen bei LernTutor</h2><p>Lege für jedes Fach einen Ordner an – darin sammelst du Dokumente, Handschrift, Vorlesungsaufnahmen und hast deinen eigenen KI-Tutor.</p><div class="row"><button class="pri" data-act="newFolder">📁 Neuer Ordner</button><button data-act="newDoc">📄 Neues Dokument</button></div></div>`;
+    } else {
+      h += `<div class="sec-h"><span>${fid ? '' : 'Ordner & Dokumente'}</span><button class="ib" data-act="sort">${S.sort === 'name' ? 'Name' : 'Datum'} ⇅</button></div>`;
+      h += `<div class="grid"><div class="tile" data-act="new"><div class="art"><div class="new-art">＋</div></div><div class="nm"><span>Neu</span></div><div class="sub">&nbsp;</div></div>${subs.map(folderTile).join('')}${docs.map(d => docTile(d)).join('')}</div>`;
+    }
+    const recs = S.recs.filter(r => (r.subjectId && folderById(r.subjectId) ? r.subjectId : null) === (fid || null));
+    if (recs.length) h += `<div class="sec-h"><span>Vorlesungsaufnahmen</span></div><div class="rows">${recs.map(recRow).join('')}</div>`;
+  }
+  $('#lib').innerHTML = h;
+  fillThumbInk();
+}
+function renderRecs() { if (!curDoc()) renderLibrary(); }
 function renderModes() {
   $('#modes').innerHTML = Object.entries(MODES).map(([k, m]) => `<button data-mode="${k}" class="${k === S.mode ? 'on' : ''}">${m.label}</button>`).join('');
   $('#ctxChk').checked = !!S.ctx;
 }
+function renderTutor() {
+  const f = curSub();
+  $('#tutorTitle').textContent = f.id === '_root' ? '🎓 Tutor' : '🎓 ' + f.name;
+  $('#ctxRow').hidden = !curDoc();
+  renderModes(); renderChat();
+}
 function renderChat() {
   const chat = chatOf(), box = $('#msgs');
   if (!chat.length) {
-    const sub = curSub();
-    box.innerHTML = `<div class="empty"><div style="font-size:40px">${esc(sub.icon || '🎓')}</div><b>Dein Tutor für ${esc(sub.name)}</b><br>Stell eine Frage, lass dich abfragen oder markiere links Text in deinen Notizen und wähle eine KI-Aktion.<br><br>Modus wählen: <b>Erklären</b>, <b>Sokratisch</b> (du kommst selbst drauf), <b>Abfragen</b> oder <b>Lösung prüfen</b>.</div>`;
+    const f = curSub();
+    box.innerHTML = f.id === '_root'
+      ? `<div class="empty"><div style="font-size:40px">🎓</div><b>Allgemeiner Tutor</b><br>Öffne einen Ordner, dann weiß der Tutor, um welches Fach es geht – jeder Ordner hat seinen eigenen Gesprächsverlauf.</div>`
+      : `<div class="empty"><div style="font-size:40px">🎓</div><b>Dein Tutor für ${esc(f.name)}</b><br>Stell eine Frage, lass dich abfragen oder markiere im Dokument Text und wähle oben eine KI-Aktion.<br><br>Modi: <b>Erklären</b>, <b>Sokratisch</b> (du kommst selbst drauf), <b>Abfragen</b>, <b>Lösung prüfen</b>.</div>`;
   } else {
-    box.innerHTML = chat.map((m, i) => `<div class="msg ${m.role}"><div class="body">${md(m.content)}</div>${m.role === 'assistant' && m.content ? `<div class="acts"><button data-ins="${i}">📥 In Notizen</button><button data-copy="${i}">📋 Kopieren</button></div>` : ''}</div>`).join('');
+    box.innerHTML = chat.map((m, i) => `<div class="msg ${m.role}"><div class="body">${md(m.content)}</div>${m.role === 'assistant' && m.content ? `<div class="acts"><button data-ins="${i}">📥 Ins Dokument</button><button data-copy="${i}">📋 Kopieren</button></div>` : ''}</div>`).join('');
   }
   $('#follow').innerHTML = chat.length ? FOLLOWUPS.map((f, i) => `<button data-f="${i}" ${busy ? 'disabled' : ''}>${f[0]}</button>`).join('') : '';
   scrollChat();
@@ -646,23 +866,215 @@ const scrollChat = () => { const b = $('#msgs'); b.scrollTop = b.scrollHeight; }
 function renderPill() {
   const s = S.settings, m = s.provider === 'ollama' ? s.ollama.model : s.provider === 'openai' ? s.openai.model : s.anthropic.model;
   const n = { ollama: 'Ollama', openai: 'API', anthropic: 'Claude' }[s.provider];
-  $('#modelPill').textContent = `🤖 ${n}: ${m || 'kein Modell'}`;
+  $('#modelPill').textContent = `🤖 ${m || n + ': kein Modell'}`;
 }
-function renderAll() { renderSide(); renderDocs(); renderModes(); renderChat(); renderPill(); renderRecs(); }
+
+/* ---------- Bibliothek: Bedienung ---------- */
+$('#lib').addEventListener('click', e => {
+  const m = e.target.closest('[data-menu]');
+  if (m) { e.stopPropagation(); const [k, id] = m.dataset.menu.split(':'); return k === 'folder' ? folderMenu(id, m) : docMenu(id, m); }
+  const a = e.target.closest('[data-act]');
+  if (a) {
+    const act = a.dataset.act;
+    if (act === 'new') return showMenu(a, [
+      { label: '📁 Neuer Ordner', fn: () => openFolderDlg(null) },
+      { label: '📄 Neues Dokument', fn: () => openDocDlg(null) },
+      '-',
+      { label: '🎙 Vorlesung aufnehmen', fn: () => $('#recBtn').click() }
+    ]);
+    if (act === 'sort') { S.sort = S.sort === 'name' ? 'date' : 'name'; save(false, true); return renderLibrary(); }
+    if (act === 'newFolder') return openFolderDlg(null);
+    if (act === 'newDoc') return openDocDlg(null);
+  }
+  const f = e.target.closest('[data-folder]'); if (f) return nav({ folder: f.dataset.folder });
+  const d = e.target.closest('[data-doc]'); if (d) return nav({ doc: d.dataset.doc });
+  const r = e.target.closest('[data-rec]'); if (r) return openRec(r.dataset.rec);
+});
+$('#lib').addEventListener('contextmenu', e => {
+  const t = e.target.closest('[data-folder],[data-doc]'); if (!t) return;
+  e.preventDefault();
+  t.dataset.folder ? folderMenu(t.dataset.folder, t) : docMenu(t.dataset.doc, t);
+});
+function folderMenu(id, anchor) {
+  showMenu(anchor, [
+    { label: '📂 Öffnen', fn: () => nav({ folder: id }) },
+    { label: '✏️ Umbenennen & Farbe', fn: () => openFolderDlg(id) },
+    { label: '🎓 Tutor öffnen', fn: () => { nav({ folder: id }); openTutor(); } },
+    { label: '📁 Unterordner erstellen', fn: () => openFolderDlg(null, id) },
+    { label: '↪️ Verschieben', fn: () => openMove('folder', id) },
+    '-',
+    { label: '🗑 Löschen', danger: true, fn: () => deleteFolder(id) }
+  ]);
+}
+function docMenu(id, anchor) {
+  showMenu(anchor, [
+    { label: '📖 Öffnen', fn: () => nav({ doc: id }) },
+    { label: '✏️ Umbenennen, Papier & Farbe', fn: () => openDocDlg(id) },
+    { label: '📑 Duplizieren', fn: () => duplicateDoc(id) },
+    { label: '↪️ Verschieben', fn: () => openMove('doc', id) },
+    { label: '⬇️ Text exportieren (.md)', fn: () => exportDoc(id) },
+    '-',
+    { label: '🗑 Löschen', danger: true, fn: () => deleteDoc(id) }
+  ]);
+}
+$('#search').addEventListener('input', () => renderLibrary());
+
+/* ---------- Ordner ---------- */
+let editFolderId = null, newFolderParent = null, fColor = FOLDER_COLORS[0];
+function swatches(el, cur, onPick) {
+  el.innerHTML = FOLDER_COLORS.map(c => `<button type="button" class="sw ${c === cur ? 'on' : ''}" data-c="${c}" style="background:${c}" aria-label="Farbe ${c}"></button>`).join('');
+  el.onclick = e => { const b = e.target.closest('[data-c]'); if (!b) return; el.querySelectorAll('.sw').forEach(x => x.classList.toggle('on', x === b)); onPick(b.dataset.c); };
+}
+function openFolderDlg(id, parentId = S.nav.folder) {
+  editFolderId = id; newFolderParent = parentId || null;
+  const f = folderById(id), p = folderById(newFolderParent);
+  $('#fDlgT').textContent = f ? 'Ordner bearbeiten' : p ? `Neuer Ordner in „${p.name}“` : 'Neuer Ordner';
+  $('#fName').value = f ? f.name : ''; $('#fPrompt').value = f ? f.prompt || '' : '';
+  fColor = f ? f.color || FOLDER_COLORS[0] : (p ? p.color : FOLDER_COLORS[S.subjects.length % FOLDER_COLORS.length]);
+  swatches($('#fColors'), fColor, c => fColor = c);
+  $('#fDel').hidden = !f; $('#fSave').textContent = f ? 'Speichern' : 'Erstellen';
+  $('#fDlg').showModal(); setTimeout(() => $('#fName').focus(), 60);
+}
+$('#fSave').onclick = e => {
+  const name = $('#fName').value.trim();
+  if (!name) { e.preventDefault(); return toast('Bitte einen Namen eingeben.'); }
+  const data = { name, color: fColor, prompt: $('#fPrompt').value.trim(), updated: Date.now() };
+  if (editFolderId) Object.assign(folderById(editFolderId), data);
+  else S.subjects.push({ id: uid(), parentId: newFolderParent, created: Date.now(), ...data });
+  save(); render();
+};
+$('#fDel').onclick = () => { $('#fDlg').close(); deleteFolder(editFolderId); };
+function deleteFolder(id) {
+  const f = folderById(id); if (!f) return;
+  const ids = descendants(id), nd = S.docs.filter(d => ids.includes(d.subjectId)).length;
+  if (!confirm(`Ordner „${f.name}“${ids.length > 1 ? ` mit ${ids.length - 1} Unterordner(n)` : ''}${nd ? ` und ${nd} Dokument(en)` : ''} löschen? Das kann nicht rückgängig gemacht werden.`)) return;
+  const now = Date.now();
+  ids.forEach(x => { S.deleted[x] = now; delete S.chats[x]; delete S.chatTs[x]; });
+  S.docs.filter(d => ids.includes(d.subjectId)).forEach(d => { S.deleted[d.id] = now; DB.del('ink:' + d.id).catch(() => {}); });
+  S.docs = S.docs.filter(d => !ids.includes(d.subjectId));
+  S.subjects = S.subjects.filter(x => !ids.includes(x.id));
+  S.recs.forEach(r => { if (ids.includes(r.subjectId)) { r.subjectId = null; r.upd = now; } });
+  save();
+  nav({ folder: ids.includes(S.nav.folder) ? f.parentId || null : S.nav.folder, doc: S.nav.doc }, false);
+}
+
+/* ---------- Dokumente ---------- */
+let editDocId = null, dPaper = 'lined', dColor = null;
+function openDocDlg(id) {
+  editDocId = id || null;
+  const d = id ? S.docs.find(x => x.id === id) : null;
+  $('#dDlgT').textContent = d ? 'Dokument bearbeiten' : 'Neues Dokument';
+  $('#dName').value = d ? d.title : 'Mitschrift ' + new Date().toLocaleDateString('de-DE');
+  dPaper = d ? d.paper || 'lined' : S.lastPaper || 'lined';
+  dColor = d ? coverOf(d) : (folderById(S.nav.folder) || {}).color || FOLDER_COLORS[0];
+  $('#dPaper').innerHTML = Object.entries(PAPERS).map(([k, n]) => `<button type="button" class="pp paper p-${k} ${k === dPaper ? 'on' : ''}" data-p="${k}">${n}</button>`).join('');
+  $('#dPaper').onclick = e => { const b = e.target.closest('[data-p]'); if (!b) return; dPaper = b.dataset.p; $('#dPaper').querySelectorAll('.pp').forEach(x => x.classList.toggle('on', x === b)); };
+  swatches($('#dColors'), dColor, c => dColor = c);
+  $('#dSave').textContent = d ? 'Speichern' : 'Erstellen';
+  $('#dDlg').showModal(); setTimeout(() => { $('#dName').focus(); $('#dName').select(); }, 60);
+}
+$('#dSave').onclick = () => {
+  const title = $('#dName').value.trim() || 'Unbenannt';
+  if (editDocId) {
+    Object.assign(S.docs.find(x => x.id === editDocId), { title, paper: dPaper, color: dColor, updated: Date.now() });
+    save(); render();
+  } else {
+    const d = { id: uid(), subjectId: S.nav.folder || null, title, content: '', paper: dPaper, color: dColor, created: Date.now(), updated: Date.now() };
+    S.docs.push(d); S.lastPaper = dPaper; save(); nav({ doc: d.id });
+  }
+};
+async function duplicateDoc(id) {
+  const d = S.docs.find(x => x.id === id); if (!d) return;
+  const c = { ...d, id: uid(), title: d.title + ' (Kopie)', created: Date.now(), updated: Date.now() };
+  const ink = inkCache.get(id) || await DB.get('ink:' + id).catch(() => null);
+  if (ink) { const rec = { upd: Date.now(), strokes: JSON.parse(JSON.stringify(ink.strokes)) }; await DB.set('ink:' + c.id, rec); inkCache.set(c.id, rec); c.inkUpd = rec.upd; }
+  S.docs.push(c); save(); render(); toast('Dupliziert');
+}
+function deleteDoc(id) {
+  const d = S.docs.find(x => x.id === id); if (!d) return;
+  if (!confirm(`„${d.title || 'Unbenannt'}“ wirklich löschen? Das kann nicht rückgängig gemacht werden.`)) return;
+  S.docs = S.docs.filter(x => x.id !== id); S.deleted[id] = Date.now();
+  DB.del('ink:' + id).catch(() => {}); inkCache.delete(id);
+  save(); nav({ folder: d.subjectId || null, doc: S.nav.doc === id ? null : S.nav.doc }, false);
+}
+function exportDoc(id) {
+  const d = S.docs.find(x => x.id === id); if (!d) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([`# ${d.title}\n\n${d.content}`], { type: 'text/markdown' }));
+  a.download = (d.title || 'Dokument').replace(/[^\wäöüÄÖÜß .-]/g, '') + '.md';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+let mvItem = null;
+function openMove(kind, id) {
+  mvItem = { kind, id };
+  const it = kind === 'folder' ? folderById(id) : S.docs.find(d => d.id === id); if (!it) return;
+  $('#mvT').textContent = `„${kind === 'folder' ? it.name : it.title}“ verschieben nach`;
+  $('#mvSel').innerHTML = folderOptions(kind === 'folder' ? descendants(id) : [], kind === 'folder' ? it.parentId : it.subjectId);
+  $('#mvDlg').showModal();
+}
+$('#mvOk').onclick = () => {
+  const to = $('#mvSel').value || null, now = Date.now();
+  if (mvItem.kind === 'folder') Object.assign(folderById(mvItem.id), { parentId: to, updated: now });
+  else Object.assign(S.docs.find(d => d.id === mvItem.id), { subjectId: to, updated: now });
+  save(); nav({ folder: S.nav.folder, doc: S.nav.doc }, false); toast('Verschoben nach ' + pathName(to));
+};
 
 /* ---------- Editor ---------- */
-const ed = $('#editor');
-let lastCaret = 0;
-ed.addEventListener('input', () => { const d = curDoc(); d.content = ed.value; d.updated = Date.now(); save(); status(); });
+const ed = $('#editor'), page = $('#page'), canvasEl = $('#canvas'), inkEl = $('#ink');
+const PW = 820;
+let lastCaret = 0, curH = 1160, ZOOM = 1;
+function fitZoom() {
+  if (document.body.dataset.view !== 'doc') return;
+  const avail = canvasEl.clientWidth - 24;
+  ZOOM = Math.min(1, Math.max(0.3, avail / PW));
+  page.style.zoom = ZOOM;
+}
+window.addEventListener('resize', fitZoom);
+function renderEditor() {
+  const d = curDoc();
+  page.className = 'paper p-' + (d.paper || 'lined');
+  if (ed.dataset.doc !== d.id) {
+    ed.value = d.content; ed.dataset.doc = d.id; lastCaret = d.content.length;
+    setPreview(false, true); canvasEl.scrollTop = 0; INK = null; inkEl.textContent = '';
+  } else if (ed.value !== d.content) {
+    const a = ed.selectionStart, b = ed.selectionEnd, focus = document.activeElement === ed;
+    ed.value = d.content; if (focus) ed.setSelectionRange(a, b);
+  }
+  if (!$('#preview').hidden) $('#preview').innerHTML = md(d.content);
+  fitZoom(); renderToolbar(); loadInk(d.id); sizePage(); status();
+}
+function sizePage(extraY) {
+  const st = canvasEl.scrollTop;
+  ed.style.height = 'auto'; const th = ed.scrollHeight; ed.style.height = th + 'px';
+  let maxY = extraY || 0;
+  if (INK) for (const s of INK.strokes) maxY = Math.max(maxY, bbox(s)[3]);
+  const textH = $('#preview').hidden ? th : $('#preview').scrollHeight;
+  curH = Math.ceil(Math.max(1160, textH + 128 + 160, maxY + 600));
+  page.style.minHeight = curH + 'px';
+  inkEl.setAttribute('width', PW); inkEl.setAttribute('height', curH); inkEl.setAttribute('viewBox', `0 0 ${PW} ${curH}`);
+  canvasEl.scrollTop = st;
+}
+function status() {
+  const d = curDoc(); if (!d) return;
+  const t = d.content.trim(), w = t ? t.split(/\s+/).length : 0, n = INK ? INK.strokes.length : d.inkN || 0;
+  $('#status').textContent = `${w} Wörter${n ? ` · ${n} Striche` : ''} · ${PAPERS[d.paper || 'lined']} · zuletzt geändert ${fmtDate(d.updated)}`;
+}
+ed.addEventListener('input', () => { const d = curDoc(); if (!d) return; d.content = ed.value; d.updated = Date.now(); save(); sizePage(); status(); });
 ['keyup', 'mouseup', 'touchend', 'blur', 'select'].forEach(ev => ed.addEventListener(ev, () => lastCaret = ed.selectionEnd));
 
 function insertIntoDoc(text) {
-  const d = curDoc(), pos = Math.min(lastCaret || d.content.length, d.content.length);
+  let d = curDoc();
+  if (!d) {
+    const fid = S.active === '_root' ? null : S.active;
+    d = { id: uid(), subjectId: fid, title: 'Tutor-Notizen ' + new Date().toLocaleDateString('de-DE'), content: '', paper: 'lined', color: (folderById(fid) || {}).color || FOLDER_COLORS[0], created: Date.now(), updated: Date.now() };
+    S.docs.push(d); nav({ doc: d.id }); lastCaret = 0;
+  }
+  const pos = Math.min(lastCaret || d.content.length, d.content.length);
   const ins = (d.content && pos > 0 ? '\n\n' : '') + text.trim() + '\n';
   d.content = d.content.slice(0, pos) + ins + d.content.slice(pos);
   d.updated = Date.now(); lastCaret = pos + ins.length;
-  save(); renderDocs(); toast('In „' + d.title + '“ eingefügt');
-  if (narrow()) setTab('edit');
+  save(); renderEditor(); toast('In „' + d.title + '“ eingefügt');
+  if (tutorOverlay()) closeTutor();
 }
 function selectedText() {
   const a = ed.selectionStart, b = ed.selectionEnd;
@@ -678,34 +1090,386 @@ const ACTIONS = {
 document.querySelector('.aibar').addEventListener('click', e => {
   const b = e.target.closest('button[data-act]'); if (!b) return;
   const t = selectedText();
-  if (!t) return toast('Erst etwas schreiben oder Text markieren.');
+  if (!t) return toast('Erst etwas tippen oder Text markieren. (Handschrift kann die KI noch nicht lesen.)');
   if (b.dataset.act === 'ask') {
-    if (narrow()) setTab('tutor');
+    openTutor();
     const q = $('#q'); q.value = `Zu dieser Stelle aus meinen Notizen:\n"${t.slice(0, 600)}"\n\nMeine Frage: `; q.focus(); q.setSelectionRange(q.value.length, q.value.length); autoGrow();
     return;
   }
   ask(ACTIONS[b.dataset.act](t));
 });
+function setPreview(on, quiet) {
+  $('#preview').hidden = !on; ed.hidden = on; inkEl.style.display = on ? 'none' : '';
+  $('#prevBtn').textContent = on ? '✏️ Bearbeiten' : '👁 Vorschau';
+  $('#prevBtn').classList.toggle('on', on);
+  if (on) { if (S.tool !== 'text') setTool('text'); $('#preview').innerHTML = md(curDoc().content); }
+  if (!quiet) sizePage();
+}
+$('#prevBtn').onclick = () => setPreview($('#preview').hidden);
+$('#paperBtn').onclick = () => {
+  const d = curDoc(); if (!d) return;
+  showMenu($('#paperBtn'), Object.entries(PAPERS).map(([k, n]) => ({ label: (d.paper === k ? '✓ ' : ' ') + n, fn: () => { d.paper = k; d.updated = Date.now(); S.lastPaper = k; save(); renderEditor(); } })));
+};
+$('#docTitle').onclick = () => { const d = curDoc(); if (d) openDocDlg(d.id); };
+$('#docMore').onclick = () => {
+  const d = curDoc(); if (!d) return;
+  showMenu($('#docMore'), [
+    { label: '✏️ Umbenennen, Papier & Farbe', fn: () => openDocDlg(d.id) },
+    { label: '↪️ Verschieben', fn: () => openMove('doc', d.id) },
+    { label: '📑 Duplizieren', fn: () => duplicateDoc(d.id) },
+    { label: '⬇️ Text exportieren (.md)', fn: () => exportDoc(d.id) },
+    { label: (S.fingerDraw ? '✓ ' : ' ') + 'Mit dem Finger zeichnen', fn: () => { S.fingerDraw = !S.fingerDraw; save(false, true); toast(S.fingerDraw ? 'Finger zeichnet jetzt (zum Scrollen den Rand nutzen)' : 'Finger scrollt, nur der Stift zeichnet'); } },
+    { label: '🧽 Ganze Handschrift löschen', fn: clearInk },
+    '-',
+    { label: '🗑 Dokument löschen', danger: true, fn: () => deleteDoc(d.id) }
+  ]);
+};
 
-$('#prevBtn').onclick = () => {
-  const p = $('#preview'), show = p.hidden;
-  p.hidden = !show; ed.hidden = show;
-  $('#prevBtn').textContent = show ? '✏️ Bearbeiten' : '👁 Vorschau';
-  if (show) p.innerHTML = md(curDoc().content);
-};
-$('#docSel').onchange = e => { S.activeDoc[S.active] = e.target.value; save(); renderDocs(); };
-$('#newDoc').onclick = () => {
-  const t = prompt('Titel des neuen Dokuments:', 'Mitschrift ' + new Date().toLocaleDateString('de-DE'));
-  if (!t) return;
-  const d = { id: uid(), subjectId: S.active, title: t.trim(), content: '', updated: Date.now() };
-  S.docs.push(d); S.activeDoc[S.active] = d.id; save(); renderDocs(); ed.focus();
-};
-$('#renDoc').onclick = () => { const d = curDoc(), t = prompt('Neuer Titel:', d.title); if (t) { d.title = t.trim(); d.updated = Date.now(); save(); renderDocs(); } };
-$('#delDoc').onclick = () => {
-  const d = curDoc();
-  if (!confirm(`„${d.title}“ wirklich löschen? Das kann nicht rückgängig gemacht werden.`)) return;
-  S.docs = S.docs.filter(x => x.id !== d.id); S.deleted[d.id] = Date.now(); delete S.activeDoc[S.active]; save(); renderDocs();
-};
+/* ---------- Handschrift: Stift, Textmarker, Radierer ---------- */
+const NS = 'http://www.w3.org/2000/svg';
+const PEN_COLORS = ['auto', '#2f6bff', '#e5484d', '#2da44e', '#f08c00', '#8e44ad'];
+const HL_COLORS = ['#ffe14d', '#7ef29a', '#ff8fc7', '#8fd3ff'];
+const PEN_W = [1.1, 1.9, 3.2], HL_W = [16, 26], ERASE_R = 11;
+let INK = null, undoS = [], redoS = [];
+const inkCache = new Map(), elOf = new WeakMap(), boxOf = new WeakMap();
+const r1 = v => Math.round(v * 10) / 10;
+const radius = (w, p) => w * (0.35 + 0.9 * Math.min(1, Math.max(0, p)));
+function bbox(s) {
+  let b = boxOf.get(s); if (b) return b;
+  const a = s.p; b = [Infinity, Infinity, -Infinity, -Infinity];
+  for (let i = 0; i < a.length; i += 3) { b[0] = Math.min(b[0], a[i]); b[1] = Math.min(b[1], a[i + 1]); b[2] = Math.max(b[2], a[i]); b[3] = Math.max(b[3], a[i + 1]); }
+  const pad = s.w; b = [b[0] - pad, b[1] - pad, b[2] + pad, b[3] + pad];
+  boxOf.set(s, b); return b;
+}
+function smooth(pts) {
+  let s = '';
+  for (let i = 1; i < pts.length - 1; i++) s += `Q${r1(pts[i][0])} ${r1(pts[i][1])} ${r1((pts[i][0] + pts[i + 1][0]) / 2)} ${r1((pts[i][1] + pts[i + 1][1]) / 2)}`;
+  const l = pts[pts.length - 1];
+  return s + `L${r1(l[0])} ${r1(l[1])}`;
+}
+function outline(s) {
+  const a = s.p, n = a.length / 3, w = s.w;
+  if (!n) return '';
+  if (n === 1 || (n === 2 && Math.hypot(a[3] - a[0], a[4] - a[1]) < 0.5)) { const r = radius(w, a[2]); return `M${r1(a[0] - r)} ${a[1]}a${r} ${r} 0 1 0 ${r1(2 * r)} 0a${r} ${r} 0 1 0 ${r1(-2 * r)} 0Z`; }
+  const L = [], Rr = [];
+  for (let i = 0; i < n; i++) {
+    const j = Math.max(0, i - 1) * 3, k = Math.min(n - 1, i + 1) * 3, x = a[i * 3], y = a[i * 3 + 1];
+    let dx = a[k] - a[j], dy = a[k + 1] - a[j + 1]; const len = Math.hypot(dx, dy) || 1; dx /= len; dy /= len;
+    const r = radius(w, a[i * 3 + 2]);
+    L.push([x - dy * r, y + dx * r]); Rr.push([x + dy * r, y - dx * r]);
+  }
+  const rE = r1(radius(w, a[a.length - 1])), rS = r1(radius(w, a[2]));
+  Rr.reverse();
+  return `M${r1(L[0][0])} ${r1(L[0][1])}${smooth(L)}A${rE} ${rE} 0 0 0 ${r1(Rr[0][0])} ${r1(Rr[0][1])}${smooth(Rr)}A${rS} ${rS} 0 0 0 ${r1(L[0][0])} ${r1(L[0][1])}Z`;
+}
+function polyD(s) {
+  const a = s.p;
+  if (a.length < 6) return `M${a[0]} ${a[1]}l0.01 0`;
+  const pts = []; for (let i = 0; i < a.length; i += 3) pts.push([a[i], a[i + 1]]);
+  return `M${pts[0][0]} ${pts[0][1]}` + smooth(pts);
+}
+function strokeEl(s) {
+  const el = document.createElementNS(NS, 'path');
+  if (s.t === 'hl') {
+    el.setAttribute('d', polyD(s)); el.setAttribute('fill', 'none'); el.setAttribute('stroke', s.c); el.setAttribute('stroke-width', s.w);
+    el.setAttribute('stroke-linecap', 'round'); el.setAttribute('stroke-linejoin', 'round'); el.setAttribute('opacity', '.42'); el.setAttribute('class', 'hl');
+  } else { el.setAttribute('d', outline(s)); el.style.fill = s.c === 'auto' ? 'var(--ink)' : s.c; }
+  elOf.set(s, el);
+  return el;
+}
+function strokeSVG(s) {
+  return s.t === 'hl'
+    ? `<path class="hl" d="${polyD(s)}" fill="none" stroke="${s.c}" stroke-width="${s.w}" stroke-linecap="round" stroke-linejoin="round" opacity=".42"/>`
+    : `<path d="${outline(s)}" style="fill:${s.c === 'auto' ? 'var(--ink)' : s.c}"/>`;
+}
+function renderInk() {
+  inkEl.textContent = '';
+  if (!INK) return;
+  const frag = document.createDocumentFragment();
+  INK.strokes.forEach(s => frag.appendChild(strokeEl(s)));
+  inkEl.appendChild(frag);
+  sizePage(); updUndo(); status();
+}
+async function loadInk(id) {
+  if (INK && INK.docId === id) return;
+  INK = { docId: id, strokes: [], upd: 0 }; undoS = []; redoS = []; updUndo();
+  let rec = inkCache.get(id);
+  if (!rec) { try { rec = await DB.get('ink:' + id); } catch (_) {} if (rec) inkCache.set(id, rec); }
+  if (!INK || INK.docId !== id) return;
+  if (rec) INK = { docId: id, strokes: rec.strokes || [], upd: rec.upd || 0 };
+  renderInk();
+}
+let inkSaveT = 0;
+function inkChanged() {
+  const d = curDoc(); if (!d || !INK || INK.docId !== d.id) return;
+  INK.upd = Date.now(); d.inkUpd = INK.upd; d.inkN = INK.strokes.length; d.updated = INK.upd;
+  const rec = { upd: INK.upd, strokes: INK.strokes }; inkCache.set(INK.docId, rec);
+  clearTimeout(inkSaveT); const id = INK.docId;
+  inkSaveT = setTimeout(() => DB.set('ink:' + id, rec).catch(e => toast('Handschrift konnte nicht gespeichert werden: ' + e.message)), 300);
+  save(); status(); updUndo();
+}
+function updUndo() { $('#undoBtn').disabled = !undoS.length; $('#redoBtn').disabled = !redoS.length; }
+function pushUndo(op) { undoS.push(op); if (undoS.length > 300) undoS.shift(); redoS = []; }
+function applyOp(op, back) {
+  const st = INK.strokes;
+  if (op.type === 'add') { if (back) { const k = st.indexOf(op.s); if (k >= 0) st.splice(k, 1); } else st.push(op.s); }
+  else if (op.type === 'erase') {
+    if (back) [...op.items].sort((x, y) => x.i - y.i).forEach(it => st.splice(Math.min(it.i, st.length), 0, it.s));
+    else op.items.forEach(it => { const k = st.indexOf(it.s); if (k >= 0) st.splice(k, 1); });
+  } else if (op.type === 'clear') INK.strokes = back ? op.items.slice() : [];
+}
+function undo() { if (!INK) return; const op = undoS.pop(); if (!op) return; applyOp(op, true); redoS.push(op); renderInk(); inkChanged(); }
+function redo() { if (!INK) return; const op = redoS.pop(); if (!op) return; applyOp(op, false); undoS.push(op); renderInk(); inkChanged(); }
+function clearInk() {
+  if (!INK || !INK.strokes.length) return toast('Keine Handschrift vorhanden.');
+  if (!confirm('Die gesamte Handschrift in diesem Dokument löschen? (Rückgängig ist möglich, solange das Dokument offen ist.)')) return;
+  pushUndo({ type: 'clear', items: INK.strokes.slice() }); INK.strokes = []; renderInk(); inkChanged();
+}
+$('#undoBtn').onclick = undo; $('#redoBtn').onclick = redo;
+
+/* Werkzeuge */
+function setTool(t) {
+  S.tool = t; if (t !== 'text') S.lastDraw = t;
+  document.body.classList.toggle('draw', t !== 'text');
+  if (t !== 'text') { ed.blur(); if (!$('#preview').hidden) setPreview(false); }
+  renderToolbar(); save(false, true);
+}
+function renderToolbar() {
+  document.querySelectorAll('.tool[data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === S.tool));
+  document.body.classList.toggle('draw', S.tool !== 'text');
+  const o = $('#toolOpts');
+  if (S.tool === 'pen' || S.tool === 'hl') {
+    const cfg = S.tool === 'pen' ? S.pen : S.hl, cols = S.tool === 'pen' ? PEN_COLORS : HL_COLORS, ws = S.tool === 'pen' ? PEN_W : HL_W;
+    o.innerHTML = '<span class="sep"></span>' + cols.map(c => `<button class="cdot ${c === cfg.c ? 'on' : ''}" data-c="${c}" style="background:${c === 'auto' ? 'var(--ink)' : c}" aria-label="Farbe"></button>`).join('')
+      + '<span class="sep"></span>' + ws.map((w, i) => { const px = S.tool === 'pen' ? 4 + i * 4 : 9 + i * 7; return `<button class="wdot ${i === cfg.w ? 'on' : ''}" data-w="${i}" aria-label="Stärke"><i style="width:${px}px;height:${px}px;${S.tool === 'hl' ? 'opacity:.5;' : ''}"></i></button>`; }).join('') + '<span class="sep"></span>';
+  } else o.innerHTML = '<span class="sep"></span>';
+  updUndo();
+}
+document.querySelector('.edbar').addEventListener('click', e => {
+  const t = e.target.closest('.tool[data-tool]'); if (t) return setTool(t.dataset.tool);
+  const c = e.target.closest('.cdot'); if (c) { (S.tool === 'hl' ? S.hl : S.pen).c = c.dataset.c; save(false, true); return renderToolbar(); }
+  const w = e.target.closest('.wdot'); if (w) { (S.tool === 'hl' ? S.hl : S.pen).w = +w.dataset.w; save(false, true); return renderToolbar(); }
+});
+
+/* Zeichnen */
+let drawing = null, pan = null, penDown = false, inertia = 0;
+const eraserC = document.createElementNS(NS, 'circle');
+eraserC.setAttribute('r', ERASE_R); eraserC.setAttribute('fill', 'rgba(128,128,128,.12)'); eraserC.setAttribute('stroke', 'rgba(128,128,128,.8)'); eraserC.setAttribute('stroke-width', '1');
+function showEraser(x, y) { eraserC.setAttribute('cx', x); eraserC.setAttribute('cy', y); if (!eraserC.isConnected) inkEl.appendChild(eraserC); }
+function pt(e) { const r = page.getBoundingClientRect(), k = PW / r.width; return [(e.clientX - r.left) * k, (e.clientY - r.top) * k]; }
+const prs = e => e.pointerType === 'pen' ? (e.pressure > 0 ? Math.round(e.pressure * 100) / 100 : 0.5) : 0.5;
+const penErase = e => e.pointerType === 'pen' && ((e.buttons & 2) || (e.buttons & 32) || e.button === 2 || e.button === 5);
+function wantsDraw(e) {
+  if (e.pointerType === 'pen') return true;
+  if (S.tool === 'text') return false;
+  if (e.pointerType === 'mouse') return e.button === 0 || e.button === 2;
+  return S.fingerDraw;
+}
+function eraseAt(x, y) {
+  for (let i = INK.strokes.length - 1; i >= 0; i--) {
+    const s = INK.strokes[i], b = bbox(s), r = ERASE_R + (s.t === 'hl' ? s.w / 2 : s.w);
+    if (x < b[0] - r || x > b[2] + r || y < b[1] - r || y > b[3] + r) continue;
+    if (hits(s, x, y, r)) { INK.strokes.splice(i, 1); const el = elOf.get(s); if (el) el.remove(); drawing.removed.push({ s, i }); }
+  }
+}
+function hits(s, x, y, r) {
+  const a = s.p;
+  if (a.length === 3) return Math.hypot(a[0] - x, a[1] - y) <= r;
+  for (let i = 0; i < a.length - 3; i += 3) if (segDist(x, y, a[i], a[i + 1], a[i + 3], a[i + 4]) <= r) return true;
+  return false;
+}
+function segDist(px, py, ax, ay, bx, by) { const dx = bx - ax, dy = by - ay, l = dx * dx + dy * dy; let t = l ? ((px - ax) * dx + (py - ay) * dy) / l : 0; t = Math.max(0, Math.min(1, t)); return Math.hypot(px - ax - t * dx, py - ay - t * dy); }
+function startStroke(e, x, y) {
+  const t = S.tool === 'hl' ? 'hl' : 'pen', cfg = t === 'hl' ? S.hl : S.pen;
+  const s = { t, c: cfg.c, w: t === 'hl' ? HL_W[cfg.w] : PEN_W[cfg.w], p: [r1(x), r1(y), prs(e)] };
+  inkEl.appendChild(strokeEl(s));
+  drawing = { id: e.pointerId, s, last: [x, y] };
+  armHold(x, y);
+}
+function commitStroke() {
+  if (!drawing || drawing.erase) return;
+  boxOf.delete(drawing.s); INK.strokes.push(drawing.s); pushUndo({ type: 'add', s: drawing.s });
+}
+page.addEventListener('pointerdown', e => {
+  if (!curDoc() || !INK || !$('#preview').hidden) return;
+  cancelAnimationFrame(inertia);
+  if (drawing && e.pointerId !== drawing.id) return;
+  if (e.pointerType === 'touch' && penDown) return;            // Handballen ignorieren
+  if (wantsDraw(e)) {
+    e.preventDefault();
+    if (S.tool === 'text') setTool(S.lastDraw || 'pen');        // Stift berührt im Tippmodus → Stiftmodus
+    try { page.setPointerCapture(e.pointerId); } catch (_) {}
+    pan = null;
+    if (e.pointerType === 'pen') penDown = true;
+    const [x, y] = pt(e);
+    if (S.tool === 'eraser' || penErase(e) || (e.pointerType === 'mouse' && e.button === 2)) { drawing = { id: e.pointerId, erase: true, removed: [] }; eraseAt(x, y); showEraser(x, y); return; }
+    startStroke(e, x, y);
+    return;
+  }
+  if (S.tool !== 'text' && e.pointerType === 'touch') {
+    pan = { id: e.pointerId, x: e.clientX, y: e.clientY, sx: canvasEl.scrollLeft, sy: canvasEl.scrollTop, ly: e.clientY, lt: performance.now(), v: 0 };
+    try { page.setPointerCapture(e.pointerId); } catch (_) {}
+  }
+});
+page.addEventListener('pointermove', e => {
+  if (pan && e.pointerId === pan.id) {
+    canvasEl.scrollTop = pan.sy - (e.clientY - pan.y); canvasEl.scrollLeft = pan.sx - (e.clientX - pan.x);
+    const now = performance.now(), dt = Math.max(1, now - pan.lt);
+    pan.v = 0.75 * pan.v + 0.25 * ((pan.ly - e.clientY) / dt); pan.ly = e.clientY; pan.lt = now;
+    return;
+  }
+  if (!drawing || e.pointerId !== drawing.id) return;
+  e.preventDefault();
+  const evs = (e.getCoalescedEvents && e.getCoalescedEvents()) || [];
+  for (const ev of evs.length ? evs : [e]) {
+    const [x, y] = pt(ev);
+    if (!drawing.erase && penErase(ev)) { commitStroke(); drawing = { id: drawing.id, erase: true, removed: [] }; }
+    if (drawing.erase) { eraseAt(x, y); showEraser(x, y); continue; }
+    if (drawing.shaped) continue;
+    if (holdAt && Math.hypot(x - holdAt[0], y - holdAt[1]) > 4) armHold(x, y);
+    if (Math.hypot(x - drawing.last[0], y - drawing.last[1]) < 1.1) continue;
+    drawing.s.p.push(r1(x), r1(y), prs(ev)); drawing.last = [x, y];
+  }
+  if (!drawing.erase && !drawing.shaped) {
+    const el = elOf.get(drawing.s); el.setAttribute('d', drawing.s.t === 'hl' ? polyD(drawing.s) : outline(drawing.s));
+    if (drawing.last[1] > curH - 320) sizePage(drawing.last[1]);
+  }
+});
+function endPointer(e) {
+  if (pan && e.pointerId === pan.id) {
+    let v = pan.v * 16; pan = null;
+    const step = () => { if (Math.abs(v) < 0.4) return; canvasEl.scrollTop += v; v *= 0.95; inertia = requestAnimationFrame(step); };
+    step(); return;
+  }
+  if (!drawing || e.pointerId !== drawing.id) return;
+  clearTimeout(holdT); holdAt = null;
+  if (e.pointerType === 'pen') penDown = false;
+  if (drawing.erase) { eraserC.remove(); if (drawing.removed.length) { pushUndo({ type: 'erase', items: drawing.removed }); inkChanged(); } }
+  else { commitStroke(); inkChanged(); }
+  drawing = null;
+  if (document.activeElement === ed) ed.blur();
+}
+page.addEventListener('pointerup', endPointer);
+page.addEventListener('pointercancel', endPointer);
+page.addEventListener('lostpointercapture', e => { if (drawing && e.pointerId === drawing.id) endPointer(e); });
+page.addEventListener('contextmenu', e => { if (S.tool !== 'text' || drawing || e.pointerType === 'pen') e.preventDefault(); });
+// Safari/iPad: Apple Pencil soll nicht scrollen; während des Zeichnens kein Scrollen
+page.addEventListener('touchstart', e => { if ([...e.changedTouches].some(t => t.touchType === 'stylus')) e.preventDefault(); }, { passive: false });
+page.addEventListener('touchmove', e => { if (drawing || [...e.changedTouches].some(t => t.touchType === 'stylus')) e.preventDefault(); }, { passive: false });
+
+/* Formerkennung: Strich ziehen und am Ende kurz still halten */
+const HOLD_MS = 520;
+let holdT = 0, holdAt = null;
+function armHold(x, y) {
+  clearTimeout(holdT); holdAt = [x, y];
+  holdT = setTimeout(() => {
+    if (!drawing || drawing.erase || drawing.shaped) return;
+    const sh = recognize(drawing.s);
+    if (!sh) return;
+    const p = avgPressure(drawing.s);
+    drawing.s.p = sh.pts.flatMap(([x, y]) => [r1(x), r1(y), p]);
+    drawing.s.shape = sh.kind; drawing.shaped = true; boxOf.delete(drawing.s);
+    const el = elOf.get(drawing.s); el.setAttribute('d', drawing.s.t === 'hl' ? polyD(drawing.s) : outline(drawing.s));
+    if (navigator.vibrate) try { navigator.vibrate(12); } catch (_) {}
+  }, HOLD_MS);
+}
+function avgPressure(s) { let t = 0, n = 0; for (let i = 2; i < s.p.length; i += 3) { t += s.p[i]; n++; } return n ? Math.round(t / n * 100) / 100 : 0.5; }
+const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+function rdp(pts, eps) {
+  if (pts.length < 3) return pts.slice();
+  let idx = 0, md = 0; const a = pts[0], b = pts[pts.length - 1];
+  for (let i = 1; i < pts.length - 1; i++) { const d = segDist(pts[i][0], pts[i][1], a[0], a[1], b[0], b[1]); if (d > md) { md = d; idx = i; } }
+  if (md <= eps) return [a, b];
+  const l = rdp(pts.slice(0, idx + 1), eps), r = rdp(pts.slice(idx), eps);
+  return l.slice(0, -1).concat(r);
+}
+function turn(a, b, c) { const v1 = Math.atan2(b[1] - a[1], b[0] - a[0]), v2 = Math.atan2(c[1] - b[1], c[0] - b[0]); let d = Math.abs(v2 - v1) * 180 / Math.PI; if (d > 180) d = 360 - d; return d; }
+function dropStraight(v, closed) {
+  let ch = true;
+  while (ch && v.length > (closed ? 3 : 2)) {
+    ch = false;
+    for (let i = closed ? 0 : 1; i < (closed ? v.length : v.length - 1); i++) {
+      const a = v[(i - 1 + v.length) % v.length], c = v[(i + 1) % v.length];
+      if (turn(a, v[i], c) < 24) { v.splice(i, 1); ch = true; break; }
+    }
+  }
+  return v;
+}
+function resample(poly, closed, step = 2.5) {
+  const out = [], P = closed ? poly.concat([poly[0]]) : poly;
+  for (let i = 0; i < P.length - 1; i++) {
+    const a = P[i], b = P[i + 1], n = Math.max(1, Math.ceil(dist(a, b) / step));
+    for (let k = 0; k < n; k++) out.push([a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n]);
+  }
+  out.push(P[P.length - 1]);
+  return out;
+}
+function snapAngle(a, b) {
+  const ang = Math.atan2(b[1] - a[1], b[0] - a[0]) * 180 / Math.PI, L = dist(a, b);
+  for (const t of [-180, -135, -90, -45, 0, 45, 90, 135, 180]) if (Math.abs(ang - t) < 7) { const r = t * Math.PI / 180; return [a[0] + Math.cos(r) * L, a[1] + Math.sin(r) * L]; }
+  return b;
+}
+function recognize(s) {
+  const pts = []; for (let i = 0; i < s.p.length; i += 3) pts.push([s.p[i], s.p[i + 1]]);
+  if (pts.length < 4) return null;
+  let len = 0; for (let i = 1; i < pts.length; i++) len += dist(pts[i - 1], pts[i]);
+  const b = bbox({ p: s.p, w: 0 }), W = b[2] - b[0], H = b[3] - b[1], D = Math.hypot(W, H);
+  if (D < 30) return null;
+  const first = pts[0], last = pts[pts.length - 1];
+  // Gerade Linie
+  if (dist(first, last) / len > 0.93) return { kind: 'line', pts: resample([first, snapAngle(first, last)], false) };
+  const closed = dist(first, last) < Math.max(0.22 * D, 12);
+  if (closed) {
+    // Vieleck (Dreieck, Rechteck, …)
+    let v = rdp(pts.concat([first]), 0.07 * D); if (v.length > 1 && dist(v[0], v[v.length - 1]) < 0.15 * D) v.pop();
+    v = dropStraight(v, true);
+    if (v.length >= 3 && v.length <= 6) {
+      let err = 0; for (const p of pts) { let m = Infinity; for (let i = 0; i < v.length; i++) { const a = v[i], c = v[(i + 1) % v.length]; m = Math.min(m, segDist(p[0], p[1], a[0], a[1], c[0], c[1])); } err += m; }
+      if (err / pts.length < 0.045 * D) {
+        if (v.length === 4) {
+          const right = [0, 1, 2, 3].every(i => Math.abs(turn(v[(i + 3) % 4], v[i], v[(i + 1) % 4]) - 90) < 20);
+          const axis = v.every((p, i) => { const q = v[(i + 1) % 4]; const a = Math.abs(Math.atan2(q[1] - p[1], q[0] - p[0]) * 180 / Math.PI) % 90; return a < 12 || a > 78; });
+          if (right && axis) return { kind: 'rect', pts: resample([[b[0], b[1]], [b[2], b[1]], [b[2], b[3]], [b[0], b[3]]], true) };
+        }
+        return { kind: v.length === 3 ? 'triangle' : 'polygon', pts: resample(v, true) };
+      }
+    }
+    // Kreis / Ellipse
+    const cx = (b[0] + b[2]) / 2, cy = (b[1] + b[3]) / 2, rx = W / 2, ry = H / 2;
+    let dev = 0; for (const p of pts) dev += Math.abs(Math.hypot((p[0] - cx) / rx, (p[1] - cy) / ry) - 1);
+    if (dev / pts.length < 0.13) {
+      const circ = Math.abs(rx - ry) / Math.max(rx, ry) < 0.14, R = (rx + ry) / 2, n = 96, out = [];
+      for (let i = 0; i <= n; i++) { const a = i / n * 2 * Math.PI; out.push([cx + Math.cos(a) * (circ ? R : rx), cy + Math.sin(a) * (circ ? R : ry)]); }
+      return { kind: circ ? 'circle' : 'ellipse', pts: out };
+    }
+    return null;
+  }
+  // Offene Formen: Wurzelzeichen √ und Winkel/Polylinie
+  let v = dropStraight(rdp(pts, 0.07 * D), false);
+  if (v.length >= 4 && v.length <= 5) {
+    const n = v.length, A = v[n - 4], B = v[n - 3], C = v[n - 2], E = v[n - 1];
+    const down = B[1] - A[1] > 0.08 * D, up = C[1] - B[1] < -0.3 * D && C[0] > B[0], flat = E[0] - C[0] > 0.2 * D && Math.abs(E[1] - C[1]) < 0.35 * (E[0] - C[0]);
+    if (down && up && flat) {
+      const top = C[1], tick = [A[0] - (B[0] - A[0]) * 0.35, A[1] - (B[1] - A[1]) * 0.15];
+      return { kind: 'root', pts: resample([tick, A, B, [C[0], top], [E[0], top]], false) };
+    }
+  }
+  if (v.length >= 3 && v.length <= 5) {
+    let err = 0; for (const p of pts) { let m = Infinity; for (let i = 0; i < v.length - 1; i++) m = Math.min(m, segDist(p[0], p[1], v[i][0], v[i][1], v[i + 1][0], v[i + 1][1])); err += m; }
+    if (err / pts.length < 0.035 * D) return { kind: 'polyline', pts: resample(v, false) };
+  }
+  return null;
+}
+
+/* Vorschaubilder mit Handschrift */
+async function fillThumbInk() {
+  for (const el of document.querySelectorAll('#lib svg[data-ink]')) {
+    const id = el.dataset.ink; let rec = inkCache.get(id);
+    if (!rec) { try { rec = await DB.get('ink:' + id); } catch (_) {} if (rec) inkCache.set(id, rec); }
+    if (!rec || !el.isConnected) continue;
+    el.innerHTML = rec.strokes.filter(s => bbox(s)[1] < 1093).map(strokeSVG).join('');
+  }
+}
 
 /* ---------- Tutor-Bedienung ---------- */
 const q = $('#q');
@@ -721,53 +1485,13 @@ $('#modes').onclick = e => {
   if (S.mode === 'abfragen' && !busy) ask('Bitte frag mich jetzt ab. Starte mit der ersten Frage.');
 };
 $('#ctxChk').onchange = e => { S.ctx = e.target.checked; save(); };
-$('#clearChat').onclick = () => { if (chatOf().length && confirm('Gesprächsverlauf für dieses Fach löschen?')) { S.chats[S.active] = []; S.chatTs[S.active] = Date.now(); save(); renderChat(); } };
+$('#clearChat').onclick = () => { if (chatOf().length && confirm('Gesprächsverlauf für diesen Ordner löschen?')) { S.chats[S.active] = []; S.chatTs[S.active] = Date.now(); save(); renderChat(); } };
 $('#follow').onclick = e => { const b = e.target.closest('[data-f]'); if (b) ask(FOLLOWUPS[+b.dataset.f][1]); };
 $('#msgs').onclick = async e => {
   const b = e.target.closest('button'); if (!b) return;
   const chat = chatOf();
   if (b.dataset.ins) insertIntoDoc(chat[+b.dataset.ins].content);
   if (b.dataset.copy) { try { await navigator.clipboard.writeText(chat[+b.dataset.copy].content); toast('Kopiert'); } catch (_) { toast('Kopieren nicht erlaubt'); } }
-};
-
-/* ---------- Fächer ---------- */
-let editSubId = null;
-$('#subjList').onclick = e => {
-  const edb = e.target.closest('[data-edit]');
-  if (edb) return openSub(edb.dataset.edit);
-  const r = e.target.closest('.subj'); if (!r) return;
-  if (busy) return toast('Bitte warten, bis die Antwort fertig ist.');
-  S.active = r.dataset.id; save(); document.body.classList.remove('side'); renderAll();
-};
-function openSub(id) {
-  editSubId = id;
-  const s = S.subjects.find(x => x.id === id) || { icon: '📘', name: '', prompt: '' };
-  $('#subDlgT').textContent = id ? 'Fach bearbeiten' : 'Neues Fach';
-  $('#subIc').value = s.icon; $('#subNm').value = s.name; $('#subPr').value = s.prompt || '';
-  $('#subDel').hidden = !id;
-  $('#subDlg').showModal();
-}
-$('#addSubj').onclick = () => openSub(null);
-$('#subSave').onclick = e => {
-  const name = $('#subNm').value.trim();
-  if (!name) { e.preventDefault(); return toast('Bitte einen Namen eingeben.'); }
-  const data = { icon: $('#subIc').value.trim() || '📘', name, prompt: $('#subPr').value.trim() };
-  data.updated = Date.now();
-  if (editSubId) Object.assign(S.subjects.find(x => x.id === editSubId), data);
-  else { const s = { id: uid(), ...data }; S.subjects.push(s); S.active = s.id; }
-  save(); renderAll();
-};
-$('#subDel').onclick = () => {
-  if (S.subjects.length < 2) return toast('Mindestens ein Fach muss bleiben.');
-  const s = S.subjects.find(x => x.id === editSubId);
-  if (!confirm(`Fach „${s.name}“ mit allen Notizen und Chats löschen?`)) return;
-  S.subjects = S.subjects.filter(x => x.id !== editSubId);
-  const now = Date.now(); S.deleted[editSubId] = now;
-  S.docs.filter(d => d.subjectId === editSubId).forEach(d => S.deleted[d.id] = now);
-  S.docs = S.docs.filter(d => d.subjectId !== editSubId); delete S.chatTs[editSubId];
-  delete S.chats[editSubId]; delete S.activeDoc[editSubId];
-  if (S.active === editSubId) S.active = S.subjects[0].id;
-  $('#subDlg').close(); save(); renderAll();
 };
 
 /* ---------- Einstellungen ---------- */
@@ -834,7 +1558,8 @@ $('#testBtn').onclick = async () => {
 $('#expBtn').onclick = async () => {
   const data = JSON.parse(JSON.stringify(S));
   if (confirm('API-Schlüssel aus dem Backup entfernen? (empfohlen)')) { data.settings.openai.key = ''; data.settings.anthropic.key = ''; data.settings.whisper.key = ''; }
-  data.transcripts = {};
+  data.transcripts = {}; data.inks = {};
+  for (const d of S.docs) { try { const k = inkCache.get(d.id) || await DB.get('ink:' + d.id); if (k) data.inks[d.id] = k; } catch (_) {} }
   for (const r of S.recs) { try { data.transcripts[r.id] = (await DB.get('tr:' + r.id)) || []; } catch (_) {} }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' }));
@@ -850,6 +1575,9 @@ $('#impFile').onchange = async e => {
     if (!confirm('Backup laden? Die aktuellen Daten werden ersetzt.')) return;
     const keys = { o: S.settings.openai.key, a: S.settings.anthropic.key, w: S.settings.whisper.key };
     const tr = d.transcripts || {}; delete d.transcripts;
+    const inks = d.inks || {}; delete d.inks;
+    for (const [id, k] of Object.entries(inks)) { await DB.set('ink:' + id, k); inkCache.set(id, k); }
+    INK = null;
     localStorage.setItem(KEY, JSON.stringify(d)); S = load();
     for (const [id, t] of Object.entries(tr)) await DB.set('tr:' + id, t);
     if (!S.settings.openai.key) S.settings.openai.key = keys.o;
@@ -902,7 +1630,7 @@ async function wake(on) {
 document.addEventListener('visibilitychange', () => { if (R.active && !document.hidden) wake(true); });
 
 function recDialogSetup() {
-  $('#rSubj').innerHTML = '<option value="auto">🤖 Automatisch erkennen</option>' + S.subjects.map(s => `<option value="${s.id}">${esc((s.icon || '') + ' ' + s.name)}</option>`).join('');
+  $('#rSubj').innerHTML = '<option value="auto">🤖 Automatisch erkennen</option>' + folderOptions([], S.nav.folder, false);
   if (!whisperReady() && SR) $('#rMethod').value = 'live';
   methodHint();
 }
@@ -920,7 +1648,7 @@ function recUI() {
   $('#rPause').textContent = R.paused ? '▶ Weiter' : '⏸ Pause';
   $('#rClose').textContent = on ? 'Ausblenden (läuft weiter)' : 'Schließen';
   const b = $('#recBtn'); b.classList.toggle('live', on);
-  b.textContent = on ? (R.paused ? '⏸ ' : '🔴 ') + fmtTime(elapsed()) : '🎙 Vorlesung';
+  b.innerHTML = on ? (R.paused ? '⏸ ' : '🔴 ') + fmtTime(elapsed()) : '🎙<span class="lbl"> Aufnahme</span>';
   $('#rTime').textContent = fmtTime(elapsed());
   $('#rState').textContent = !on ? '' : R.paused ? 'pausiert' : R.note || (R.meta.method === 'live' ? 'hört zu …' : `nimmt auf · Teil ${R.meta.chunks}`);
 }
@@ -1087,6 +1815,7 @@ async function processRec(id) {
     const sug = await suggestTarget(meta, text);
     const ch = await askAssign(sug);
     if (!ch) { setRecStatus(meta, 'transkribiert'); return; }
+    if (ch.subjectId === 'new') { const nf = { id: uid(), parentId: null, name: ch.newName || 'Neues Fach', color: FOLDER_COLORS[S.subjects.length % FOLDER_COLORS.length], prompt: '', created: Date.now(), updated: Date.now() }; S.subjects.push(nf); ch.subjectId = nf.id; }
     meta.title = ch.title; meta.subjectId = ch.subjectId;
     let block = '';
     if (ch.sum) {
@@ -1096,13 +1825,12 @@ async function processRec(id) {
     }
     if (ch.tr) block += `\n\n### Transkript\n${text}`;
     let doc = S.docs.find(d => d.id === ch.docId);
-    if (!doc) { doc = { id: uid(), subjectId: ch.subjectId, title: ch.title, content: '', updated: Date.now() }; S.docs.push(doc); }
+    if (!doc) { doc = { id: uid(), subjectId: ch.subjectId, title: ch.title, content: '', paper: S.lastPaper || 'lined', color: (folderById(ch.subjectId) || {}).color, created: Date.now(), updated: Date.now() }; S.docs.push(doc); }
     meta.docId = doc.id;
     if (block.trim()) { doc.content = (doc.content.trim() ? doc.content.replace(/\s+$/, '') + '\n\n---\n\n' : '') + block.trim() + '\n'; doc.updated = Date.now(); }
-    S.active = ch.subjectId; S.activeDoc[ch.subjectId] = doc.id;
     setRecStatus(meta, 'fertig');
-    renderAll(); if (narrow()) setTab('edit');
-    toast(`„${meta.title}“ → ${curSub().name} / ${doc.title}`);
+    nav({ doc: doc.id });
+    toast(`„${meta.title}“ → ${pathName(doc.subjectId)} / ${doc.title}`);
   } catch (e) {
     meta.err = e.message; setRecStatus(meta, 'Fehler: ' + e.message.slice(0, 90));
     toast('Verarbeitung fehlgeschlagen: ' + e.message);
@@ -1110,28 +1838,31 @@ async function processRec(id) {
 }
 
 async function suggestTarget(meta, text) {
-  const subs = meta.subjectId ? S.subjects.filter(s => s.id === meta.subjectId) : S.subjects;
-  const list = subs.length ? subs : S.subjects;
-  const date = new Date(meta.created).toLocaleDateString('de-DE');
-  const fallback = { subjectId: list[0].id, docId: 'new', title: meta.title || 'Vorlesung ' + date, reason: 'Keine automatische Zuordnung möglich – bitte selbst wählen.' };
-  const catalog = list.map(s => `Fach-ID ${s.id}: ${s.name}\n` + (docsOf(s.id).slice(0, 15).map(d => `  - Dokument-ID ${d.id}: „${d.title}“ – ${d.content.replace(/\s+/g, ' ').slice(0, 160)}`).join('\n') || '  (noch keine Dokumente)')).join('\n');
+  const date = new Date(meta.created).toLocaleDateString('de-DE'), title0 = meta.title || 'Vorlesung ' + date;
+  const pre = folderById(meta.subjectId);
+  const list = pre ? descendants(pre.id).map(folderById).filter(Boolean) : S.subjects;
+  const fallback = { subjectId: pre ? pre.id : (S.nav.folder || (S.subjects[0] || {}).id || 'new'), newName: 'Neues Fach', docId: 'new', title: title0, reason: 'Keine automatische Zuordnung möglich – bitte selbst wählen.' };
+  const catalog = list.map(f => `Ordner-ID ${f.id}: ${pathName(f.id)}\n` + (docsOf(f.id).slice(0, 15).map(d => `  - Dokument-ID ${d.id}: „${d.title}“ – ${d.content.replace(/\s+/g, ' ').slice(0, 160)}`).join('\n') || '  (noch keine Dokumente)')).join('\n');
   const mid = Math.floor(text.length / 2);
   const sample = text.slice(0, 3000) + (text.length > 6000 ? ' … ' + text.slice(mid, mid + 1500) : '');
   try {
     const out = await complete([
-      { role: 'system', content: 'Du ordnest Vorlesungsmitschnitte den richtigen Fächern und Dokumenten zu. Antworte ausschließlich mit einem JSON-Objekt.' },
-      { role: 'user', content: `Fächer und vorhandene Dokumente:\n${catalog}\n\nAusschnitt aus dem Transkript der Vorlesung:\n"""\n${sample}\n"""\n\nZu welchem Fach gehört die Vorlesung? Passt sie in ein vorhandenes Dokument (gleiche Vorlesungsreihe oder gleiches Kapitel) oder braucht sie ein neues? Antworte genau in diesem Format:\n{"subjectId":"…","docId":"… oder new","title":"kurzer Titel mit dem Thema der Vorlesung","reason":"ein Satz Begründung"}` }
+      { role: 'system', content: 'Du ordnest Vorlesungsmitschnitte den richtigen Ordnern (Fächern) und Dokumenten zu. Antworte ausschließlich mit einem JSON-Objekt.' },
+      { role: 'user', content: `Ordner und vorhandene Dokumente:\n${catalog || '(noch keine Ordner)'}\n\nAusschnitt aus dem Transkript der Vorlesung:\n"""\n${sample}\n"""\n\nZu welchem Ordner gehört die Vorlesung? Passt kein Ordner, schlage einen kurzen Namen für einen neuen Ordner (das Fach) vor. Passt sie in ein vorhandenes Dokument (gleiche Vorlesungsreihe oder gleiches Kapitel) oder braucht sie ein neues? Antworte genau in diesem Format:\n{"folderId":"… oder new","newFolder":"Fachname, nur falls new","docId":"… oder new","title":"kurzer Titel mit dem Thema der Vorlesung","reason":"ein Satz Begründung"}` }
     ]);
     const j = JSON.parse(out.match(/\{[\s\S]*\}/)[0]);
-    const sub = list.find(s => s.id === j.subjectId) || list.find(s => s.name.toLowerCase() === String(j.subjectId || '').toLowerCase()) || list[0];
-    const doc = S.docs.find(d => d.id === j.docId && d.subjectId === sub.id);
-    return { subjectId: sub.id, docId: doc ? doc.id : 'new', title: meta.title || String(j.title || fallback.title).slice(0, 80), reason: String(j.reason || '') };
+    const title = meta.title || String(j.title || title0).slice(0, 80), reason = String(j.reason || '');
+    let f = list.find(x => x.id === j.folderId) || list.find(x => x.name.toLowerCase() === String(j.folderId || j.newFolder || '').toLowerCase()) || pre;
+    if (!f) return { subjectId: 'new', newName: String(j.newFolder || 'Neues Fach').slice(0, 60), docId: 'new', title, reason };
+    const doc = S.docs.find(d => d.id === j.docId && d.subjectId === f.id);
+    return { subjectId: f.id, newName: '', docId: doc ? doc.id : 'new', title, reason };
   } catch (e) { return fallback; }
 }
 
 let asgResolve = null;
 function askAssign(sug) {
-  $('#asgSubj').innerHTML = S.subjects.map(s => `<option value="${s.id}" ${s.id === sug.subjectId ? 'selected' : ''}>${esc((s.icon || '') + ' ' + s.name)}</option>`).join('');
+  $('#asgSubj').innerHTML = folderOptions([], sug.subjectId, false) + `<option value="new" ${sug.subjectId === 'new' ? 'selected' : ''}>＋ Neuer Ordner …</option>`;
+  $('#asgNew').value = sug.newName || ''; $('#asgNewWrap').hidden = $('#asgSubj').value !== 'new';
   fillAsgDocs(sug.docId);
   $('#asgTitle').value = sug.title;
   $('#asgWhy').textContent = sug.reason ? '🤖 ' + sug.reason : '';
@@ -1142,14 +1873,14 @@ function askAssign(sug) {
 }
 function fillAsgDocs(sel) {
   const sid = $('#asgSubj').value;
-  $('#asgDoc').innerHTML = '<option value="new">＋ Neues Dokument</option>' + docsOf(sid).map(d => `<option value="${d.id}" ${d.id === sel ? 'selected' : ''}>${esc(d.title)}</option>`).join('');
+  $('#asgDoc').innerHTML = '<option value="new">＋ Neues Dokument</option>' + (sid === 'new' ? [] : docsOf(sid)).map(d => `<option value="${d.id}" ${d.id === sel ? 'selected' : ''}>${esc(d.title)}</option>`).join('');
 }
-$('#asgSubj').onchange = () => fillAsgDocs('new');
+$('#asgSubj').onchange = () => { $('#asgNewWrap').hidden = $('#asgSubj').value !== 'new'; fillAsgDocs('new'); };
 $('#asgDlg').addEventListener('close', () => {
   if (!asgResolve) return;
   const res = asgResolve; asgResolve = null;
   if ($('#asgDlg').returnValue !== 'ok') return res(null);
-  res({ subjectId: $('#asgSubj').value, docId: $('#asgDoc').value, title: $('#asgTitle').value.trim() || 'Vorlesung', sum: $('#asgSum').checked, tr: $('#asgTr').checked });
+  res({ subjectId: $('#asgSubj').value, newName: $('#asgNew').value.trim(), docId: $('#asgDoc').value, title: $('#asgTitle').value.trim() || 'Vorlesung', sum: $('#asgSum').checked, tr: $('#asgTr').checked });
 });
 
 function splitText(t, size) {
@@ -1164,7 +1895,7 @@ function splitText(t, size) {
   return out;
 }
 async function summarize(meta, text, prog) {
-  const sub = (S.subjects.find(s => s.id === meta.subjectId) || curSub()).name;
+  const sub = folderById(meta.subjectId) ? pathName(meta.subjectId) : 'unbekanntes Fach';
   const size = S.settings.provider === 'ollama' ? Math.max(5000, Math.round((+S.settings.ollama.ctx || 8192) * 1.4)) : 60000;
   let src = text, round = 0;
   while (src.length > size && round < 3) {
@@ -1188,18 +1919,7 @@ async function summarize(meta, text, prog) {
   return `## 🎙 Vorlesung: ${meta.title} (${date})\n\n${out.trim()}`;
 }
 
-/* Aufnahme-Liste & Details */
-function renderRecs() {
-  const el = $('#recList'); if (!el) return;
-  if (!S.recs.length) { el.innerHTML = '<p class="hint" style="padding:4px 14px">Noch keine Aufnahmen.</p>'; return; }
-  el.innerHTML = S.recs.slice(0, 40).map(r => {
-    const s = S.subjects.find(x => x.id === r.subjectId);
-    const ic = R.active && R.meta === r ? '🔴' : (s ? s.icon : '🎙');
-    return `<div class="subj rec" data-rec="${r.id}"><span class="ic">${esc(ic || '🎙')}</span><span class="nm">${esc(recName(r))}<small>${new Date(r.created).toLocaleDateString('de-DE')} · ${fmtTime(r.dur || 0)} · ${esc(r.status || '')}</small></span></div>`;
-  }).join('');
-}
-$('#recList').onclick = e => { const r = e.target.closest('[data-rec]'); if (r) { document.body.classList.remove('side'); openRec(r.dataset.rec); } };
-
+/* Aufnahme-Details */
 async function openRec(id) {
   const r = getRec(id); if (!r) return;
   if (R.active && R.meta === r) { recUI(); showLiveText(); return $('#recDlg').showModal(); }
@@ -1237,8 +1957,9 @@ $('#riTutor').onclick = async () => {
   const sum = await DB.get('sum:' + r.id);
   if (!sum) return toast('Erst „Zuordnen & zusammenfassen“ ausführen.');
   if (busy) return toast('Bitte warten, bis die aktuelle Antwort fertig ist.');
-  if (r.subjectId && getSubjectExists(r.subjectId)) S.active = r.subjectId;
-  S.mode = 'abfragen'; $('#riDlg').close(); renderAll(); setTab('tutor');
+  S.mode = 'abfragen'; $('#riDlg').close();
+  nav({ folder: getSubjectExists(r.subjectId) ? r.subjectId : null, doc: r.docId && S.docs.some(d => d.id === r.docId) ? r.docId : null });
+  openTutor();
   ask(`Hier ist die Zusammenfassung meiner Vorlesung „${recName(r)}“:\n\n${sum}\n\nHilf mir beim Nacharbeiten: Frag mich nacheinander zu den wichtigsten Punkten ab und kläre meine Rückfragen.`);
 };
 const getSubjectExists = id => S.subjects.some(s => s.id === id);
@@ -1322,10 +2043,11 @@ async function findSyncFile() {
   const j = await (await gfetch(`${DRIVE}?spaces=appDataFolder&q=${q}&orderBy=modifiedTime desc&fields=files(id,modifiedTime)`)).json();
   return (j.files || [])[0] || null;
 }
-async function uploadSync(fileId, body) {
+function uploadSync(fileId, body) { return uploadFile(fileId, SYNC_FILE, body); }
+async function uploadFile(fileId, name, body) {
   if (fileId) return (await gfetch(`${DRIVE_UP}/${fileId}?uploadType=media&fields=id,modifiedTime`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body })).json();
   const b = 'lt' + uid();
-  const multi = `--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify({ name: SYNC_FILE, parents: ['appDataFolder'] })}\r\n--${b}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${b}--`;
+  const multi = `--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify({ name, parents: ['appDataFolder'] })}\r\n--${b}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${b}--`;
   return (await gfetch(`${DRIVE_UP}?uploadType=multipart&fields=id,modifiedTime`, { method: 'POST', headers: { 'Content-Type': 'multipart/related; boundary=' + b }, body: multi })).json();
 }
 
@@ -1356,13 +2078,13 @@ async function mergeRemote(rem) {
   const alive = (id, ts) => !(del[id] && del[id] >= (ts || 0));
 
   S.subjects = lww(S.subjects, rem.subjects, 'updated').filter(s => alive(s.id, s.updated));
-  if (!S.subjects.length) S.subjects = fresh().subjects;
+  S.subjects.forEach(f => { if (f.parentId && !S.subjects.some(p => p.id === f.parentId)) f.parentId = null; });
 
   const base = S.sync.base, local = new Map(S.docs.map(d => [d.id, d])), out = [];
   for (const r of rem.docs || []) {
     const l = local.get(r.id); local.delete(r.id);
     if (!l) { out.push(r); continue; }
-    if (l.content === r.content && l.title === r.title) { out.push((l.updated || 0) >= (r.updated || 0) ? l : r); continue; }
+    if (l.content === r.content && l.title === r.title && (l.inkUpd || 0) === (r.inkUpd || 0)) { out.push((l.updated || 0) >= (r.updated || 0) ? l : r); continue; }
     const b = base[r.id] != null ? base[r.id] : -1;
     const lCh = (l.updated || 0) > b, rCh = (r.updated || 0) > b;
     if (lCh && rCh && l.content.trim() && r.content.trim()) {
@@ -1373,7 +2095,8 @@ async function mergeRemote(rem) {
     } else out.push(!lCh ? r : !rCh ? l : ((l.updated || 0) >= (r.updated || 0) ? l : r));
   }
   out.push(...local.values());
-  S.docs = out.filter(d => alive(d.id, d.updated) && S.subjects.some(s => s.id === d.subjectId));
+  S.docs = out.filter(d => alive(d.id, d.updated));
+  S.docs.forEach(d => { if (d.subjectId && !S.subjects.some(s => s.id === d.subjectId)) d.subjectId = null; });
 
   const rc = rem.chats || {}, rt = rem.chatTs || {};
   for (const sid of Object.keys(rt)) if ((rt[sid] || 0) > (S.chatTs[sid] || 0) && Array.isArray(rc[sid])) { S.chats[sid] = rc[sid]; S.chatTs[sid] = rt[sid]; }
@@ -1389,7 +2112,7 @@ async function mergeRemote(rem) {
   }
   if (R.active && R.meta && !recs.includes(R.meta)) recs.push(R.meta);
   S.recs = recs.sort((a, b) => b.created - a.created);
-  if (!S.subjects.find(s => s.id === S.active)) S.active = S.subjects[0].id;
+  if (S.active !== '_root' && !folderById(S.active)) S.active = '_root';
   return conflicts;
 }
 
@@ -1416,6 +2139,7 @@ async function syncNow(interactive) {
       S.docs.forEach(d => S.sync.base[d.id] = d.updated || 0);
     }
     if (rev === r0) S.sync.dirty = false;
+    await syncInk();
     S.sync.enabled = true; S.sync.last = Date.now();
     save(true, true);
     if (merged) { renderAll(); if (conflicts) toast(`⚠️ ${conflicts} Dokument(e) wurden auf zwei Geräten geändert – beide Fassungen behalten.`); }
@@ -1423,6 +2147,31 @@ async function syncNow(interactive) {
     syncErr = e.auth ? 'auth' : e.message;
     if (interactive && !e.auth) toast('Sync fehlgeschlagen: ' + e.message);
   } finally { syncing = false; renderSync(); }
+}
+async function syncInk() {
+  const q = encodeURIComponent("name contains 'ink-'");
+  const files = ((await (await gfetch(`${DRIVE}?spaces=appDataFolder&q=${q}&pageSize=1000&fields=files(id,name)`)).json()).files) || [];
+  const byFile = new Map(files.map(f => [f.name, f]));
+  let changed = false;
+  for (const d of S.docs) {
+    const name = 'ink-' + d.id + '.json';
+    let local = inkCache.get(d.id); if (!local) { try { local = await DB.get('ink:' + d.id); } catch (_) {} }
+    const lu = local ? local.upd || 0 : 0;
+    if ((d.inkUpd || 0) > lu) {
+      const f = byFile.get(name); if (!f) continue;
+      const rec = await (await gfetch(`${DRIVE}/${f.id}?alt=media`)).json();
+      if ((rec.upd || 0) > lu) {
+        await DB.set('ink:' + d.id, rec); inkCache.set(d.id, rec); S.sync.inkBase[d.id] = rec.upd; changed = true;
+        if (INK && INK.docId === d.id && !drawing) { INK = null; loadInk(d.id); }
+      }
+    } else if (local && lu > (S.sync.inkBase[d.id] || 0)) {
+      const f = byFile.get(name);
+      await uploadFile(f && f.id, name, JSON.stringify(local));
+      S.sync.inkBase[d.id] = lu;
+      if ((d.inkUpd || 0) < lu) { d.inkUpd = lu; d.inkN = local.strokes.length; S.sync.dirty = true; rev++; scheduleSync(); }
+    }
+  }
+  if (changed && !curDoc()) renderLibrary();
 }
 function scheduleSync() { clearTimeout(syncT); if (S.sync.enabled && tokenValid()) syncT = setTimeout(() => syncNow(false), 15000); }
 setInterval(() => { if (S.sync.enabled && tokenValid() && !document.hidden) syncNow(false); }, 60000);
@@ -1467,16 +2216,39 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.
 }
 
 /* ---------- Layout ---------- */
-$('#menuBtn').onclick = () => document.body.classList.toggle('side');
-document.querySelector('main').addEventListener('click', () => document.body.classList.remove('side'));
-document.querySelector('.tabs').onclick = e => { const b = e.target.closest('[data-tab]'); if (b) setTab(b.dataset.tab); };
+$('#backBtn').onclick = () => {
+  const d = curDoc();
+  if (d) return nav({ folder: d.subjectId || null });
+  const f = folderById(S.nav.folder); nav({ folder: f ? f.parentId || null : null });
+};
+$('#tutorBtn').onclick = () => document.body.classList.contains('tutor-open') ? closeTutor() : openTutor();
+$('#tutorClose').onclick = closeTutor;
+$('#scrim').onclick = closeTutor;
+$('#moreBtn').onclick = () => showMenu($('#moreBtn'), [
+  { label: '🤖 KI-Einstellungen', fn: openSettings },
+  { label: '☁️ Google-Drive-Sync', fn: openSyncDlg },
+  '-',
+  { label: '⬇️ Backup speichern', fn: () => $('#expBtn').click() },
+  { label: '⬆️ Backup laden', fn: () => $('#impBtn').click() },
+  ...(installEvt ? [{ label: '💻 Als App installieren', fn: () => $('#installBtn').click() }] : [])
+]);
+document.addEventListener('keydown', e => {
+  if (document.querySelector('dialog[open]')) return;
+  if (e.key === 'Escape') { hideMenu(); if (document.body.classList.contains('tutor-open')) closeTutor(); return; }
+  if (!curDoc() || document.activeElement === ed || document.activeElement === q || document.activeElement === $('#search')) return;
+  const k = e.key.toLowerCase();
+  if ((e.ctrlKey || e.metaKey) && k === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+  else if ((e.ctrlKey || e.metaKey) && (k === 'y' || (k === 'z' && e.shiftKey))) { e.preventDefault(); redo(); }
+  else if (!e.ctrlKey && !e.metaKey && !e.altKey) { const t = { t: 'text', p: 'pen', h: 'hl', e: 'eraser' }[k]; if (t) setTool(t); }
+});
 
-setTab('edit');
-renderAll();
+try { history.replaceState({ ...S.nav }, ''); } catch (_) {}
+render();
 renderSync();
+if (migratedV2) save();
 if (S.sync.enabled && clientId()) setTimeout(() => { if (!tokenValid()) toast('☁️ Tippe irgendwo hin, um mit Google Drive zu synchronisieren.'); }, 1200);
-window.addEventListener('load', () => { if (window.katex) { renderChat(); if (!$('#preview').hidden) $('#preview').innerHTML = md(curDoc().content); } });
-if (!S.settings.ollama.model && S.settings.provider === 'ollama') setTimeout(() => toast('Tipp: Oben rechts auf 🤖 tippen und die KI einrichten.'), 800);
+window.addEventListener('load', () => { if (window.katex) { renderChat(); if (curDoc() && !$('#preview').hidden) $('#preview').innerHTML = md(curDoc().content); } });
+if (!S.settings.ollama.model && S.settings.provider === 'ollama') setTimeout(() => toast('Tipp: Oben rechts unter ••• → KI-Einstellungen die KI einrichten.'), 900);
 </script>
 </body>
 </html>

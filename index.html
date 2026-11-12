@@ -97,6 +97,7 @@ body[data-view=lib] .v-doc,body[data-view=doc] .v-lib{display:none!important}
 #canvas{flex:1;overflow:auto;background:var(--canvas);padding:24px 12px 140px;overscroll-behavior:contain}
 #page{width:820px;margin:0 auto;position:relative;border-radius:4px;box-shadow:var(--shadow);--lh:32px;padding:64px 60px 64px 72px}
 body.draw #page{touch-action:none;cursor:crosshair}
+#page{color:var(--text)}
 #editor{display:block;width:100%;border:0;border-radius:0;resize:none;background:transparent;outline:none;padding:0;font-size:18px;line-height:var(--lh);overflow:hidden;color:var(--text);min-height:var(--lh);position:relative;z-index:1}
 body.draw #editor{pointer-events:none;-webkit-user-select:none;user-select:none}
 #preview{font-size:17px;line-height:1.65;position:relative;z-index:1}
@@ -227,7 +228,7 @@ dialog summary{cursor:pointer;color:var(--acc);font-size:14px}
         <button class="tool" id="redoBtn" title="Wiederholen"><svg viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
         <button class="tool" id="penSetBtn" data-pop title="Stift-Einstellungen: Strichstabilisierung, Stifttyp, Druck"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
         <span class="sep"></span>
-        <button class="chip" id="paperBtn">📄 Papier</button>
+        <button class="chip" id="paperBtn" data-pop>📄 Papier</button>
         <button class="chip" id="prevBtn">👁 Vorschau</button>
         <span class="sep"></span>
         <span class="aibar">
@@ -361,6 +362,7 @@ dialog summary{cursor:pointer;color:var(--acc);font-size:14px}
     <h2 id="dDlgT">Neues Dokument</h2>
     <label>Titel <input type="text" id="dName" autocomplete="off"></label>
     <div><div class="lbl-s">Papier</div><div class="papers" id="dPaper"></div></div>
+    <div><div class="lbl-s">Papierfarbe</div><div class="swatches" id="dPaperColor"></div></div>
     <div><div class="lbl-s">Farbe</div><div class="swatches" id="dColors"></div></div>
     <div class="row"><button value="cancel">Abbrechen</button><button class="pri" id="dSave" value="ok">Erstellen</button></div>
   </form>
@@ -469,6 +471,20 @@ const uid = () => Math.random().toString(36).slice(2, 10);
 
 const FOLDER_COLORS = ['#4f8cff', '#34c759', '#ff9f0a', '#ff453a', '#bf5af2', '#32c3e6', '#ffcc00', '#ff6482', '#a2845e', '#8e8e93'];
 const PAPERS = { blank: 'Blanko', lined: 'Liniert', grid: 'Kariert', dots: 'Punkte' };
+const PAPER_COLORS = {
+  auto: ['Automatisch', ''], white: ['Weiß', '#ffffff'], cream: ['Creme', '#fbf5e3'], yellow: ['Gelb', '#fff4b8'],
+  green: ['Mint', '#e6f4ea'], blue: ['Hellblau', '#e6effa'], pink: ['Rosa', '#fbe9ef'], gray: ['Grau', '#ececef'], dark: ['Dunkel', '#1f2228'], black: ['Schwarz', '#000000']
+};
+function paperVars(pc) {
+  const c = PAPER_COLORS[pc]; if (!c || !c[1]) return '';
+  const dark = pc === 'dark' || pc === 'black';
+  return dark
+    ? `--paper:${c[1]};--text:#ececf1;--ink:#f2f2f7;--rule:#39455e;--rule2:#2f3540;--dot:#4f586c;--blend:screen;`
+    : `--paper:${c[1]};--text:#1c1c1e;--ink:#1c1c1e;--rule:#c6d4ee;--rule2:#d8dee9;--dot:#aeb8cc;--blend:multiply;`;
+}
+function paperColorDots(cur) {
+  return Object.entries(PAPER_COLORS).map(([k, [n, c]]) => `<button type="button" class="sw pcol ${k === (cur || 'auto') ? 'on' : ''}" data-pc="${k}" title="${n}" style="background:${c || 'linear-gradient(135deg,#fff 50%,#1f1f22 50%)'}" aria-label="${n}"></button>`).join('');
+}
 const ROOT = { id: '_root', name: 'Allgemein', prompt: '' };
 
 const MODES = {
@@ -846,7 +862,7 @@ function folderTile(f) {
   return `<div class="tile" data-folder="${f.id}"><div class="art folder-art">${folderSVG(f.color || FOLDER_COLORS[0], n)}</div><div class="nm"><span>${esc(f.name)}</span><button class="chev" data-menu="folder:${f.id}" aria-label="Optionen">⌄</button></div><div class="sub">${n} ${n === 1 ? 'Element' : 'Elemente'}</div></div>`;
 }
 function docTile(d, showPath) {
-  return `<div class="tile" data-doc="${d.id}"><div class="art"><div class="thumb paper p-${d.paper || 'lined'}" style="--cover:${coverOf(d)}"><p>${esc(previewText(d.content))}</p>${d.inkN ? `<svg data-ink="${d.id}" viewBox="0 0 820 1093" preserveAspectRatio="xMinYMin slice"></svg>` : ''}</div></div><div class="nm"><span>${esc(d.title || 'Unbenannt')}</span><button class="chev" data-menu="doc:${d.id}" aria-label="Optionen">⌄</button></div><div class="sub">${showPath ? esc(pathName(d.subjectId)) + ' · ' : ''}${fmtDate(d.updated)}</div></div>`;
+  return `<div class="tile" data-doc="${d.id}"><div class="art"><div class="thumb paper p-${d.paper || 'lined'}" style="--cover:${coverOf(d)};${paperVars(d.paperColor)}"><p>${esc(previewText(d.content))}</p>${d.inkN ? `<svg data-ink="${d.id}" viewBox="0 0 820 1093" preserveAspectRatio="xMinYMin slice"></svg>` : ''}</div></div><div class="nm"><span>${esc(d.title || 'Unbenannt')}</span><button class="chev" data-menu="doc:${d.id}" aria-label="Optionen">⌄</button></div><div class="sub">${showPath ? esc(pathName(d.subjectId)) + ' · ' : ''}${fmtDate(d.updated)}</div></div>`;
 }
 function recRow(r) {
   const live = R.active && R.meta === r;
@@ -996,15 +1012,18 @@ function deleteFolder(id) {
 }
 
 /* ---------- Dokumente ---------- */
-let editDocId = null, dPaper = 'lined', dColor = null;
+let editDocId = null, dPaper = 'lined', dPaperColor = 'auto', dColor = null;
 function openDocDlg(id) {
   editDocId = id || null;
   const d = id ? S.docs.find(x => x.id === id) : null;
   $('#dDlgT').textContent = d ? 'Dokument bearbeiten' : 'Neues Dokument';
   $('#dName').value = d ? d.title : 'Mitschrift ' + new Date().toLocaleDateString('de-DE');
   dPaper = d ? d.paper || 'lined' : S.lastPaper || 'lined';
+  dPaperColor = d ? d.paperColor || 'auto' : S.lastPaperColor || 'auto';
+  $('#dPaperColor').innerHTML = paperColorDots(dPaperColor);
+  $('#dPaperColor').onclick = e => { const b = e.target.closest('[data-pc]'); if (!b) return; dPaperColor = b.dataset.pc; $('#dPaperColor').querySelectorAll('.sw').forEach(x => x.classList.toggle('on', x === b)); $('#dPaper').querySelectorAll('.pp').forEach(x => x.style.cssText = paperVars(dPaperColor)); };
   dColor = d ? coverOf(d) : (folderById(S.nav.folder) || {}).color || FOLDER_COLORS[0];
-  $('#dPaper').innerHTML = Object.entries(PAPERS).map(([k, n]) => `<button type="button" class="pp paper p-${k} ${k === dPaper ? 'on' : ''}" data-p="${k}">${n}</button>`).join('');
+  $('#dPaper').innerHTML = Object.entries(PAPERS).map(([k, n]) => `<button type="button" class="pp paper p-${k} ${k === dPaper ? 'on' : ''}" data-p="${k}" style="${paperVars(dPaperColor)}">${n}</button>`).join('');
   $('#dPaper').onclick = e => { const b = e.target.closest('[data-p]'); if (!b) return; dPaper = b.dataset.p; $('#dPaper').querySelectorAll('.pp').forEach(x => x.classList.toggle('on', x === b)); };
   swatches($('#dColors'), dColor, c => dColor = c);
   $('#dSave').textContent = d ? 'Speichern' : 'Erstellen';
@@ -1013,11 +1032,11 @@ function openDocDlg(id) {
 $('#dSave').onclick = () => {
   const title = $('#dName').value.trim() || 'Unbenannt';
   if (editDocId) {
-    Object.assign(S.docs.find(x => x.id === editDocId), { title, paper: dPaper, color: dColor, updated: Date.now() });
+    Object.assign(S.docs.find(x => x.id === editDocId), { title, paper: dPaper, paperColor: dPaperColor, color: dColor, updated: Date.now() });
     save(); render();
   } else {
-    const d = { id: uid(), subjectId: S.nav.folder || null, title, content: '', paper: dPaper, color: dColor, created: Date.now(), updated: Date.now() };
-    S.docs.push(d); S.lastPaper = dPaper; save(); nav({ doc: d.id });
+    const d = { id: uid(), subjectId: S.nav.folder || null, title, content: '', paper: dPaper, paperColor: dPaperColor, color: dColor, created: Date.now(), updated: Date.now() };
+    S.docs.push(d); S.lastPaper = dPaper; S.lastPaperColor = dPaperColor; save(); nav({ doc: d.id });
   }
 };
 async function duplicateDoc(id) {
@@ -1070,6 +1089,7 @@ window.addEventListener('resize', fitZoom);
 function renderEditor() {
   const d = curDoc();
   page.className = 'paper p-' + (d.paper || 'lined');
+  page.style.cssText = paperVars(d.paperColor) + (page.style.zoom ? `zoom:${page.style.zoom};` : '') + (page.style.minHeight ? `min-height:${page.style.minHeight};` : '');
   if (ed.dataset.doc !== d.id) {
     ed.value = d.content; ed.dataset.doc = d.id; lastCaret = d.content.length;
     setPreview(false, true); canvasEl.scrollTop = 0; INK = null; inkEl.textContent = '';
@@ -1145,7 +1165,14 @@ function setPreview(on, quiet) {
 $('#prevBtn').onclick = () => setPreview($('#preview').hidden);
 $('#paperBtn').onclick = () => {
   const d = curDoc(); if (!d) return;
-  showMenu($('#paperBtn'), Object.entries(PAPERS).map(([k, n]) => ({ label: (d.paper === k ? '✓ ' : ' ') + n, fn: () => { d.paper = k; d.updated = Date.now(); S.lastPaper = k; save(); renderEditor(); } })));
+  showPop($('#paperBtn'), `<div class="pop-h">Papier</div><div class="seg">${Object.entries(PAPERS).map(([k, n]) => `<button data-pt="${k}" class="${(d.paper || 'lined') === k ? 'on' : ''}">${n}</button>`).join('')}</div><div class="lbl-s">Papierfarbe</div><div class="swatches">${paperColorDots(d.paperColor)}</div>`, (e, kind) => {
+    if (kind !== 'click') return;
+    const t = e.target.closest('[data-pt]'), c = e.target.closest('[data-pc]');
+    if (t) { d.paper = t.dataset.pt; S.lastPaper = d.paper; t.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === t)); }
+    else if (c) { d.paperColor = c.dataset.pc; S.lastPaperColor = d.paperColor; c.parentElement.querySelectorAll('.sw').forEach(b => b.classList.toggle('on', b === c)); }
+    else return;
+    d.updated = Date.now(); save(); renderEditor();
+  });
 };
 $('#docTitle').onclick = () => { const d = curDoc(); if (d) openDocDlg(d.id); };
 $('#docMore').onclick = () => {

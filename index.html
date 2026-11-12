@@ -102,6 +102,30 @@ body.draw #editor{pointer-events:none;-webkit-user-select:none;user-select:none}
 #preview{font-size:17px;line-height:1.65;position:relative;z-index:1}
 #ink{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:2}
 #ink .hl{mix-blend-mode:var(--blend)}
+#ink .sel{filter:drop-shadow(0 0 2.5px var(--acc))}
+#ink .sel-box{fill:rgba(47,107,255,.05);stroke:var(--acc);stroke-width:1.5;stroke-dasharray:6 5}
+#ink .sel-h{fill:var(--panel);stroke:var(--acc);stroke-width:2}
+#ink .lasso{fill:rgba(47,107,255,.06);stroke:var(--acc);stroke-width:1.6;stroke-dasharray:5 4}
+#ink .laser{fill:none;stroke:#ff2d2d;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px #ff2d2d)}
+#selBar{position:fixed;z-index:40;display:flex;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.2);padding:4px}
+#selBar button{background:none;border:0;border-radius:8px;font-size:13px;min-height:36px;padding:4px 9px;white-space:nowrap}
+#selBar button:hover{background:var(--panel2)}
+#pop{position:fixed;z-index:60;width:min(340px,92vw);max-height:76dvh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:0 14px 44px rgba(0,0,0,.22);padding:14px;display:none}
+#pop.on{display:grid;gap:10px}
+.pop-h{font-weight:700;font-size:16px}
+.pop-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px;color:var(--text)}
+.pop-row input[type=checkbox]{width:20px;height:20px;accent-color:var(--acc)}
+#pop input[type=range]{width:100%;accent-color:var(--acc)}
+.seg{display:flex;background:var(--panel2);border-radius:10px;padding:2px}
+.seg button{flex:1;border:0;background:none;border-radius:8px;font-size:13px;min-height:34px;padding:4px}
+.seg button.on{background:var(--panel);box-shadow:0 1px 3px rgba(0,0,0,.15);font-weight:600}
+.sym-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sym{position:relative;border:1px solid var(--line);border-radius:10px;padding:6px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;background:var(--paper)}
+.sym svg{width:100%;height:54px}
+.sym span{font-size:11px;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sym-x{position:absolute;top:2px;right:2px;min-height:22px;min-width:22px;padding:0;border:0;background:none;color:var(--muted);font-size:12px}
+.cplus{display:inline-flex;align-items:center;justify-content:center;font-size:15px;color:var(--muted);background:var(--panel2);cursor:pointer;position:relative;overflow:hidden}
+.cplus input{position:absolute;inset:0;opacity:0;cursor:pointer}
 .pstatus{max-width:820px;margin:12px auto 0;font-size:12px;color:var(--muted);text-align:right}
 /* Tutor */
 #tutor{width:420px;flex:0 0 420px;display:none;flex-direction:column;background:var(--panel);border-left:1px solid var(--line);min-height:0}
@@ -189,13 +213,19 @@ dialog summary{cursor:pointer;color:var(--acc);font-size:14px}
 
     <section id="editorView" class="v-doc">
       <div class="edbar">
-        <button class="tool" data-tool="text" title="Tippen (Tastatur)"><svg viewBox="0 0 24 24"><path d="M5 6.5V5h14v1.5M12 5v14M9 19h6"/></svg></button>
-        <button class="tool" data-tool="pen" title="Stift"><svg viewBox="0 0 24 24"><path d="M4 20l1.2-4.4L16.4 4.4a2 2 0 0 1 2.8 0l.4.4a2 2 0 0 1 0 2.8L8.4 18.8z"/><path d="M14.5 6.3l3.2 3.2"/></svg></button>
-        <button class="tool" data-tool="hl" title="Textmarker"><svg viewBox="0 0 24 24"><path d="M9.5 14.5L6 19h5l2.2-2.6"/><path d="M9.5 14.5l7.8-10.2 3.8 2.9-7.9 10.2z"/></svg></button>
-        <button class="tool" data-tool="eraser" title="Radierer (S Pen: Seitentaste gedrückt halten)"><svg viewBox="0 0 24 24"><path d="M8.5 20H20"/><path d="M5.4 13.6l7.2-7.2a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L11.2 20H8.6l-3.2-3.2a2 2 0 0 1 0-3.2z"/><path d="M9 10l5 5"/></svg></button>
+        <button class="tool" data-tool="text" title="Tippen (Tastatur) – T"><svg viewBox="0 0 24 24"><path d="M5 6.5V5h14v1.5M12 5v14M9 19h6"/></svg></button>
+        <button class="tool" data-tool="pen" title="Stift – P (nochmal tippen: Einstellungen)"><svg viewBox="0 0 24 24"><path d="M4 20l1.2-4.4L16.4 4.4a2 2 0 0 1 2.8 0l.4.4a2 2 0 0 1 0 2.8L8.4 18.8z"/><path d="M14.5 6.3l3.2 3.2"/></svg></button>
+        <button class="tool" data-tool="hl" title="Textmarker – H"><svg viewBox="0 0 24 24"><path d="M9.5 14.5L6 19h5l2.2-2.6"/><path d="M9.5 14.5l7.8-10.2 3.8 2.9-7.9 10.2z"/></svg></button>
+        <button class="tool" data-tool="eraser" title="Radierer – E (S Pen: Seitentaste gedrückt halten)"><svg viewBox="0 0 24 24"><path d="M8.5 20H20"/><path d="M5.4 13.6l7.2-7.2a2 2 0 0 1 2.8 0l3.2 3.2a2 2 0 0 1 0 2.8L11.2 20H8.6l-3.2-3.2a2 2 0 0 1 0-3.2z"/><path d="M9 10l5 5"/></svg></button>
+        <button class="tool" data-tool="shape" title="Formen – S"><svg viewBox="0 0 24 24"><circle cx="8.5" cy="8.5" r="4.5"/><rect x="11" y="11" width="9" height="9" rx="1"/></svg></button>
+        <button class="tool" data-tool="lasso" title="Lasso – L: markieren, verschieben, kopieren"><svg viewBox="0 0 24 24"><path stroke-dasharray="2.6 2.4" d="M12 4c5 0 8.5 2.3 8.5 5.5S16.6 15 12 15s-8.5-2.3-8.5-5.5S7 4 12 4z"/><path d="M7.5 14.2c-1.6 1.4-1.4 3.6.6 4.3 1.4.5 2.4-.6 1.9-1.8"/></svg></button>
+        <button class="tool" id="symBtn" data-pop title="Symbole einfügen &amp; speichern"><svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg></button>
+        <button class="tool" id="imgBtn" title="Bild einfügen"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-4.5 3.5 3 3-2.5 4.5 4"/></svg></button>
+        <button class="tool" data-tool="laser" title="Laserpointer"><svg viewBox="0 0 24 24"><circle cx="7" cy="17" r="2.5"/><path d="M9 15l9-9M14 5.5l1 2.5M18.5 10l-2.5-1M17.5 4.5l1.5 1.5"/></svg></button>
         <span class="opts" id="toolOpts"></span>
         <button class="tool" id="undoBtn" title="Rückgängig"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
         <button class="tool" id="redoBtn" title="Wiederholen"><svg viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
+        <button class="tool" id="penSetBtn" data-pop title="Stift-Einstellungen: Strichstabilisierung, Stifttyp, Druck"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
         <span class="sep"></span>
         <button class="chip" id="paperBtn">📄 Papier</button>
         <button class="chip" id="prevBtn">👁 Vorschau</button>
@@ -244,10 +274,15 @@ dialog summary{cursor:pointer;color:var(--acc);font-size:14px}
 </div>
 <div id="scrim"></div>
 <div id="menu" role="menu"></div>
+<div id="pop"></div>
+<div id="selBar" hidden>
+  <button data-sa="cut">✂️ Ausschneiden</button><button data-sa="copy">📋 Kopieren</button><button data-sa="dup">⧉ Duplizieren</button><button data-sa="color" data-pop>🎨 Farbe</button><button data-sa="sym">⭐ Als Symbol</button><button data-sa="del" class="danger">🗑</button>
+</div>
 <div hidden>
   <button id="setBtn"></button><button id="syncSetBtn"></button><button id="installBtn"></button>
   <button id="expBtn"></button><button id="impBtn"></button>
   <input type="file" id="impFile" accept=".json,application/json">
+  <input type="file" id="imgFile" accept="image/*">
 </div>
 
 <!-- Einstellungen -->
@@ -475,7 +510,8 @@ function fresh() {
     sync: { clientId: '', device: '', enabled: false, auto: true, dirty: false, remoteMod: '', last: 0, base: {}, inkBase: {} },
     active: '_root', activeDoc: {}, mode: 'erklaeren', ctx: true, v2: true,
     nav: { folder: null, doc: null }, sort: 'date',
-    tool: 'text', lastDraw: 'pen', pen: { c: 'auto', w: 1 }, hl: { c: '#ffe14d', w: 0 }, fingerDraw: false, lastPaper: 'lined'
+    tool: 'text', lastDraw: 'pen', pen: { c: 'auto', w: 1 }, hl: { c: '#ffe14d', w: 0 }, fingerDraw: false, lastPaper: 'lined',
+    ink: { stab: 3, pressure: true, holdShape: true, hlStraight: false, penStyle: 'fountain', eraseMode: 'stroke', eraseSize: 1, eraseHlOnly: false, customColors: [] }, symbols: [], zoomUser: 1
   };
 }
 let migratedV2 = false;
@@ -507,7 +543,8 @@ function load() {
       s.sync = Object.assign(fresh().sync, s.sync || {}); s.sync.base = s.sync.base || {}; s.sync.inkBase = s.sync.inkBase || {};
       s.recs = (s.recs || []).map(r => r.status === 'nimmt auf' ? Object.assign(r, { status: 'unterbrochen' }) : r); s.chats = s.chats || {}; s.activeDoc = s.activeDoc || {};
       s.mode = MODES[s.mode] ? s.mode : 'erklaeren';
-      for (const k of ['nav', 'sort', 'tool', 'lastDraw', 'pen', 'hl', 'fingerDraw', 'lastPaper']) if (s[k] === undefined) s[k] = f[k];
+      for (const k of ['nav', 'sort', 'tool', 'lastDraw', 'pen', 'hl', 'fingerDraw', 'lastPaper', 'symbols', 'zoomUser']) if (s[k] === undefined) s[k] = f[k];
+      s.ink = Object.assign(f.ink, s.ink || {});
       if (!s.v2) migrateV2(s);
       return s;
     }
@@ -1026,7 +1063,7 @@ let lastCaret = 0, curH = 1160, ZOOM = 1;
 function fitZoom() {
   if (document.body.dataset.view !== 'doc') return;
   const avail = canvasEl.clientWidth - 24;
-  ZOOM = Math.min(1, Math.max(0.3, avail / PW));
+  ZOOM = Math.min(1, Math.max(0.3, avail / PW)) * (S.zoomUser || 1);
   page.style.zoom = ZOOM;
 }
 window.addEventListener('resize', fitZoom);
@@ -1125,22 +1162,35 @@ $('#docMore').onclick = () => {
   ]);
 };
 
-/* ---------- Handschrift: Stift, Textmarker, Radierer ---------- */
+/* ---------- Handschrift: Werkzeuge wie in GoodNotes ---------- */
 const NS = 'http://www.w3.org/2000/svg';
 const PEN_COLORS = ['auto', '#2f6bff', '#e5484d', '#2da44e', '#f08c00', '#8e44ad'];
 const HL_COLORS = ['#ffe14d', '#7ef29a', '#ff8fc7', '#8fd3ff'];
-const PEN_W = [1.1, 1.9, 3.2], HL_W = [16, 26], ERASE_R = 11;
+const PEN_W = [1.1, 1.9, 3.2], HL_W = [16, 26], ERASE_SIZES = [6, 11, 20];
+const PEN_STYLES = { fountain: 'Füller', ball: 'Kugelschreiber', brush: 'Pinsel' };
+const DRAW_TOOLS = ['pen', 'hl', 'eraser', 'shape', 'lasso', 'laser'];
 let INK = null, undoS = [], redoS = [];
 const inkCache = new Map(), elOf = new WeakMap(), boxOf = new WeakMap();
 const r1 = v => Math.round(v * 10) / 10;
-const radius = (w, p) => w * (0.35 + 0.9 * Math.min(1, Math.max(0, p)));
+const clamp01 = v => Math.min(1, Math.max(0, v));
+function rad(s, p) {
+  const st = s.ps || 'fountain';
+  if (st === 'ball') return s.w * 0.8;
+  if (st === 'brush') return s.w * (0.12 + 1.55 * clamp01(p));
+  return s.w * (0.35 + 0.9 * clamp01(p));
+}
+const clone = o => JSON.parse(JSON.stringify(o));
 function bbox(s) {
   let b = boxOf.get(s); if (b) return b;
-  const a = s.p; b = [Infinity, Infinity, -Infinity, -Infinity];
-  for (let i = 0; i < a.length; i += 3) { b[0] = Math.min(b[0], a[i]); b[1] = Math.min(b[1], a[i + 1]); b[2] = Math.max(b[2], a[i]); b[3] = Math.max(b[3], a[i + 1]); }
-  const pad = s.w; b = [b[0] - pad, b[1] - pad, b[2] + pad, b[3] + pad];
+  if (s.t === 'img') b = [s.x, s.y, s.x + s.w, s.y + s.h];
+  else {
+    const a = s.p; b = [Infinity, Infinity, -Infinity, -Infinity];
+    for (let i = 0; i < a.length; i += 3) { b[0] = Math.min(b[0], a[i]); b[1] = Math.min(b[1], a[i + 1]); b[2] = Math.max(b[2], a[i]); b[3] = Math.max(b[3], a[i + 1]); }
+    const pad = s.t === 'hl' ? s.w / 2 : s.w * 1.6; b = [b[0] - pad, b[1] - pad, b[2] + pad, b[3] + pad];
+  }
   boxOf.set(s, b); return b;
 }
+function unionBox(items) { const b = [Infinity, Infinity, -Infinity, -Infinity]; for (const s of items) { const q = bbox(s); b[0] = Math.min(b[0], q[0]); b[1] = Math.min(b[1], q[1]); b[2] = Math.max(b[2], q[2]); b[3] = Math.max(b[3], q[3]); } return b; }
 function smooth(pts) {
   let s = '';
   for (let i = 1; i < pts.length - 1; i++) s += `Q${r1(pts[i][0])} ${r1(pts[i][1])} ${r1((pts[i][0] + pts[i + 1][0]) / 2)} ${r1((pts[i][1] + pts[i + 1][1]) / 2)}`;
@@ -1148,17 +1198,18 @@ function smooth(pts) {
   return s + `L${r1(l[0])} ${r1(l[1])}`;
 }
 function outline(s) {
-  const a = s.p, n = a.length / 3, w = s.w;
+  const a = s.p, n = a.length / 3;
   if (!n) return '';
-  if (n === 1 || (n === 2 && Math.hypot(a[3] - a[0], a[4] - a[1]) < 0.5)) { const r = radius(w, a[2]); return `M${r1(a[0] - r)} ${a[1]}a${r} ${r} 0 1 0 ${r1(2 * r)} 0a${r} ${r} 0 1 0 ${r1(-2 * r)} 0Z`; }
+  if (n === 1 || (n === 2 && Math.hypot(a[3] - a[0], a[4] - a[1]) < 0.5)) { const r = r1(rad(s, a[2])); return `M${r1(a[0] - r)} ${a[1]}a${r} ${r} 0 1 0 ${r1(2 * r)} 0a${r} ${r} 0 1 0 ${r1(-2 * r)} 0Z`; }
   const L = [], Rr = [];
   for (let i = 0; i < n; i++) {
     const j = Math.max(0, i - 1) * 3, k = Math.min(n - 1, i + 1) * 3, x = a[i * 3], y = a[i * 3 + 1];
     let dx = a[k] - a[j], dy = a[k + 1] - a[j + 1]; const len = Math.hypot(dx, dy) || 1; dx /= len; dy /= len;
-    const r = radius(w, a[i * 3 + 2]);
+    let r = rad(s, a[i * 3 + 2]);
+    if (s.ps === 'brush') { const t = Math.min(i, n - 1 - i); if (t < 4) r *= 0.4 + 0.15 * t; }
     L.push([x - dy * r, y + dx * r]); Rr.push([x + dy * r, y - dx * r]);
   }
-  const rE = r1(radius(w, a[a.length - 1])), rS = r1(radius(w, a[2]));
+  const rE = r1(rad(s, a[a.length - 1])), rS = r1(rad(s, a[2]));
   Rr.reverse();
   return `M${r1(L[0][0])} ${r1(L[0][1])}${smooth(L)}A${rE} ${rE} 0 0 0 ${r1(Rr[0][0])} ${r1(Rr[0][1])}${smooth(Rr)}A${rS} ${rS} 0 0 0 ${r1(L[0][0])} ${r1(L[0][1])}Z`;
 }
@@ -1168,19 +1219,25 @@ function polyD(s) {
   const pts = []; for (let i = 0; i < a.length; i += 3) pts.push([a[i], a[i + 1]]);
   return `M${pts[0][0]} ${pts[0][1]}` + smooth(pts);
 }
+const fillOf = c => c === 'auto' ? 'var(--ink)' : c;
 function strokeEl(s) {
-  const el = document.createElementNS(NS, 'path');
-  if (s.t === 'hl') {
+  let el;
+  if (s.t === 'img') {
+    el = document.createElementNS(NS, 'image');
+    el.setAttribute('href', s.src); el.setAttribute('x', s.x); el.setAttribute('y', s.y); el.setAttribute('width', s.w); el.setAttribute('height', s.h); el.setAttribute('preserveAspectRatio', 'none');
+  } else if (s.t === 'hl') {
+    el = document.createElementNS(NS, 'path');
     el.setAttribute('d', polyD(s)); el.setAttribute('fill', 'none'); el.setAttribute('stroke', s.c); el.setAttribute('stroke-width', s.w);
     el.setAttribute('stroke-linecap', 'round'); el.setAttribute('stroke-linejoin', 'round'); el.setAttribute('opacity', '.42'); el.setAttribute('class', 'hl');
-  } else { el.setAttribute('d', outline(s)); el.style.fill = s.c === 'auto' ? 'var(--ink)' : s.c; }
+  } else { el = document.createElementNS(NS, 'path'); el.setAttribute('d', outline(s)); el.style.fill = fillOf(s.c); }
   elOf.set(s, el);
   return el;
 }
 function strokeSVG(s) {
+  if (s.t === 'img') return `<image href="${s.src}" x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" preserveAspectRatio="none"/>`;
   return s.t === 'hl'
     ? `<path class="hl" d="${polyD(s)}" fill="none" stroke="${s.c}" stroke-width="${s.w}" stroke-linecap="round" stroke-linejoin="round" opacity=".42"/>`
-    : `<path d="${outline(s)}" style="fill:${s.c === 'auto' ? 'var(--ink)' : s.c}"/>`;
+    : `<path d="${outline(s)}" style="fill:${fillOf(s.c)}"/>`;
 }
 function renderInk() {
   inkEl.textContent = '';
@@ -1189,9 +1246,11 @@ function renderInk() {
   INK.strokes.forEach(s => frag.appendChild(strokeEl(s)));
   inkEl.appendChild(frag);
   sizePage(); updUndo(); status();
+  renderSel();
 }
 async function loadInk(id) {
   if (INK && INK.docId === id) return;
+  clearSel();
   INK = { docId: id, strokes: [], upd: 0 }; undoS = []; redoS = []; updUndo();
   let rec = inkCache.get(id);
   if (!rec) { try { rec = await DB.get('ink:' + id); } catch (_) {} if (rec) inkCache.set(id, rec); }
@@ -1210,67 +1269,290 @@ function inkChanged() {
 }
 function updUndo() { $('#undoBtn').disabled = !undoS.length; $('#redoBtn').disabled = !redoS.length; }
 function pushUndo(op) { undoS.push(op); if (undoS.length > 300) undoS.shift(); redoS = []; }
+const snapOp = before => ({ type: 'snap', before, after: INK.strokes.slice() });
 function applyOp(op, back) {
   const st = INK.strokes;
   if (op.type === 'add') { if (back) { const k = st.indexOf(op.s); if (k >= 0) st.splice(k, 1); } else st.push(op.s); }
-  else if (op.type === 'erase') {
-    if (back) [...op.items].sort((x, y) => x.i - y.i).forEach(it => st.splice(Math.min(it.i, st.length), 0, it.s));
-    else op.items.forEach(it => { const k = st.indexOf(it.s); if (k >= 0) st.splice(k, 1); });
-  } else if (op.type === 'clear') INK.strokes = back ? op.items.slice() : [];
+  else if (op.type === 'snap') INK.strokes = (back ? op.before : op.after).slice();
 }
-function undo() { if (!INK) return; const op = undoS.pop(); if (!op) return; applyOp(op, true); redoS.push(op); renderInk(); inkChanged(); }
-function redo() { if (!INK) return; const op = redoS.pop(); if (!op) return; applyOp(op, false); undoS.push(op); renderInk(); inkChanged(); }
+function undo() { if (!INK) return; const op = undoS.pop(); if (!op) return; clearSel(); applyOp(op, true); redoS.push(op); renderInk(); inkChanged(); }
+function redo() { if (!INK) return; const op = redoS.pop(); if (!op) return; clearSel(); applyOp(op, false); undoS.push(op); renderInk(); inkChanged(); }
 function clearInk() {
   if (!INK || !INK.strokes.length) return toast('Keine Handschrift vorhanden.');
-  if (!confirm('Die gesamte Handschrift in diesem Dokument löschen? (Rückgängig ist möglich, solange das Dokument offen ist.)')) return;
-  pushUndo({ type: 'clear', items: INK.strokes.slice() }); INK.strokes = []; renderInk(); inkChanged();
+  if (!confirm('Die gesamte Handschrift und alle Bilder in diesem Dokument löschen? (Rückgängig ist möglich, solange das Dokument offen ist.)')) return;
+  const before = INK.strokes.slice(); clearSel(); INK.strokes = []; pushUndo(snapOp(before)); renderInk(); inkChanged();
 }
 $('#undoBtn').onclick = undo; $('#redoBtn').onclick = redo;
 
-/* Werkzeuge */
+/* Popover (Einstellungen, Symbole) */
+function showPop(anchor, html, handler) {
+  const p = $('#pop');
+  p.innerHTML = html; p.classList.add('on'); p.dataset.for = anchor.id || '';
+  const r = anchor.getBoundingClientRect(), pw = p.offsetWidth, ph = p.offsetHeight;
+  let x = Math.min(r.left, innerWidth - pw - 8), y = r.bottom + 6;
+  if (y + ph > innerHeight - 8) y = Math.max(8, innerHeight - ph - 8);
+  p.style.left = Math.max(8, x) + 'px'; p.style.top = y + 'px';
+  p.onclick = e => handler(e, 'click'); p.oninput = e => handler(e, 'input'); p.onchange = e => handler(e, 'change');
+}
+function hidePop() { $('#pop').classList.remove('on'); }
+document.addEventListener('pointerdown', e => { if (!e.target.closest('#pop') && !e.target.closest('[data-pop]')) hidePop(); }, true);
+
+/* Werkzeuge & Optionen */
 function setTool(t) {
-  S.tool = t; if (t !== 'text') S.lastDraw = t;
+  if (t !== 'lasso') clearSel();
+  S.tool = t; if (['pen', 'hl', 'eraser', 'shape'].includes(t)) S.lastDraw = t;
   document.body.classList.toggle('draw', t !== 'text');
   if (t !== 'text') { ed.blur(); if (!$('#preview').hidden) setPreview(false); }
   renderToolbar(); save(false, true);
 }
+function colorDots(cols, cur) {
+  return cols.map(c => `<button class="cdot ${c === cur ? 'on' : ''}" data-c="${c}" style="background:${fillOf(c)}" aria-label="Farbe"></button>`).join('');
+}
 function renderToolbar() {
   document.querySelectorAll('.tool[data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === S.tool));
   document.body.classList.toggle('draw', S.tool !== 'text');
-  const o = $('#toolOpts');
-  if (S.tool === 'pen' || S.tool === 'hl') {
-    const cfg = S.tool === 'pen' ? S.pen : S.hl, cols = S.tool === 'pen' ? PEN_COLORS : HL_COLORS, ws = S.tool === 'pen' ? PEN_W : HL_W;
-    o.innerHTML = '<span class="sep"></span>' + cols.map(c => `<button class="cdot ${c === cfg.c ? 'on' : ''}" data-c="${c}" style="background:${c === 'auto' ? 'var(--ink)' : c}" aria-label="Farbe"></button>`).join('')
-      + '<span class="sep"></span>' + ws.map((w, i) => { const px = S.tool === 'pen' ? 4 + i * 4 : 9 + i * 7; return `<button class="wdot ${i === cfg.w ? 'on' : ''}" data-w="${i}" aria-label="Stärke"><i style="width:${px}px;height:${px}px;${S.tool === 'hl' ? 'opacity:.5;' : ''}"></i></button>`; }).join('') + '<span class="sep"></span>';
+  const o = $('#toolOpts'), t = S.tool;
+  if (t === 'pen' || t === 'hl' || t === 'shape') {
+    const isHl = t === 'hl', cfg = isHl ? S.hl : S.pen, cols = (isHl ? HL_COLORS : PEN_COLORS).concat(isHl ? [] : S.ink.customColors), ws = isHl ? HL_W : PEN_W;
+    o.innerHTML = '<span class="sep"></span>' + colorDots(cols, cfg.c)
+      + (isHl ? '' : `<label class="cdot cplus" title="Eigene Farbe"><input type="color" id="customColor" value="#3355ff">＋</label>`)
+      + '<span class="sep"></span>' + ws.map((w, i) => { const px = isHl ? 9 + i * 7 : 4 + i * 4; return `<button class="wdot ${i === cfg.w ? 'on' : ''}" data-w="${i}" aria-label="Stärke"><i style="width:${px}px;height:${px}px;${isHl ? 'opacity:.5;' : ''}"></i></button>`; }).join('') + '<span class="sep"></span>';
+  } else if (t === 'eraser') {
+    o.innerHTML = '<span class="sep"></span>' + `<button class="chip ${S.ink.eraseMode === 'stroke' ? 'on' : ''}" data-em="stroke">Ganzer Strich</button><button class="chip ${S.ink.eraseMode === 'partial' ? 'on' : ''}" data-em="partial">Teilweise</button>`
+      + ERASE_SIZES.map((r, i) => `<button class="wdot ${i === S.ink.eraseSize ? 'on' : ''}" data-es="${i}" aria-label="Größe"><i style="width:${6 + i * 6}px;height:${6 + i * 6}px;background:none;border:1.5px solid var(--text)"></i></button>`).join('') + '<span class="sep"></span>';
+  } else if (t === 'lasso') {
+    o.innerHTML = '<span class="sep"></span><span class="hint" style="padding:0 6px">Einkreisen zum Markieren</span>' + (CLIP ? '<button class="chip" id="pasteBtn">📋 Einfügen</button>' : '') + '<span class="sep"></span>';
+  } else if (t === 'laser') {
+    o.innerHTML = '<span class="sep"></span><span class="hint" style="padding:0 6px">Laserpointer – verschwindet von selbst</span><span class="sep"></span>';
   } else o.innerHTML = '<span class="sep"></span>';
   updUndo();
 }
+function penSettingsHTML() {
+  const i = S.ink;
+  return `<div class="pop-h">Stift-Einstellungen</div>
+  <div class="lbl-s">Stifttyp</div>
+  <div class="seg">${Object.entries(PEN_STYLES).map(([k, n]) => `<button data-ps="${k}" class="${i.penStyle === k ? 'on' : ''}">${n}</button>`).join('')}</div>
+  <label class="pop-row">Strichstabilisierung <b id="stabV">${i.stab === 0 ? 'Aus' : i.stab}</b></label>
+  <input type="range" min="0" max="10" step="1" value="${i.stab}" data-k="stab">
+  <p class="hint">Glättet zittrige Linien. Höher = ruhiger, aber etwas verzögert.</p>
+  <label class="pop-row"><span>Druckempfindlichkeit</span><input type="checkbox" data-k="pressure" ${i.pressure ? 'checked' : ''}></label>
+  <label class="pop-row"><span>Form erkennen beim Halten</span><input type="checkbox" data-k="holdShape" ${i.holdShape ? 'checked' : ''}></label>
+  <label class="pop-row"><span>Textmarker gerade ziehen</span><input type="checkbox" data-k="hlStraight" ${i.hlStraight ? 'checked' : ''}></label>
+  <label class="pop-row"><span>Mit dem Finger zeichnen</span><input type="checkbox" data-k="fingerDraw" ${S.fingerDraw ? 'checked' : ''}></label>
+  <label class="pop-row">Zoom <b>${Math.round((S.zoomUser || 1) * 100)} %</b><button class="chip" data-act="zoomReset">Zurücksetzen</button></label>
+  <p class="hint">S Pen: Seitentaste gedrückt halten = Radierer. Mit zwei Fingern zoomen, mit einem Finger scrollen.</p>`;
+}
+function openPenSettings(anchor) {
+  showPop(anchor, penSettingsHTML(), (e, kind) => {
+    const t = e.target;
+    if (kind === 'click' && t.dataset.ps) { S.ink.penStyle = t.dataset.ps; t.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === t)); save(false, true); }
+    if (kind === 'click' && t.dataset.act === 'zoomReset') { S.zoomUser = 1; fitZoom(); hidePop(); save(false, true); }
+    if ((kind === 'input' || kind === 'change') && t.dataset.k) {
+      const k = t.dataset.k;
+      if (k === 'stab') { S.ink.stab = +t.value; $('#stabV').textContent = S.ink.stab === 0 ? 'Aus' : S.ink.stab; }
+      else if (k === 'fingerDraw') S.fingerDraw = t.checked;
+      else S.ink[k] = t.checked;
+      save(false, true);
+    }
+  });
+}
+$('#penSetBtn').onclick = () => openPenSettings($('#penSetBtn'));
 document.querySelector('.edbar').addEventListener('click', e => {
-  const t = e.target.closest('.tool[data-tool]'); if (t) return setTool(t.dataset.tool);
-  const c = e.target.closest('.cdot'); if (c) { (S.tool === 'hl' ? S.hl : S.pen).c = c.dataset.c; save(false, true); return renderToolbar(); }
-  const w = e.target.closest('.wdot'); if (w) { (S.tool === 'hl' ? S.hl : S.pen).w = +w.dataset.w; save(false, true); return renderToolbar(); }
+  const t = e.target.closest('.tool[data-tool]');
+  if (t) {
+    const tool = t.dataset.tool;
+    if (tool === S.tool && ['pen', 'hl', 'shape'].includes(tool)) return openPenSettings(t);
+    return setTool(tool);
+  }
+  const c = e.target.closest('.cdot[data-c]'); if (c) { (S.tool === 'hl' ? S.hl : S.pen).c = c.dataset.c; save(false, true); return renderToolbar(); }
+  const w = e.target.closest('.wdot[data-w]'); if (w) { (S.tool === 'hl' ? S.hl : S.pen).w = +w.dataset.w; save(false, true); return renderToolbar(); }
+  const em = e.target.closest('[data-em]'); if (em) { S.ink.eraseMode = em.dataset.em; save(false, true); return renderToolbar(); }
+  const es = e.target.closest('[data-es]'); if (es) { S.ink.eraseSize = +es.dataset.es; save(false, true); return renderToolbar(); }
+  if (e.target.closest('#pasteBtn')) return pasteClip();
+});
+document.querySelector('.edbar').addEventListener('change', e => {
+  if (e.target.id !== 'customColor') return;
+  const c = e.target.value; S.ink.customColors = [c, ...S.ink.customColors.filter(x => x !== c)].slice(0, 6); S.pen.c = c; save(false, true); renderToolbar();
 });
 
-/* Zeichnen */
-let drawing = null, pan = null, penDown = false, inertia = 0;
+/* Bild einfügen */
+$('#imgBtn').onclick = () => { if (!curDoc()) return; $('#imgFile').click(); };
+$('#imgFile').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f || !INK) return;
+  try {
+    const url = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(f); });
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+    const maxPx = 1400, k = Math.min(1, maxPx / Math.max(img.width, img.height));
+    const cv = document.createElement('canvas'); cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k);
+    cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+    const src = cv.toDataURL('image/jpeg', 0.82);
+    const w = Math.min(460, PW - 120), h = w * cv.height / cv.width;
+    insertItems([{ t: 'img', src, x: 0, y: 0, w: r1(w), h: r1(h) }]);
+  } catch (err) { toast('Bild konnte nicht geladen werden.'); }
+};
+
+/* Symbole (Elemente) */
+function builtinSymbols() {
+  const S0 = (pts, extra = {}) => ({ t: 'pen', c: 'auto', w: 1.6, ps: 'ball', p: resample(pts, false).flatMap(([x, y]) => [r1(x), r1(y), 0.5]), ...extra });
+  const star = []; for (let i = 0; i <= 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 14 : 34; star.push([34 + Math.cos(a) * r, 34 + Math.sin(a) * r]); }
+  return [
+    { id: 'b-check', name: 'Haken', builtin: true, items: [S0([[2, 22], [14, 36], [42, 2]], { c: '#2da44e', w: 2.2 })] },
+    { id: 'b-cross', name: 'Kreuz', builtin: true, items: [S0([[2, 2], [34, 34]], { c: '#e5484d', w: 2.2 }), S0([[34, 2], [2, 34]], { c: '#e5484d', w: 2.2 })] },
+    { id: 'b-arrow', name: 'Pfeil', builtin: true, items: [S0([[2, 18], [70, 18]]), S0([[56, 6], [70, 18], [56, 30]])] },
+    { id: 'b-star', name: 'Stern', builtin: true, items: [S0(star, { c: '#f08c00', w: 1.8 })] },
+    { id: 'b-root', name: 'Wurzel', builtin: true, items: [S0([[2, 30], [10, 26], [20, 50], [32, 2], [90, 2]])] },
+    { id: 'b-box', name: 'Merkkasten', builtin: true, items: [S0([[2, 2], [240, 2], [240, 70], [2, 70], [2, 2]], { c: '#2f6bff', w: 1.4 })] }
+  ];
+}
+function symbolThumb(sym) {
+  const b = unionBox(sym.items), w = Math.max(10, b[2] - b[0]), h = Math.max(10, b[3] - b[1]);
+  return `<svg viewBox="${b[0] - 4} ${b[1] - 4} ${w + 8} ${h + 8}">${sym.items.map(strokeSVG).join('')}</svg>`;
+}
+function openSymbols(anchor) {
+  const all = S.symbols.concat(builtinSymbols());
+  const html = `<div class="pop-h">Symbole</div>
+  <div class="sym-grid">${all.map(s => `<div class="sym" data-sym="${s.id}" title="${esc(s.name)}">${symbolThumb(s)}<span>${esc(s.name)}</span>${s.builtin ? '' : `<button class="sym-x" data-symdel="${s.id}" aria-label="Löschen">✕</button>`}</div>`).join('')}</div>
+  <p class="hint">Eigene Symbole: mit dem Lasso etwas markieren und „⭐ Als Symbol speichern“ tippen. Antippen fügt das Symbol ein.</p>`;
+  showPop(anchor, html, (e, kind) => {
+    if (kind !== 'click') return;
+    const del = e.target.closest('[data-symdel]');
+    if (del) { e.stopPropagation(); const s = S.symbols.find(x => x.id === del.dataset.symdel); if (s && confirm(`Symbol „${s.name}“ löschen?`)) { S.symbols = S.symbols.filter(x => x !== s); S.deleted[s.id] = Date.now(); save(); openSymbols(anchor); } return; }
+    const el = e.target.closest('[data-sym]'); if (!el) return;
+    const sym = all.find(x => x.id === el.dataset.sym); hidePop();
+    if (sym) insertItems(clone(sym.items));
+  });
+}
+$('#symBtn').onclick = () => { if (curDoc()) openSymbols($('#symBtn')); };
+function saveSymbol() {
+  if (!SEL || !SEL.items.length) return;
+  const name = prompt('Name des Symbols:', 'Symbol ' + (S.symbols.length + 1)); if (!name) return;
+  const b = unionBox(SEL.items);
+  const items = transformItems(clone(SEL.items), (x, y) => [x - b[0], y - b[1]], 1);
+  S.symbols.unshift({ id: uid(), name: name.trim(), items, upd: Date.now() });
+  save(); toast(`Symbol „${name.trim()}“ gespeichert – oben unter ⭐ zu finden`);
+}
+
+/* Lasso-Auswahl */
+let SEL = null, CLIP = null;
+try { CLIP = JSON.parse(localStorage.getItem('lerntutor.clip') || 'null'); } catch (_) {}
+function transformItems(items, fn, ws = 1) {
+  return items.map(s => {
+    if (s.t === 'img') { const [x0, y0] = fn(s.x, s.y), [x1, y1] = fn(s.x + s.w, s.y + s.h); return { ...s, x: r1(x0), y: r1(y0), w: r1(x1 - x0), h: r1(y1 - y0) }; }
+    const p = s.p.slice();
+    for (let i = 0; i < p.length; i += 3) { const [x, y] = fn(p[i], p[i + 1]); p[i] = r1(x); p[i + 1] = r1(y); }
+    return { ...s, p, w: Math.round(s.w * ws * 100) / 100 };
+  });
+}
+function selHandle() { const b = SEL.box; return [b[2], b[3]]; }
+function renderSel(tf) {
+  const old = inkEl.querySelector('#selG'); if (old) old.remove();
+  inkEl.querySelectorAll('.sel').forEach(el => { el.classList.remove('sel'); el.removeAttribute('transform'); });
+  if (!SEL) { $('#selBar').hidden = true; return; }
+  const ub = unionBox(SEL.items); SEL.box = [ub[0] - 6, ub[1] - 6, ub[2] + 6, ub[3] + 6];
+  for (const s of SEL.items) { const el = elOf.get(s); if (el) { el.classList.add('sel'); if (tf) el.setAttribute('transform', tf); } }
+  const g = document.createElementNS(NS, 'g'); g.id = 'selG'; if (tf) g.setAttribute('transform', tf);
+  const b = SEL.box;
+  g.innerHTML = `<rect x="${b[0]}" y="${b[1]}" width="${b[2] - b[0]}" height="${b[3] - b[1]}" class="sel-box"/><circle cx="${b[2]}" cy="${b[3]}" r="9" class="sel-h"/>`;
+  inkEl.appendChild(g);
+  if (tf) $('#selBar').hidden = true; else placeSelBar();
+}
+function placeSelBar() {
+  if (!SEL) return;
+  const bar = $('#selBar'), r = page.getBoundingClientRect(), k = r.width / PW, c = canvasEl.getBoundingClientRect();
+  bar.hidden = false;
+  let x = r.left + SEL.box[0] * k, y = r.top + SEL.box[1] * k - bar.offsetHeight - 10;
+  if (y < c.top + 4) y = r.top + SEL.box[3] * k + 12;
+  x = Math.max(c.left + 6, Math.min(x, c.right - bar.offsetWidth - 6));
+  y = Math.max(c.top + 4, Math.min(y, c.bottom - bar.offsetHeight - 4));
+  bar.style.left = x + 'px'; bar.style.top = y + 'px';
+}
+canvasEl.addEventListener('scroll', () => { if (SEL && !$('#selBar').hidden) placeSelBar(); });
+window.addEventListener('resize', () => { if (SEL) placeSelBar(); });
+function clearSel() { if (!SEL) return; SEL = null; renderSel(); }
+function pointInPoly(x, y, poly) {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i], [xj, yj] = poly[j];
+    if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) inside = !inside;
+  }
+  return inside;
+}
+function selectInPoly(poly) {
+  if (poly.length < 3) return [];
+  return INK.strokes.filter(s => {
+    if (s.t === 'img') { const b = bbox(s); return pointInPoly((b[0] + b[2]) / 2, (b[1] + b[3]) / 2, poly); }
+    const a = s.p, n = a.length / 3, step = Math.max(1, Math.floor(n / 24)); let inn = 0, tot = 0;
+    for (let i = 0; i < n; i += step) { tot++; if (pointInPoly(a[i * 3], a[i * 3 + 1], poly)) inn++; }
+    return tot && inn / tot >= 0.5;
+  });
+}
+function replaceItems(oldItems, newItems, extraBefore) {
+  const before = extraBefore || INK.strokes.slice();
+  oldItems.forEach((s, j) => { const k = INK.strokes.indexOf(s); if (k >= 0) INK.strokes[k] = newItems[j]; });
+  pushUndo(snapOp(before)); SEL = { items: newItems }; renderInk(); inkChanged();
+}
+function deleteSel() {
+  if (!SEL) return;
+  const before = INK.strokes.slice(), set = new Set(SEL.items);
+  INK.strokes = INK.strokes.filter(s => !set.has(s)); SEL = null;
+  pushUndo(snapOp(before)); renderInk(); inkChanged();
+}
+function copySel() {
+  if (!SEL) return;
+  CLIP = clone(SEL.items);
+  try { localStorage.setItem('lerntutor.clip', JSON.stringify(CLIP)); } catch (_) {}
+  toast('Kopiert'); renderToolbar();
+}
+function insertItems(items) {
+  if (!INK) return;
+  const b = unionBox(items), c = canvasEl.getBoundingClientRect();
+  const [cx, cy] = ptAt(c.left + c.width / 2, c.top + c.height * 0.45);
+  const dx = Math.max(10, Math.min(PW - 10, cx)) - (b[0] + b[2]) / 2, dy = Math.max(20, cy) - (b[1] + b[3]) / 2;
+  const n = transformItems(items, (x, y) => [x + dx, y + dy]);
+  const before = INK.strokes.slice(); INK.strokes.push(...n);
+  pushUndo(snapOp(before));
+  if (S.tool !== 'lasso') setTool('lasso');
+  SEL = { items: n }; renderInk(); inkChanged();
+}
+function pasteClip() { if (!CLIP) return toast('Zwischenablage ist leer.'); insertItems(clone(CLIP)); }
+function duplicateSel() {
+  if (!SEL) return;
+  const n = transformItems(clone(SEL.items), (x, y) => [x + 24, y + 24]);
+  const before = INK.strokes.slice(); INK.strokes.push(...n); pushUndo(snapOp(before));
+  SEL = { items: n }; renderInk(); inkChanged();
+}
+function recolorSel(c) {
+  if (!SEL) return;
+  const n = SEL.items.map(s => s.t === 'img' ? s : { ...s, c: s.t === 'hl' && c === 'auto' ? '#ffe14d' : c });
+  replaceItems(SEL.items, n);
+}
+$('#selBar').addEventListener('click', e => {
+  const b = e.target.closest('[data-sa]'); if (!b) return;
+  const a = b.dataset.sa;
+  if (a === 'cut') { copySel(); deleteSel(); }
+  else if (a === 'copy') copySel();
+  else if (a === 'dup') duplicateSel();
+  else if (a === 'del') deleteSel();
+  else if (a === 'sym') saveSymbol();
+  else if (a === 'color') showPop(b, `<div class="pop-h">Farbe ändern</div><div class="swatches">${colorDots(PEN_COLORS.concat(HL_COLORS, S.ink.customColors), '')}</div>`, (ev, kind) => { const c = ev.target.closest('[data-c]'); if (kind === 'click' && c) { hidePop(); recolorSel(c.dataset.c); } });
+});
+
+/* Zeichnen, Radieren, Lasso, Laser, Zoom */
+let drawing = null, pan = null, pinch = null, penDown = false, inertia = 0;
+const touches = new Map();
 const eraserC = document.createElementNS(NS, 'circle');
-eraserC.setAttribute('r', ERASE_R); eraserC.setAttribute('fill', 'rgba(128,128,128,.12)'); eraserC.setAttribute('stroke', 'rgba(128,128,128,.8)'); eraserC.setAttribute('stroke-width', '1');
-function showEraser(x, y) { eraserC.setAttribute('cx', x); eraserC.setAttribute('cy', y); if (!eraserC.isConnected) inkEl.appendChild(eraserC); }
-function pt(e) { const r = page.getBoundingClientRect(), k = PW / r.width; return [(e.clientX - r.left) * k, (e.clientY - r.top) * k]; }
-const prs = e => e.pointerType === 'pen' ? (e.pressure > 0 ? Math.round(e.pressure * 100) / 100 : 0.5) : 0.5;
+eraserC.setAttribute('fill', 'rgba(128,128,128,.12)'); eraserC.setAttribute('stroke', 'rgba(128,128,128,.8)'); eraserC.setAttribute('stroke-width', '1');
+const eraseR = () => ERASE_SIZES[S.ink.eraseSize] || 11;
+function showEraser(x, y) { eraserC.setAttribute('r', eraseR()); eraserC.setAttribute('cx', x); eraserC.setAttribute('cy', y); if (!eraserC.isConnected) inkEl.appendChild(eraserC); }
+function ptAt(cx, cy) { const r = page.getBoundingClientRect(), k = PW / r.width; return [(cx - r.left) * k, (cy - r.top) * k]; }
+const pt = e => ptAt(e.clientX, e.clientY);
+const prs = e => !S.ink.pressure ? 0.5 : e.pointerType === 'pen' ? (e.pressure > 0 ? Math.round(e.pressure * 100) / 100 : 0.5) : 0.5;
 const penErase = e => e.pointerType === 'pen' && ((e.buttons & 2) || (e.buttons & 32) || e.button === 2 || e.button === 5);
 function wantsDraw(e) {
   if (e.pointerType === 'pen') return true;
   if (S.tool === 'text') return false;
   if (e.pointerType === 'mouse') return e.button === 0 || e.button === 2;
   return S.fingerDraw;
-}
-function eraseAt(x, y) {
-  for (let i = INK.strokes.length - 1; i >= 0; i--) {
-    const s = INK.strokes[i], b = bbox(s), r = ERASE_R + (s.t === 'hl' ? s.w / 2 : s.w);
-    if (x < b[0] - r || x > b[2] + r || y < b[1] - r || y > b[3] + r) continue;
-    if (hits(s, x, y, r)) { INK.strokes.splice(i, 1); const el = elOf.get(s); if (el) el.remove(); drawing.removed.push({ s, i }); }
-  }
 }
 function hits(s, x, y, r) {
   const a = s.p;
@@ -1279,39 +1561,119 @@ function hits(s, x, y, r) {
   return false;
 }
 function segDist(px, py, ax, ay, bx, by) { const dx = bx - ax, dy = by - ay, l = dx * dx + dy * dy; let t = l ? ((px - ax) * dx + (py - ay) * dy) / l : 0; t = Math.max(0, Math.min(1, t)); return Math.hypot(px - ax - t * dx, py - ay - t * dy); }
+function eraseAt(x, y) {
+  const R0 = eraseR();
+  for (let i = INK.strokes.length - 1; i >= 0; i--) {
+    const s = INK.strokes[i];
+    if (s.t === 'img' || (S.ink.eraseHlOnly && s.t !== 'hl')) continue;
+    const b = bbox(s), r = R0 + (s.t === 'hl' ? s.w / 2 : s.w);
+    if (x < b[0] - r || x > b[2] + r || y < b[1] - r || y > b[3] + r) continue;
+    if (!hits(s, x, y, r)) continue;
+    const el = elOf.get(s);
+    if (S.ink.eraseMode === 'stroke') { INK.strokes.splice(i, 1); if (el) el.remove(); drawing.changed = true; continue; }
+    // Teilweise radieren: Strich an der Radierstelle auftrennen
+    const a = s.p, runs = []; let cur = [];
+    for (let k = 0; k < a.length; k += 3) {
+      if (Math.hypot(a[k] - x, a[k + 1] - y) > r) cur.push(a[k], a[k + 1], a[k + 2]);
+      else { if (cur.length >= 6) runs.push(cur); cur = []; }
+    }
+    if (cur.length >= 6) runs.push(cur);
+    const parts = runs.map(p => { const n = { ...s, p }; delete n.shape; return n; });
+    INK.strokes.splice(i, 1, ...parts);
+    if (el) { parts.forEach(p => el.before(strokeEl(p))); el.remove(); }
+    drawing.changed = true;
+  }
+}
 function startStroke(e, x, y) {
   const t = S.tool === 'hl' ? 'hl' : 'pen', cfg = t === 'hl' ? S.hl : S.pen;
   const s = { t, c: cfg.c, w: t === 'hl' ? HL_W[cfg.w] : PEN_W[cfg.w], p: [r1(x), r1(y), prs(e)] };
+  if (t === 'pen' && S.ink.penStyle !== 'fountain') s.ps = S.ink.penStyle;
   inkEl.appendChild(strokeEl(s));
-  drawing = { id: e.pointerId, s, last: [x, y] };
-  armHold(x, y);
+  drawing = { id: e.pointerId, s, last: [x, y], sm: [x, y], raw: [x, y] };
+  if (S.ink.holdShape || S.tool === 'shape') armHold(x, y);
+}
+function stabilize(s) {
+  const k = Math.min(S.ink.stab, 10); if (k < 2 || s.shape) return;
+  const a = s.p, n = a.length / 3, win = Math.round(k / 3); if (n < 5) return;
+  const out = a.slice();
+  for (let i = 1; i < n - 1; i++) {
+    let sx = 0, sy = 0, c = 0;
+    for (let j = Math.max(0, i - win); j <= Math.min(n - 1, i + win); j++) { sx += a[j * 3]; sy += a[j * 3 + 1]; c++; }
+    out[i * 3] = r1(sx / c); out[i * 3 + 1] = r1(sy / c);
+  }
+  s.p = out;
 }
 function commitStroke() {
-  if (!drawing || drawing.erase) return;
-  boxOf.delete(drawing.s); INK.strokes.push(drawing.s); pushUndo({ type: 'add', s: drawing.s });
+  if (!drawing || !drawing.s) return;
+  const s = drawing.s;
+  // Stabilisierung: zum letzten echten Punkt aufschließen, dann glätten
+  if (!drawing.shaped && S.ink.stab > 0 && drawing.raw) { const [x, y] = drawing.raw; if (Math.hypot(x - drawing.last[0], y - drawing.last[1]) > 0.8) s.p.push(r1(x), r1(y), s.p[s.p.length - 1]); stabilize(s); }
+  if (!drawing.shaped && (S.tool === 'shape' || (s.t === 'hl' && S.ink.hlStraight))) {
+    const sh = S.tool === 'shape' ? recognize(s) : (s.p.length >= 6 ? { kind: 'line', pts: resample([[s.p[0], s.p[1]], snapAngle([s.p[0], s.p[1]], [s.p[s.p.length - 3], s.p[s.p.length - 2]])], false) } : null);
+    if (sh) { const p = avgPressure(s); s.p = sh.pts.flatMap(([x, y]) => [r1(x), r1(y), p]); s.shape = sh.kind; }
+  }
+  boxOf.delete(s);
+  const el = elOf.get(s); if (el) el.setAttribute('d', s.t === 'hl' ? polyD(s) : outline(s));
+  INK.strokes.push(s); pushUndo({ type: 'add', s });
 }
+function startLaser(e, x, y) {
+  const el = document.createElementNS(NS, 'path'); el.setAttribute('class', 'laser');
+  inkEl.appendChild(el);
+  drawing = { id: e.pointerId, laser: true, el, s: { p: [r1(x), r1(y), 0.5] }, last: [x, y] };
+}
+function fadeLaser(el) { setTimeout(() => { el.style.transition = 'opacity .7s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 750); }, 700); }
+
 page.addEventListener('pointerdown', e => {
   if (!curDoc() || !INK || !$('#preview').hidden) return;
   cancelAnimationFrame(inertia);
+  if (e.pointerType === 'touch') touches.set(e.pointerId, [e.clientX, e.clientY]);
+  // Zwei Finger: Zoomen
+  if (e.pointerType === 'touch' && touches.size === 2 && !penDown && S.tool !== 'text') {
+    if (drawing && drawing.touch) { if (drawing.el && drawing.s && !drawing.lasso) drawing.el.remove(); if (drawing.lassoEl) drawing.lassoEl.remove(); drawing = null; }
+    pan = null;
+    const [a, b] = [...touches.values()], mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+    pinch = { d0: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, z0: S.zoomUser || 1, L: ptAt(mid[0], mid[1]) };
+    return;
+  }
   if (drawing && e.pointerId !== drawing.id) return;
   if (e.pointerType === 'touch' && penDown) return;            // Handballen ignorieren
+  const [x, y] = pt(e);
+  // Auswahl verschieben / skalieren
+  if (SEL && S.tool === 'lasso') {
+    const h = selHandle(), b = SEL.box;
+    if (Math.hypot(x - h[0], y - h[1]) < 22) { e.preventDefault(); try { page.setPointerCapture(e.pointerId); } catch (_) {} drawing = { id: e.pointerId, mode: 'scale', start: [x, y], touch: e.pointerType === 'touch' }; return; }
+    if (x >= b[0] && x <= b[2] && y >= b[1] && y <= b[3]) { e.preventDefault(); try { page.setPointerCapture(e.pointerId); } catch (_) {} drawing = { id: e.pointerId, mode: 'move', start: [x, y], touch: e.pointerType === 'touch' }; return; }
+    clearSel();
+    if (!wantsDraw(e)) { if (e.pointerType === 'touch') startPan(e); return; }
+  }
   if (wantsDraw(e)) {
     e.preventDefault();
-    if (S.tool === 'text') setTool(S.lastDraw || 'pen');        // Stift berührt im Tippmodus → Stiftmodus
+    if (S.tool === 'text') setTool(S.lastDraw || 'pen');        // Stift im Tippmodus → Stiftmodus
     try { page.setPointerCapture(e.pointerId); } catch (_) {}
     pan = null;
     if (e.pointerType === 'pen') penDown = true;
-    const [x, y] = pt(e);
-    if (S.tool === 'eraser' || penErase(e) || (e.pointerType === 'mouse' && e.button === 2)) { drawing = { id: e.pointerId, erase: true, removed: [] }; eraseAt(x, y); showEraser(x, y); return; }
-    startStroke(e, x, y);
+    if (S.tool === 'eraser' || penErase(e) || (e.pointerType === 'mouse' && e.button === 2)) { drawing = { id: e.pointerId, erase: true, before: INK.strokes.slice(), lastE: [x, y] }; eraseAt(x, y); showEraser(x, y); return; }
+    if (S.tool === 'lasso') { const el = document.createElementNS(NS, 'path'); el.setAttribute('class', 'lasso'); inkEl.appendChild(el); drawing = { id: e.pointerId, lasso: true, lassoEl: el, poly: [[x, y]], touch: e.pointerType === 'touch' }; return; }
+    if (S.tool === 'laser') return startLaser(e, x, y);
+    startStroke(e, x, y); drawing.touch = e.pointerType === 'touch';
     return;
   }
-  if (S.tool !== 'text' && e.pointerType === 'touch') {
-    pan = { id: e.pointerId, x: e.clientX, y: e.clientY, sx: canvasEl.scrollLeft, sy: canvasEl.scrollTop, ly: e.clientY, lt: performance.now(), v: 0 };
-    try { page.setPointerCapture(e.pointerId); } catch (_) {}
-  }
+  if (S.tool !== 'text' && e.pointerType === 'touch') startPan(e);
 });
+function startPan(e) {
+  pan = { id: e.pointerId, x: e.clientX, y: e.clientY, sx: canvasEl.scrollLeft, sy: canvasEl.scrollTop, ly: e.clientY, lt: performance.now(), v: 0 };
+  try { page.setPointerCapture(e.pointerId); } catch (_) {}
+}
 page.addEventListener('pointermove', e => {
+  if (e.pointerType === 'touch' && touches.has(e.pointerId)) touches.set(e.pointerId, [e.clientX, e.clientY]);
+  if (pinch && touches.size >= 2) {
+    const [a, b] = [...touches.values()], mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+    S.zoomUser = Math.max(0.5, Math.min(3, pinch.z0 * Math.hypot(a[0] - b[0], a[1] - b[1]) / pinch.d0));
+    fitZoom();
+    const r = page.getBoundingClientRect(), k = r.width / PW;
+    canvasEl.scrollLeft += r.left + pinch.L[0] * k - mid[0]; canvasEl.scrollTop += r.top + pinch.L[1] * k - mid[1];
+    return;
+  }
   if (pan && e.pointerId === pan.id) {
     canvasEl.scrollTop = pan.sy - (e.clientY - pan.y); canvasEl.scrollLeft = pan.sx - (e.clientX - pan.x);
     const now = performance.now(), dt = Math.max(1, now - pan.lt);
@@ -1320,22 +1682,42 @@ page.addEventListener('pointermove', e => {
   }
   if (!drawing || e.pointerId !== drawing.id) return;
   e.preventDefault();
+  const [px, py] = pt(e);
+  if (drawing.mode === 'move') { const dx = px - drawing.start[0], dy = py - drawing.start[1]; drawing.d = [dx, dy]; renderSel(`translate(${r1(dx)} ${r1(dy)})`); return; }
+  if (drawing.mode === 'scale') {
+    const b = SEL.box, w0 = b[2] - b[0], h0 = b[3] - b[1];
+    const sc = Math.max(0.15, Math.min(8, Math.max((px - b[0]) / w0, (py - b[1]) / h0)));
+    drawing.sc = sc; renderSel(`translate(${r1(b[0])} ${r1(b[1])}) scale(${sc.toFixed(3)}) translate(${r1(-b[0])} ${r1(-b[1])})`); return;
+  }
   const evs = (e.getCoalescedEvents && e.getCoalescedEvents()) || [];
   for (const ev of evs.length ? evs : [e]) {
-    const [x, y] = pt(ev);
-    if (!drawing.erase && penErase(ev)) { commitStroke(); drawing = { id: drawing.id, erase: true, removed: [] }; }
-    if (drawing.erase) { eraseAt(x, y); showEraser(x, y); continue; }
+    let [x, y] = pt(ev);
+    if (drawing.lasso) { drawing.poly.push([x, y]); continue; }
+    if (drawing.laser) { if (Math.hypot(x - drawing.last[0], y - drawing.last[1]) > 1.5) { drawing.s.p.push(r1(x), r1(y), 0.5); drawing.last = [x, y]; } continue; }
+    if (!drawing.erase && penErase(ev)) { commitStroke(); drawing = { id: drawing.id, erase: true, before: INK.strokes.slice() }; }
+    if (drawing.erase) {
+      const L = drawing.lastE || [x, y], dd = Math.hypot(x - L[0], y - L[1]), st = Math.max(1, Math.ceil(dd / (eraseR() * 0.6)));
+      for (let q = 1; q <= st; q++) eraseAt(L[0] + (x - L[0]) * q / st, L[1] + (y - L[1]) * q / st);
+      drawing.lastE = [x, y]; showEraser(x, y); continue;
+    }
     if (drawing.shaped) continue;
+    drawing.raw = [x, y];
     if (holdAt && Math.hypot(x - holdAt[0], y - holdAt[1]) > 4) armHold(x, y);
+    // Strichstabilisierung (nachziehender Pinsel)
+    if (S.ink.stab > 0) { const f = 1 - Math.min(0.9, S.ink.stab * 0.085); drawing.sm = [drawing.sm[0] + (x - drawing.sm[0]) * f, drawing.sm[1] + (y - drawing.sm[1]) * f]; [x, y] = drawing.sm; }
     if (Math.hypot(x - drawing.last[0], y - drawing.last[1]) < 1.1) continue;
     drawing.s.p.push(r1(x), r1(y), prs(ev)); drawing.last = [x, y];
   }
+  if (drawing.lasso) { drawing.lassoEl.setAttribute('d', 'M' + drawing.poly.map(p => r1(p[0]) + ' ' + r1(p[1])).join('L')); return; }
+  if (drawing.laser) { drawing.el.setAttribute('d', polyD(drawing.s)); return; }
   if (!drawing.erase && !drawing.shaped) {
     const el = elOf.get(drawing.s); el.setAttribute('d', drawing.s.t === 'hl' ? polyD(drawing.s) : outline(drawing.s));
     if (drawing.last[1] > curH - 320) sizePage(drawing.last[1]);
   }
 });
 function endPointer(e) {
+  if (e.pointerType === 'touch') touches.delete(e.pointerId);
+  if (pinch) { if (touches.size < 2) { pinch = null; save(false, true); } return; }
   if (pan && e.pointerId === pan.id) {
     let v = pan.v * 16; pan = null;
     const step = () => { if (Math.abs(v) < 0.4) return; canvasEl.scrollTop += v; v *= 0.95; inertia = requestAnimationFrame(step); };
@@ -1344,9 +1726,21 @@ function endPointer(e) {
   if (!drawing || e.pointerId !== drawing.id) return;
   clearTimeout(holdT); holdAt = null;
   if (e.pointerType === 'pen') penDown = false;
-  if (drawing.erase) { eraserC.remove(); if (drawing.removed.length) { pushUndo({ type: 'erase', items: drawing.removed }); inkChanged(); } }
-  else { commitStroke(); inkChanged(); }
-  drawing = null;
+  const d = drawing; drawing = null;
+  if (d.mode === 'move') {
+    if (d.d && Math.hypot(d.d[0], d.d[1]) > 0.5) replaceItems(SEL.items, transformItems(SEL.items, (x, y) => [x + d.d[0], y + d.d[1]]));
+    else renderSel();
+  } else if (d.mode === 'scale') {
+    const b = SEL.box;
+    if (d.sc && Math.abs(d.sc - 1) > 0.005) replaceItems(SEL.items, transformItems(SEL.items, (x, y) => [b[0] + (x - b[0]) * d.sc, b[1] + (y - b[1]) * d.sc], d.sc));
+    else renderSel();
+  } else if (d.lasso) {
+    d.lassoEl.remove();
+    const items = selectInPoly(d.poly);
+    SEL = items.length ? { items } : null; renderSel();
+  } else if (d.laser) fadeLaser(d.el);
+  else if (d.erase) { eraserC.remove(); if (d.changed) { pushUndo(snapOp(d.before)); inkChanged(); } }
+  else { drawing = d; commitStroke(); drawing = null; inkChanged(); }
   if (document.activeElement === ed) ed.blur();
 }
 page.addEventListener('pointerup', endPointer);
@@ -1355,7 +1749,7 @@ page.addEventListener('lostpointercapture', e => { if (drawing && e.pointerId ==
 page.addEventListener('contextmenu', e => { if (S.tool !== 'text' || drawing || e.pointerType === 'pen') e.preventDefault(); });
 // Safari/iPad: Apple Pencil soll nicht scrollen; während des Zeichnens kein Scrollen
 page.addEventListener('touchstart', e => { if ([...e.changedTouches].some(t => t.touchType === 'stylus')) e.preventDefault(); }, { passive: false });
-page.addEventListener('touchmove', e => { if (drawing || [...e.changedTouches].some(t => t.touchType === 'stylus')) e.preventDefault(); }, { passive: false });
+page.addEventListener('touchmove', e => { if (drawing || pinch || [...e.changedTouches].some(t => t.touchType === 'stylus')) e.preventDefault(); }, { passive: false });
 
 /* Formerkennung: Strich ziehen und am Ende kurz still halten */
 const HOLD_MS = 520;
@@ -2059,7 +2453,7 @@ async function buildPayload() {
   }
   return {
     v: 1, at: Date.now(), from: S.sync.device || 'Gerät',
-    subjects: S.subjects, docs: S.docs, chats: S.chats, chatTs: S.chatTs, deleted: S.deleted,
+    subjects: S.subjects, docs: S.docs, chats: S.chats, chatTs: S.chatTs, deleted: S.deleted, symbols: S.symbols,
     recs: S.recs.filter(r => !(R.active && R.meta === r)), transcripts, summaries
   };
 }
@@ -2078,6 +2472,7 @@ async function mergeRemote(rem) {
   const alive = (id, ts) => !(del[id] && del[id] >= (ts || 0));
 
   S.subjects = lww(S.subjects, rem.subjects, 'updated').filter(s => alive(s.id, s.updated));
+  S.symbols = lww(S.symbols || [], rem.symbols || [], 'upd').filter(s => alive(s.id, s.upd));
   S.subjects.forEach(f => { if (f.parentId && !S.subjects.some(p => p.id === f.parentId)) f.parentId = null; });
 
   const base = S.sync.base, local = new Map(S.docs.map(d => [d.id, d])), out = [];
@@ -2234,12 +2629,17 @@ $('#moreBtn').onclick = () => showMenu($('#moreBtn'), [
 ]);
 document.addEventListener('keydown', e => {
   if (document.querySelector('dialog[open]')) return;
-  if (e.key === 'Escape') { hideMenu(); if (document.body.classList.contains('tutor-open')) closeTutor(); return; }
+  if (e.key === 'Escape') { hideMenu(); hidePop(); if (SEL) return clearSel(); if (document.body.classList.contains('tutor-open')) closeTutor(); return; }
   if (!curDoc() || document.activeElement === ed || document.activeElement === q || document.activeElement === $('#search')) return;
   const k = e.key.toLowerCase();
   if ((e.ctrlKey || e.metaKey) && k === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
   else if ((e.ctrlKey || e.metaKey) && (k === 'y' || (k === 'z' && e.shiftKey))) { e.preventDefault(); redo(); }
-  else if (!e.ctrlKey && !e.metaKey && !e.altKey) { const t = { t: 'text', p: 'pen', h: 'hl', e: 'eraser' }[k]; if (t) setTool(t); }
+  else if ((e.ctrlKey || e.metaKey) && k === 'c' && SEL) { e.preventDefault(); copySel(); }
+  else if ((e.ctrlKey || e.metaKey) && k === 'x' && SEL) { e.preventDefault(); copySel(); deleteSel(); }
+  else if ((e.ctrlKey || e.metaKey) && k === 'v' && CLIP) { e.preventDefault(); pasteClip(); }
+  else if ((e.ctrlKey || e.metaKey) && k === 'd' && SEL) { e.preventDefault(); duplicateSel(); }
+  else if ((e.key === 'Delete' || e.key === 'Backspace') && SEL) { e.preventDefault(); deleteSel(); }
+  else if (!e.ctrlKey && !e.metaKey && !e.altKey) { const t = { t: 'text', p: 'pen', h: 'hl', e: 'eraser', s: 'shape', l: 'lasso' }[k]; if (t) setTool(t); }
 });
 
 try { history.replaceState({ ...S.nav }, ''); } catch (_) {}

@@ -1,5 +1,5 @@
 // LernTutor – Offline-Speicher für die App selbst (KI-, Google- und API-Aufrufe laufen immer direkt übers Netz)
-const CACHE = 'lerntutor-v4';
+const CACHE = 'lerntutor-v5';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png', './icon-maskable.png'];
 
 self.addEventListener('install', e => {

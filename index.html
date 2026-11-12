@@ -79,7 +79,7 @@ body[data-view=lib] .v-doc,body[data-view=doc] .v-lib{display:none!important}
 .p-dots{background-image:radial-gradient(circle at 1px 1px,var(--dot) 1.1px,transparent 1.6px);background-size:var(--lh) var(--lh)}
 /* Editor */
 #editorView{flex:1;display:flex;flex-direction:column;min-height:0;min-width:0}
-.edbar{display:flex;align-items:center;gap:3px;padding:6px 10px;border-bottom:1px solid var(--line);background:var(--panel);overflow-x:auto;scrollbar-width:none;flex:0 0 auto}
+.edbar{display:flex;flex-wrap:wrap;align-items:center;gap:3px;row-gap:4px;padding:6px 10px;border-bottom:1px solid var(--line);background:var(--panel);flex:0 0 auto}
 .edbar::-webkit-scrollbar{display:none}
 .tool{flex:0 0 auto;background:none;border:0;border-radius:10px;min-width:42px;min-height:40px;padding:4px 8px;color:var(--text);display:flex;align-items:center;justify-content:center}
 .tool svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
@@ -227,8 +227,8 @@ dialog summary{cursor:pointer;color:var(--acc);font-size:14px}
         <button class="tool" id="undoBtn" title="Rückgängig"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
         <button class="tool" id="redoBtn" title="Wiederholen"><svg viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
         <button class="tool" id="penSetBtn" data-pop title="Stift-Einstellungen: Strichstabilisierung, Stifttyp, Druck"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+        <button class="chip" id="paperBtn" data-pop title="Papierart &amp; Papierfarbe">📄 Papier</button>
         <span class="sep"></span>
-        <button class="chip" id="paperBtn" data-pop>📄 Papier</button>
         <button class="chip" id="prevBtn">👁 Vorschau</button>
         <span class="sep"></span>
         <span class="aibar">
@@ -1178,7 +1178,8 @@ $('#docTitle').onclick = () => { const d = curDoc(); if (d) openDocDlg(d.id); };
 $('#docMore').onclick = () => {
   const d = curDoc(); if (!d) return;
   showMenu($('#docMore'), [
-    { label: '✏️ Umbenennen, Papier & Farbe', fn: () => openDocDlg(d.id) },
+    { label: '🎨 Papierfarbe & Papierart', fn: () => $('#paperBtn').click() },
+    { label: '✏️ Umbenennen', fn: () => openDocDlg(d.id) },
     { label: '↪️ Verschieben', fn: () => openMove('doc', d.id) },
     { label: '📑 Duplizieren', fn: () => duplicateDoc(d.id) },
     { label: '⬇️ Text exportieren (.md)', fn: () => exportDoc(d.id) },
@@ -2634,7 +2635,14 @@ window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); instal
 $('#installBtn').onclick = async () => { if (!installEvt) return; installEvt.prompt(); await installEvt.userChoice; installEvt = null; $('#installBtn').hidden = true; };
 window.addEventListener('appinstalled', () => toast('LernTutor ist jetzt als App installiert.'));
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  const hadSW = !!navigator.serviceWorker.controller; let reloaded = false;
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    const chk = () => reg.update().catch(() => {});
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) chk(); });
+    setInterval(chk, 30 * 60 * 1000);
+  }).catch(() => {});
+  // Neue Version aktiv → einmal neu laden, damit Updates sofort ankommen
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadSW && !reloaded) { reloaded = true; save(false, true); location.reload(); } });
 }
 
 /* ---------- Layout ---------- */

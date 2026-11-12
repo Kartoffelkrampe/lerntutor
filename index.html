@@ -95,12 +95,20 @@ body[data-view=lib] .v-doc,body[data-view=doc] .v-lib{display:none!important}
 .chip.on{background:var(--acc);color:#fff}
 .aibar{display:flex;gap:6px;flex:0 0 auto}
 #canvas{flex:1;overflow:auto;background:var(--canvas);padding:24px 12px 140px;overscroll-behavior:contain}
-#page{width:820px;margin:0 auto;position:relative;border-radius:4px;box-shadow:var(--shadow);--lh:32px;padding:64px 60px 64px 72px}
+#page{width:820px;margin:0 auto;box-sizing:border-box;position:relative;border-radius:4px;box-shadow:var(--shadow);--lh:32px;padding:64px 60px 64px 72px}
 body.draw #page{touch-action:none;cursor:crosshair}
 #page{color:var(--text)}
-#editor{display:block;width:100%;border:0;border-radius:0;resize:none;background:transparent;outline:none;padding:0;font-size:18px;line-height:var(--lh);overflow:hidden;color:var(--text);min-height:var(--lh);position:relative;z-index:1}
+#editor{display:block;width:100%;border:0;border-radius:0;resize:none;background:transparent;outline:none;padding:0;font-size:clamp(9px,calc(var(--lh) * .56),26px);line-height:var(--lh);overflow:hidden;color:var(--text);min-height:var(--lh);position:relative;z-index:1}
 body.draw #editor{pointer-events:none;-webkit-user-select:none;user-select:none}
 #preview{font-size:17px;line-height:1.65;position:relative;z-index:1}
+#pbreaks{position:absolute;left:0;right:0;top:0;pointer-events:none;z-index:0}
+.pbreak{position:absolute;left:-1px;right:-1px;height:14px;margin-top:-7px;background:var(--canvas);box-shadow:inset 0 5px 5px -5px rgba(0,0,0,.35),inset 0 -5px 5px -5px rgba(0,0,0,.35)}
+.pbreak span{position:absolute;right:8px;top:-1px;font-size:10px;color:var(--muted)}
+.pop-sub{display:grid;gap:8px}
+.pop-two{display:flex;gap:8px;align-items:center}
+.pop-two input[type=number]{width:96px;min-height:34px}
+.grid-row{display:flex;gap:10px;align-items:center}
+.grid-row input[type=number]{width:70px;min-height:34px}
 #ink{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:2}
 #ink .hl{mix-blend-mode:var(--blend)}
 #ink .sel{filter:drop-shadow(0 0 2.5px var(--acc))}
@@ -246,6 +254,7 @@ dialog summary{cursor:pointer;color:var(--acc);font-size:14px}
         <div id="page" class="paper p-lined">
           <textarea id="editor" spellcheck="true" placeholder="Tippen oder mit dem Stift schreiben …&#10;Formeln mit $…$, z. B. $F = m \cdot a$.&#10;Text markieren → oben eine KI-Aktion wählen."></textarea>
           <div id="preview" hidden></div>
+          <div id="pbreaks"></div>
           <svg id="ink" xmlns="http://www.w3.org/2000/svg"></svg>
         </div>
         <div class="pstatus" id="status"></div>
@@ -362,6 +371,7 @@ dialog summary{cursor:pointer;color:var(--acc);font-size:14px}
     <h2 id="dDlgT">Neues Dokument</h2>
     <label>Titel <input type="text" id="dName" autocomplete="off"></label>
     <div><div class="lbl-s">Papier</div><div class="papers" id="dPaper"></div></div>
+    <div class="pop-sub" id="dPaperSize"></div>
     <div><div class="lbl-s">Papierfarbe</div><div class="swatches" id="dPaperColor"></div></div>
     <div><div class="lbl-s">Farbe</div><div class="swatches" id="dColors"></div></div>
     <div class="row"><button value="cancel">Abbrechen</button><button class="pri" id="dSave" value="ok">Erstellen</button></div>
@@ -481,6 +491,24 @@ function paperVars(pc) {
   return dark
     ? `--paper:${c[1]};--text:#ececf1;--ink:#f2f2f7;--rule:#39455e;--rule2:#2f3540;--dot:#4f586c;--blend:screen;`
     : `--paper:${c[1]};--text:#1c1c1e;--ink:#1c1c1e;--rule:#c6d4ee;--rule2:#d8dee9;--dot:#aeb8cc;--blend:multiply;`;
+}
+const PAPER_SIZES = { std: ['Endlos', 820, 0], a5: ['A5', 559, 794], a4: ['A4', 794, 1123], a3: ['A3', 1123, 1587], letter: ['Letter', 816, 1056], custom: ['Eigene', 0, 0] };
+const GRID_DEF = 32, GRID_MIN = 10, GRID_MAX = 80;
+// Seitenmaße in logischen Pixeln (96 dpi); h = 0 → endlose Seite
+function pageDims(d) {
+  const k = (d && d.size) || 'std';
+  let w, h;
+  if (k === 'custom') { w = clampN(d.sizeW, 200, 4000, 820); h = clampN(d.sizeH, 0, 8000, 1160); }
+  else { const z = PAPER_SIZES[k] || PAPER_SIZES.std; w = z[1]; h = z[2]; if (h && d.orient === 'l') [w, h] = [h, w]; }
+  return { w, h };
+}
+function clampN(v, a, b, def) { v = Math.round(+v); return Number.isFinite(v) && v > 0 ? Math.max(a, Math.min(b, v)) : def; }
+function gridOf(d) { return clampN(d && d.grid, GRID_MIN, GRID_MAX, GRID_DEF); }
+function sizeLabel(d) {
+  const k = (d && d.size) || 'std', { w, h } = pageDims(d);
+  if (k === 'std') return 'Endlos';
+  if (k === 'custom') return `${w} × ${h || '∞'} px`;
+  return PAPER_SIZES[k][0] + (d.orient === 'l' ? ' quer' : '');
 }
 function paperColorDots(cur) {
   return Object.entries(PAPER_COLORS).map(([k, [n, c]]) => `<button type="button" class="sw pcol ${k === (cur || 'auto') ? 'on' : ''}" data-pc="${k}" title="${n}" style="background:${c || 'linear-gradient(135deg,#fff 50%,#1f1f22 50%)'}" aria-label="${n}"></button>`).join('');
@@ -862,7 +890,7 @@ function folderTile(f) {
   return `<div class="tile" data-folder="${f.id}"><div class="art folder-art">${folderSVG(f.color || FOLDER_COLORS[0], n)}</div><div class="nm"><span>${esc(f.name)}</span><button class="chev" data-menu="folder:${f.id}" aria-label="Optionen">⌄</button></div><div class="sub">${n} ${n === 1 ? 'Element' : 'Elemente'}</div></div>`;
 }
 function docTile(d, showPath) {
-  return `<div class="tile" data-doc="${d.id}"><div class="art"><div class="thumb paper p-${d.paper || 'lined'}" style="--cover:${coverOf(d)};${paperVars(d.paperColor)}"><p>${esc(previewText(d.content))}</p>${d.inkN ? `<svg data-ink="${d.id}" viewBox="0 0 820 1093" preserveAspectRatio="xMinYMin slice"></svg>` : ''}</div></div><div class="nm"><span>${esc(d.title || 'Unbenannt')}</span><button class="chev" data-menu="doc:${d.id}" aria-label="Optionen">⌄</button></div><div class="sub">${showPath ? esc(pathName(d.subjectId)) + ' · ' : ''}${fmtDate(d.updated)}</div></div>`;
+  return `<div class="tile" data-doc="${d.id}"><div class="art"><div class="thumb paper p-${d.paper || 'lined'}" style="--cover:${coverOf(d)};${paperVars(d.paperColor)}--lh:${(7.4 * gridOf(d) / GRID_DEF * 820 / pageDims(d).w).toFixed(2)}px"><p>${esc(previewText(d.content))}</p>${d.inkN ? `<svg data-ink="${d.id}" viewBox="0 0 ${pageDims(d).w} ${Math.round(pageDims(d).w * 4 / 3)}" preserveAspectRatio="xMinYMin slice"></svg>` : ''}</div></div><div class="nm"><span>${esc(d.title || 'Unbenannt')}</span><button class="chev" data-menu="doc:${d.id}" aria-label="Optionen">⌄</button></div><div class="sub">${showPath ? esc(pathName(d.subjectId)) + ' · ' : ''}${fmtDate(d.updated)}</div></div>`;
 }
 function recRow(r) {
   const live = R.active && R.meta === r;
@@ -1012,7 +1040,9 @@ function deleteFolder(id) {
 }
 
 /* ---------- Dokumente ---------- */
-let editDocId = null, dPaper = 'lined', dPaperColor = 'auto', dColor = null;
+let editDocId = null, dPaper = 'lined', dPaperColor = 'auto', dColor = null, dSize = {};
+function renderDlgSize() { $('#dPaperSize').innerHTML = paperFormHTML({ ...dSize, paper: dPaper }); }
+['click', 'input', 'change'].forEach(ev => $('#dPaperSize').addEventListener(ev, e => { if (paperFormEvent(dSize, e, ev) === 'rerender') renderDlgSize(); }));
 function openDocDlg(id) {
   editDocId = id || null;
   const d = id ? S.docs.find(x => x.id === id) : null;
@@ -1024,7 +1054,10 @@ function openDocDlg(id) {
   $('#dPaperColor').onclick = e => { const b = e.target.closest('[data-pc]'); if (!b) return; dPaperColor = b.dataset.pc; $('#dPaperColor').querySelectorAll('.sw').forEach(x => x.classList.toggle('on', x === b)); $('#dPaper').querySelectorAll('.pp').forEach(x => x.style.cssText = paperVars(dPaperColor)); };
   dColor = d ? coverOf(d) : (folderById(S.nav.folder) || {}).color || FOLDER_COLORS[0];
   $('#dPaper').innerHTML = Object.entries(PAPERS).map(([k, n]) => `<button type="button" class="pp paper p-${k} ${k === dPaper ? 'on' : ''}" data-p="${k}" style="${paperVars(dPaperColor)}">${n}</button>`).join('');
-  $('#dPaper').onclick = e => { const b = e.target.closest('[data-p]'); if (!b) return; dPaper = b.dataset.p; $('#dPaper').querySelectorAll('.pp').forEach(x => x.classList.toggle('on', x === b)); };
+  $('#dPaper').onclick = e => { const b = e.target.closest('[data-p]'); if (!b) return; dPaper = b.dataset.p; $('#dPaper').querySelectorAll('.pp').forEach(x => x.classList.toggle('on', x === b)); renderDlgSize(); };
+  const src = d || S.lastSize || {};
+  dSize = { size: src.size || 'std', orient: src.orient || 'p', sizeW: src.sizeW, sizeH: src.sizeH, grid: src.grid };
+  renderDlgSize();
   swatches($('#dColors'), dColor, c => dColor = c);
   $('#dSave').textContent = d ? 'Speichern' : 'Erstellen';
   $('#dDlg').showModal(); setTimeout(() => { $('#dName').focus(); $('#dName').select(); }, 60);
@@ -1032,11 +1065,11 @@ function openDocDlg(id) {
 $('#dSave').onclick = () => {
   const title = $('#dName').value.trim() || 'Unbenannt';
   if (editDocId) {
-    Object.assign(S.docs.find(x => x.id === editDocId), { title, paper: dPaper, paperColor: dPaperColor, color: dColor, updated: Date.now() });
+    Object.assign(S.docs.find(x => x.id === editDocId), { title, paper: dPaper, paperColor: dPaperColor, color: dColor, ...dSize, updated: Date.now() });
     save(); render();
   } else {
-    const d = { id: uid(), subjectId: S.nav.folder || null, title, content: '', paper: dPaper, paperColor: dPaperColor, color: dColor, created: Date.now(), updated: Date.now() };
-    S.docs.push(d); S.lastPaper = dPaper; S.lastPaperColor = dPaperColor; save(); nav({ doc: d.id });
+    const d = { id: uid(), subjectId: S.nav.folder || null, title, content: '', paper: dPaper, paperColor: dPaperColor, color: dColor, ...dSize, created: Date.now(), updated: Date.now() };
+    S.docs.push(d); rememberPaper(d); save(); nav({ doc: d.id });
   }
 };
 async function duplicateDoc(id) {
@@ -1077,19 +1110,22 @@ $('#mvOk').onclick = () => {
 
 /* ---------- Editor ---------- */
 const ed = $('#editor'), page = $('#page'), canvasEl = $('#canvas'), inkEl = $('#ink');
-const PW = 820;
+let PW = 820, PH = 0;
 let lastCaret = 0, curH = 1160, ZOOM = 1;
 function fitZoom() {
   if (document.body.dataset.view !== 'doc') return;
   const avail = canvasEl.clientWidth - 24;
-  ZOOM = Math.min(1, Math.max(0.3, avail / PW)) * (S.zoomUser || 1);
+  ZOOM = Math.min(1, Math.max(0.1, avail / PW)) * (S.zoomUser || 1);
   page.style.zoom = ZOOM;
 }
 window.addEventListener('resize', fitZoom);
 function renderEditor() {
   const d = curDoc();
   page.className = 'paper p-' + (d.paper || 'lined');
-  page.style.cssText = paperVars(d.paperColor) + (page.style.zoom ? `zoom:${page.style.zoom};` : '') + (page.style.minHeight ? `min-height:${page.style.minHeight};` : '');
+  const dm = pageDims(d), oldPW = PW; PW = dm.w; PH = dm.h;
+  const pad = PW >= 640 ? '64px 60px 64px 72px' : `${Math.round(PW * .08)}px ${Math.round(PW * .07)}px ${Math.round(PW * .08)}px ${Math.round(PW * .085)}px`;
+  page.style.cssText = paperVars(d.paperColor) + `width:${PW}px;padding:${pad};--lh:${gridOf(d)}px;` + (page.style.zoom ? `zoom:${page.style.zoom};` : '') + (page.style.minHeight ? `min-height:${page.style.minHeight};` : '');
+  if (oldPW !== PW) { fitZoom(); sizePage(); }
   if (ed.dataset.doc !== d.id) {
     ed.value = d.content; ed.dataset.doc = d.id; lastCaret = d.content.length;
     setPreview(false, true); canvasEl.scrollTop = 0; INK = null; inkEl.textContent = '';
@@ -1106,15 +1142,25 @@ function sizePage(extraY) {
   let maxY = extraY || 0;
   if (INK) for (const s of INK.strokes) maxY = Math.max(maxY, bbox(s)[3]);
   const textH = $('#preview').hidden ? th : $('#preview').scrollHeight;
-  curH = Math.ceil(Math.max(1160, textH + 128 + 160, maxY + 600));
-  page.style.minHeight = curH + 'px';
+  if (PH) {
+    // feste Seitengröße: so viele Seiten wie nötig (immer eine leere Seite am Ende zum Weiterschreiben, sobald die letzte belegt ist)
+    const need = Math.max(textH + 128, maxY + 40, extraY || 0);
+    const n = Math.max(1, Math.ceil(need / PH) + (need % PH > PH * .7 ? 1 : 0));
+    curH = n * PH;
+    let h = ''; for (let i = 1; i < n; i++) h += `<div class="pbreak" style="top:${i * PH}px"><span>${i + 1}</span></div>`;
+    $('#pbreaks').innerHTML = h; $('#pbreaks').style.height = curH + 'px';
+  } else {
+    curH = Math.ceil(Math.max(1160, textH + 128 + 160, maxY + 600));
+    $('#pbreaks').innerHTML = '';
+  }
+  page.style.minHeight = curH + 'px'; if (PH) page.style.height = curH + 'px'; else page.style.height = '';
   inkEl.setAttribute('width', PW); inkEl.setAttribute('height', curH); inkEl.setAttribute('viewBox', `0 0 ${PW} ${curH}`);
   canvasEl.scrollTop = st;
 }
 function status() {
   const d = curDoc(); if (!d) return;
   const t = d.content.trim(), w = t ? t.split(/\s+/).length : 0, n = INK ? INK.strokes.length : d.inkN || 0;
-  $('#status').textContent = `${w} Wörter${n ? ` · ${n} Striche` : ''} · ${PAPERS[d.paper || 'lined']} · zuletzt geändert ${fmtDate(d.updated)}`;
+  $('#status').textContent = `${w} Wörter${n ? ` · ${n} Striche` : ''} · ${PAPERS[d.paper || 'lined']} · ${sizeLabel(d)} · zuletzt geändert ${fmtDate(d.updated)}`;
 }
 ed.addEventListener('input', () => { const d = curDoc(); if (!d) return; d.content = ed.value; d.updated = Date.now(); save(); sizePage(); status(); });
 ['keyup', 'mouseup', 'touchend', 'blur', 'select'].forEach(ev => ed.addEventListener(ev, () => lastCaret = ed.selectionEnd));
@@ -1163,17 +1209,48 @@ function setPreview(on, quiet) {
   if (!quiet) sizePage();
 }
 $('#prevBtn').onclick = () => setPreview($('#preview').hidden);
-$('#paperBtn').onclick = () => {
+// gemeinsame Bausteine für Papier-Popover und Dokument-Dialog
+function paperFormHTML(o) {
+  const k = o.size || 'std', fixed = k !== 'std' && k !== 'custom', dm = pageDims(o), g = gridOf(o);
+  return `<div class="lbl-s">Format</div><div class="seg" data-g="size">${Object.entries(PAPER_SIZES).map(([key, z]) => `<button type="button" data-size="${key}" class="${k === key ? 'on' : ''}">${z[0]}</button>`).join('')}</div>
+  ${fixed ? `<div class="seg"><button type="button" data-orient="p" class="${o.orient !== 'l' ? 'on' : ''}">▯ Hochformat</button><button type="button" data-orient="l" class="${o.orient === 'l' ? 'on' : ''}">▭ Querformat</button></div><div class="lbl-s" style="margin:0">${dm.w} × ${dm.h} px</div>` : ''}
+  ${k === 'custom' ? `<div class="pop-two"><input type="number" data-cw min="200" max="4000" value="${dm.w}" aria-label="Breite in Pixel"> × <input type="number" data-ch min="0" max="8000" value="${dm.h}" aria-label="Höhe in Pixel"> px</div><div class="lbl-s" style="margin:0">Höhe 0 = endlos nach unten</div>` : ''}
+  ${(o.paper || 'lined') !== 'blank' ? `<div class="lbl-s" style="margin:4px 0 0">${o.paper === 'dots' ? 'Punktabstand' : o.paper === 'grid' ? 'Kästchengröße' : 'Zeilenabstand'}</div><div class="grid-row"><input type="range" data-grid min="${GRID_MIN}" max="${GRID_MAX}" step="1" value="${g}"><input type="number" data-gridn min="${GRID_MIN}" max="${GRID_MAX}" value="${g}"> px</div><div class="presets">${[16, 20, 24, 32, 40, 48].map(v => `<button type="button" class="chip" data-gridp="${v}">${v}</button>`).join('')}</div>` : ''}`;
+}
+// verarbeitet Klicks/Eingaben im Formular; gibt 'rerender', 'live' oder '' zurück
+function paperFormEvent(o, e, kind) {
+  const t = e.target;
+  if (kind === 'click') {
+    const sz = t.closest('[data-size]'), or = t.closest('[data-orient]'), gp = t.closest('[data-gridp]');
+    if (sz) { const k = sz.dataset.size; if (k === 'custom' && !o.sizeW) { const dm = pageDims(o); o.sizeW = dm.w; o.sizeH = dm.h || 1160; } o.size = k; return 'rerender'; }
+    if (or) { o.orient = or.dataset.orient; return 'rerender'; }
+    if (gp) { o.grid = +gp.dataset.gridp; return 'rerender'; }
+    return '';
+  }
+  if (t.matches('[data-grid]') || (t.matches('[data-gridn]') && kind === 'change')) {
+    o.grid = clampN(t.value, GRID_MIN, GRID_MAX, GRID_DEF);
+    const box = t.closest('.grid-row'); box.querySelector('[data-grid]').value = o.grid; if (t.matches('[data-grid]')) box.querySelector('[data-gridn]').value = o.grid;
+    return 'live';
+  }
+  if (kind === 'change' && t.matches('[data-cw]')) { o.sizeW = clampN(t.value, 200, 4000, 820); t.value = o.sizeW; return 'live'; }
+  if (kind === 'change' && t.matches('[data-ch]')) { const v = Math.round(+t.value); o.sizeH = v > 0 ? clampN(v, 200, 8000, 1160) : 0; t.value = o.sizeH; return 'live'; }
+  return '';
+}
+function rememberPaper(o) { S.lastPaper = o.paper; S.lastPaperColor = o.paperColor; S.lastSize = { size: o.size || 'std', orient: o.orient || 'p', sizeW: o.sizeW, sizeH: o.sizeH, grid: o.grid }; }
+function openPaperPop() {
   const d = curDoc(); if (!d) return;
-  showPop($('#paperBtn'), `<div class="pop-h">Papier</div><div class="seg">${Object.entries(PAPERS).map(([k, n]) => `<button data-pt="${k}" class="${(d.paper || 'lined') === k ? 'on' : ''}">${n}</button>`).join('')}</div><div class="lbl-s">Papierfarbe</div><div class="swatches">${paperColorDots(d.paperColor)}</div>`, (e, kind) => {
-    if (kind !== 'click') return;
+  showPop($('#paperBtn'), `<div class="pop-h">Papier</div><div class="seg">${Object.entries(PAPERS).map(([k, n]) => `<button type="button" data-pt="${k}" class="${(d.paper || 'lined') === k ? 'on' : ''}">${n}</button>`).join('')}</div><div class="pop-sub">${paperFormHTML(d)}</div><div class="lbl-s" style="margin:4px 0 0">Papierfarbe</div><div class="swatches">${paperColorDots(d.paperColor)}</div>`, (e, kind) => {
     const t = e.target.closest('[data-pt]'), c = e.target.closest('[data-pc]');
-    if (t) { d.paper = t.dataset.pt; S.lastPaper = d.paper; t.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === t)); }
-    else if (c) { d.paperColor = c.dataset.pc; S.lastPaperColor = d.paperColor; c.parentElement.querySelectorAll('.sw').forEach(b => b.classList.toggle('on', b === c)); }
-    else return;
-    d.updated = Date.now(); save(); renderEditor();
+    let r = '';
+    if (kind === 'click' && t) { d.paper = t.dataset.pt; r = 'rerender'; }
+    else if (kind === 'click' && c) { d.paperColor = c.dataset.pc; c.parentElement.querySelectorAll('.sw').forEach(b => b.classList.toggle('on', b === c)); r = 'live'; }
+    else r = paperFormEvent(d, e, kind);
+    if (!r) return;
+    d.updated = Date.now(); rememberPaper(d); save(); renderEditor(); sizePage(); renderInk && INK && renderInk();
+    if (r === 'rerender') { const sc = $('#pop').scrollTop; openPaperPop(); $('#pop').scrollTop = sc; }
   });
-};
+}
+$('#paperBtn').onclick = openPaperPop;
 $('#docTitle').onclick = () => { const d = curDoc(); if (d) openDocDlg(d.id); };
 $('#docMore').onclick = () => {
   const d = curDoc(); if (!d) return;
@@ -1889,7 +1966,8 @@ async function fillThumbInk() {
     const id = el.dataset.ink; let rec = inkCache.get(id);
     if (!rec) { try { rec = await DB.get('ink:' + id); } catch (_) {} if (rec) inkCache.set(id, rec); }
     if (!rec || !el.isConnected) continue;
-    el.innerHTML = rec.strokes.filter(s => bbox(s)[1] < 1093).map(strokeSVG).join('');
+    const lim = +el.getAttribute('viewBox').split(' ')[3] || 1093;
+    el.innerHTML = rec.strokes.filter(s => bbox(s)[1] < lim).map(strokeSVG).join('');
   }
 }
 
